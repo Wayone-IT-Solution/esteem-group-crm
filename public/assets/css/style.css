@@ -51131,7 +51131,7 @@ rect {
   position: relative;
   letter-spacing: 0.5px;
   padding: 4px;
-  font-size: 14px;
+  font-size: 16px;
   display: block;
   padding-left: 8px;
   color: var(--light-font);
@@ -51144,10 +51144,11 @@ rect {
 }
 .page-sidebar .sidebar-link {
   font-weight: 500;
-  padding: 10px 20px;
+  padding: 10px 10px;
   border-radius: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
 }
 @media (max-width: 767.98px) {
