@@ -49,7 +49,7 @@
                     class="modal-content shadow-lg rounded-3">
                     @csrf
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title"><i class="fa-solid fa-user-tag me-2"></i> Add Role</h5>
+                        <h5 class="modal-title text-white"><i class="fa-solid fa-user-tag me-2"></i> Add Role</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -74,6 +74,8 @@
 
 
                     </div>
+                    <span id="editSubmitSpinner_success"></span>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success" id="addSubmitBtn">
                             <span id="addSubmitText"><i class="fa-solid fa-paper-plane me-1"></i> Submit</span>
@@ -124,6 +126,8 @@
                             <label for="editRoleDisplayName">Display Name</label>
                         </div> --}}
                     </div>
+                    <span id="editSubmitSpinner_success1"></span>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success" id="editSubmitBtn">
                             <span id="editSubmitText"><i class="fa-solid fa-save me-1"></i> Update</span>
@@ -164,14 +168,14 @@
                                                         data-company-id="{{ $role->company_id }}"
                                                         data-name="{{ $role->name }}"
                                                         data-update-url="{{ route('role.update', $role->id) }}">
-                                                        <i class="fa-solid fa-pen"></i> Edit
+                                                        <i class="fa-solid fa-pen"></i>
                                                     </button>
                                                     <form action="{{ route('role.destroy', $role->id) }}" method="POST"
                                                         class="delete-role-form">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger">
-                                                            <i class="fa-solid fa-trash"></i> Delete
+                                                            <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -191,16 +195,29 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function showToast(message, type = 'success') {
-            const alertType = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertType = type === 'success' ? 'text-success' : 'text-danger';
             const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
             const toast = `
-                <div class="alert ${alertType} alert-dismissible fade show custom-alert shadow-sm mt-2" role="alert">
+                <div class="alert ${alertType} alert-dismissible fade show custom-alert" role="alert">
                     <i class="fa-solid ${icon} me-2"></i> ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`;
-            $('#alertContainer').append(toast);
+            $('#editSubmitSpinner_success').append(toast);
             setTimeout(() => $('.custom-alert').alert('close'), 2000);
         }
+
+        function showToast1(message, type = 'success') {
+            const alertType = type === 'success' ? 'text-success' : 'text-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const toast = `
+                <div class="alert ${alertType} alert-dismissible fade show custom-alert" role="alert">
+                    <i class="fa-solid ${icon} me-2"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;
+            $('#editSubmitSpinner_success1').append(toast);
+            setTimeout(() => $('.custom-alert').alert('close'), 2000);
+        }
+
 
         $.ajaxSetup({
             headers: {
@@ -232,9 +249,12 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#addRoleModal').modal('hide');
+
                         showToast('Role added successfully.');
-                        setTimeout(() => location.reload(), 1000);
+                        setTimeout(() => {
+                            $('#addRoleModal').modal('hide');
+                            location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;
@@ -267,9 +287,11 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#editRoleModal').modal('hide');
-                        showToast('Role updated successfully.');
-                        setTimeout(() => location.reload(), 1000);
+                        showToast1('Role updated successfully.');
+                        setTimeout(() => {
+                            $('#editRoleModal').modal('hide');
+                            location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;

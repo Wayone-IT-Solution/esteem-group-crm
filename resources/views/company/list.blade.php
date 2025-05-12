@@ -35,8 +35,11 @@
                         <ol class="breadcrumb justify-content-sm-end align-items-center mb-3">
                             <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal"
                                 data-bs-target="#addCompanyModal">
-                                <i class="fa-solid fa-building me-2"></i>
-                                Add Company
+                                <span class="text-white">
+                                    <i class="fa-solid fa-building me-2"></i>
+                                    Add Company
+                                </span>
+
                             </button>
 
                             <!-- Add Company Modal -->
@@ -47,7 +50,7 @@
                                         enctype="multipart/form-data" class="modal-content shadow-lg rounded-3">
                                         @csrf
                                         <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title" id="addCompanyModalLabel">
+                                            <h5 class="modal-title text-white" id="addCompanyModalLabel">
                                                 <i class="fa-solid fa-building me-2"></i> Add Company
                                             </h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -69,6 +72,8 @@
                                                 <div id="addLogoPreview" class="mt-2"></div>
                                             </div>
                                         </div>
+                                        <span id="editSubmitSpinner_success"></span>
+
 
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-success" id="addSubmitBtn">
@@ -93,7 +98,7 @@
                                         @csrf
                                         <input type="hidden" name="_method" value="PUT">
                                         <div class="modal-header bg-warning text-white">
-                                            <h5 class="modal-title" id="editCompanyModalLabel">
+                                            <h5 class="modal-title text-white" id="editCompanyModalLabel">
                                                 <i class="fa-solid fa-pen me-2"></i> Edit Company
                                             </h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
@@ -116,6 +121,11 @@
                                                 <div id="currentLogo" class="mt-2"></div>
                                             </div>
                                         </div>
+
+                                        <!-- Alert Container -->
+                                        <div id="alertContainer" class="position-fixed top-0 end-0 p-3"
+                                            style="z-index: 1055;"></div>
+                                        <span id="editSubmitSpinner_success1"></span>
 
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-success" id="editSubmitBtn">
@@ -170,7 +180,7 @@
                                                         data-id="{{ $company->id }}" data-name="{{ $company->name }}"
                                                         data-logo="{{ asset('storage/' . $company->logo) }}"
                                                         data-update-url="{{ route('company.update', $company->id) }}">
-                                                        <i class="fa-solid fa-pen"></i> Edit
+                                                        <i class="fa-solid fa-pen"></i>
                                                     </a>
                                                     <form action="{{ route('company.destroy', $company->id) }}"
                                                         method="POST" style="display:inline;">
@@ -178,7 +188,7 @@
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger"
                                                             onclick="return confirm('Are you sure?')">
-                                                            <i class="fa-solid fa-trash"></i> Delete
+                                                            <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -194,8 +204,7 @@
         </div>
     </div>
 
-    <!-- Alert Container -->
-    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -206,16 +215,29 @@
         });
 
         function showToast(message, type = 'success') {
-            const alertType = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertType = type === 'success' ? 'text-success' : 'text-danger';
             const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
             const toast = `
-                <div class="alert ${alertType} alert-dismissible fade show custom-alert shadow-sm mt-2" role="alert">
+                <div class="alert ${alertType} alert-dismissible fade show custom-alert" role="alert">
                     <i class="fa-solid ${icon} me-2"></i> ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>`;
-            $('#alertContainer').append(toast);
-            setTimeout(() => $('.custom-alert').alert('close'), 5000);
+            $('#editSubmitSpinner_success').append(toast);
+            setTimeout(() => $('.custom-alert').alert('close'), 2000);
         }
+
+        function showToast1(message, type = 'success') {
+            const alertType = type === 'success' ? 'text-success' : 'text-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const toast = `
+                <div class="alert ${alertType} alert-dismissible fade show custom-alert" role="alert">
+                    <i class="fa-solid ${icon} me-2"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`;
+            $('#editSubmitSpinner_success1').append(toast);
+            setTimeout(() => $('.custom-alert').alert('close'), 2000);
+        }
+
 
         $(document).ready(function() {
             $('#companyLogo').on('change', function() {
@@ -253,9 +275,12 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#addCompanyModal').modal('hide');
+
                         showToast('Company added successfully.');
-                        setTimeout(() => location.reload(), 1000);
+                        setTimeout(() => {
+                            $('#addCompanyModal').modal('hide');
+                            location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;
@@ -285,9 +310,12 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#editCompanyModal').modal('hide');
-                        showToast('Company updated successfully.');
-                        setTimeout(() => location.reload(), 1000);
+
+                        showToast1('Company updated successfully.');
+                        setTimeout(() => {
+                            $('#editCompanyModal').modal('hide');
+                            location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;

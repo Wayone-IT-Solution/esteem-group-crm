@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\AlluserController;
 
 // Auth routes
 Route::get('/', [AuthController::class, 'index']);
@@ -30,10 +32,7 @@ Route::post('/admin/roles', [RoleController::class, 'store'])->name('role.store'
 Route::get('/admin/roles/{role}/edit', [RoleController::class, 'edit'])->name('role.edit');  // Edit role form
 Route::put('/admin/roles/{role}', [RoleController::class, 'update'])->name('role.update');  // Update role
 Route::delete('/admin/roles/{role}', [RoleController::class, 'destroy'])->name('role.destroy');  // Delete role
-// admin all deaprtment
-use App\Http\Controllers\DepartmentController;
 
-// Admin Department routes
 // Admin Department routes
 Route::get('/admin/departments', [DepartmentController::class, 'index'])->name('admin.department');
 Route::get('/admin/departments/create', [DepartmentController::class, 'create'])->name('department.create');
@@ -41,3 +40,11 @@ Route::post('/admin/departments', [DepartmentController::class, 'store'])->name(
 Route::get('/admin/departments/{department}/edit', [DepartmentController::class, 'edit'])->name('department.edit');
 Route::put('/admin/departments/{department}', [DepartmentController::class, 'update'])->name('department.update');
 Route::delete('/admin/departments/{department}', [DepartmentController::class, 'destroy'])->name('department.destroy');
+
+// Admin All Users routes
+Route::get('/admin/users', [AlluserController::class, 'index'])->name('admin.all_users');  // View all users
+Route::get('/admin/users/create', [AlluserController::class, 'create'])->name('users.create');  // Create user form
+Route::post('/admin/users', [AlluserController::class, 'store'])->name('users.store');  // Store user
+Route::get('/admin/users/{user}/edit', [AlluserController::class, 'edit'])->name('users.edit');  // Edit user form
+Route::put('/admin/users/{user}', [AlluserController::class, 'update'])->name('users.update');  // Update user
+Route::delete('/admin/users/{user}', [AlluserController::class, 'destroy'])->name('users.destroy');  // Delete user

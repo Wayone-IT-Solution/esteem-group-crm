@@ -196,7 +196,7 @@
                             </a>
                             <ul class="sidebar-submenu" style="display: none;">
                                 <li>
-                                    <a href="box-layout.html">
+                                    <a href="{{ route('admin.all_users') }}">
                                         <i class="fa-solid fa-user-group me-2"></i> All Users
                                     </a>
                                 </li>
@@ -224,7 +224,14 @@
                                 </span>
                             </a>
                         </li>
-
+                        <li class="sidebar-list">
+                            <a class="sidebar-link" href="{{ url('auth/logout') }}">
+                                <span>
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>
+                                    Logout
+                                </span>
+                            </a>
+                        </li>
 
                     </ul>
                     </li>

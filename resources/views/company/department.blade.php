@@ -47,7 +47,7 @@
                     class="modal-content shadow-lg rounded-3">
                     @csrf
                     <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title"><i class="fa-solid fa-building me-2"></i> Add Department</h5>
+                        <h5 class="modal-title text-white"><i class="fa-solid fa-building me-2"></i> Add Department</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -67,6 +67,8 @@
                             <label for="departmentName">Department</label>
                         </div>
                     </div>
+                    <span id="editSubmitSpinner_success"></span>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success" id="addSubmitBtn">
                             <span id="addSubmitText"><i class="fa-solid fa-paper-plane me-1"></i> Submit</span>
@@ -87,7 +89,7 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-header bg-warning text-white">
-                        <h5 class="modal-title"><i class="fa-solid fa-pen me-2"></i> Edit Department</h5>
+                        <h5 class="modal-title text-white"><i class="fa-solid fa-pen me-2"></i> Edit Department</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
@@ -108,6 +110,7 @@
                             <label for="editDepartmentName">Department</label>
                         </div>
                     </div>
+                    <span id="editSubmitSpinner_success1"></span>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success" id="editSubmitBtn">
                             <span id="editSubmitText"><i class="fa-solid fa-save me-1"></i> Update</span>
@@ -116,6 +119,7 @@
                         </button>
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -149,14 +153,14 @@
                                                         data-department="{{ $department->department }}"
                                                         data-company-id="{{ $department->company_id }}"
                                                         data-update-url="{{ route('department.update', $department->id) }}">
-                                                        <i class="fa-solid fa-pen"></i> Edit
+                                                        <i class="fa-solid fa-pen"></i>
                                                     </button>
                                                     <form action="{{ route('department.destroy', $department->id) }}"
                                                         method="POST" class="delete-department-form">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger">
-                                                            <i class="fa-solid fa-trash"></i> Delete
+                                                            <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -180,7 +184,16 @@
             const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
             const toast =
                 `<div class="alert ${alertType} alert-dismissible fade show custom-alert shadow-sm mt-2" role="alert"><i class="fa-solid ${icon} me-2"></i> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
-            $('#alertContainer').append(toast);
+            $('#editSubmitSpinner_success').append(toast);
+            setTimeout(() => $('.custom-alert').alert('close'), 2000);
+        }
+
+        function showToast1(message, type = 'success') {
+            const alertType = type === 'success' ? 'text-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            const toast =
+                `<div class="alert ${alertType} alert-dismissible fade show custom-alert " role="alert"><i class="fa-solid ${icon} me-2"></i> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+            $('#editSubmitSpinner_success1').append(toast);
             setTimeout(() => $('.custom-alert').alert('close'), 2000);
         }
 
@@ -215,7 +228,7 @@
                     success: function() {
                         $('#addDepartmentModal').modal('hide');
                         showToast('Department added successfully.');
-                        setTimeout(() => location.reload(), 1000);
+                        setTimeout(() => location.reload(), 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;
@@ -248,9 +261,11 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#editDepartmentModal').modal('hide');
-                        showToast('Department updated successfully.');
-                        setTimeout(() => location.reload(), 1000);
+                        showToast1('Department updated successfully.');
+                        setTimeout(() => {
+                            $('#editDepartmentModal').modal('hide');
+                            location.reload();
+                        }, 2000);
                     },
                     error: function(xhr) {
                         const errors = xhr.responseJSON?.errors;
