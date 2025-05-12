@@ -21,37 +21,50 @@ class CompanyController extends Controller
     }
 
     // Store a new company
+
     public function store(Request $request)
-    {
-        // Check if the company name already exists
-        $existingCompany = Company::where('name', $request->company_name)->first();
+{
+    // Check if the company name already exists
+    $existingCompany = Company::where('name', $request->company_name)->first();
 
-        if ($existingCompany) {
-            return response()->json(['error' => 'A company with this name already exists. Please choose a different name.'], 400);
-        }
-
-        // Validation for file and company name
-        $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_logo' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
-        ]);
-
-        // Handle logo upload
-        $logoPath = $request->file('company_logo')->store('logo', 'public');
-
-        // Create the company
-        $company = Company::create([
-            'name' => $request->company_name,
-            'logo' => $logoPath,
-        ]);
-
-        // Return company data as JSON response
-        return response()->json([
-            'company_id' => $company->id,
-            'company_name' => $company->name,
-            'company_logo_url' => asset('storage/' . $company->logo),
-        ]);
+    if ($existingCompany) {
+        return response()->json(['error' => 'A company with this name already exists. Please choose a different name.'], 400);
     }
+
+    // Validation for file and company name
+    $request->validate([
+        'company_name' => 'required|string|max:255',
+        'company_logo' => 'required|image|max:2048',
+    ]);
+
+    // Handle logo upload and save it to the 'public/uploads/logo' directory
+    $logo = $request->file('company_logo');
+
+    // Generate a unique file name to avoid overwriting files
+    $logoName = uniqid() . '.' . $logo->getClientOriginalExtension();
+
+    // Move the file to the 'public/uploads/logo' directory
+    $logo->move(public_path('uploads/logo'), $logoName);
+
+    // Save the logo file path to the database
+    $logoPath = 'uploads/logo/' . $logoName;
+
+    // Create the company
+    $company = Company::create([
+        'name' => $request->company_name,
+        'logo' => $logoPath,
+    ]);
+
+    // Return company data as JSON response
+    return response()->json([
+        'company_id' => $company->id,
+        'company_name' => $company->name,
+        'company_logo_url' => asset($logoPath),
+    ]);
+}
+
+
+
 
     // Show the form to edit an existing company
     public function edit($id)

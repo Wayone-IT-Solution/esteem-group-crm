@@ -70,7 +70,7 @@
                     <span id="editSubmitSpinner_success"></span>
 
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success" id="addSubmitBtn">
+                        <button type="submit" class="btn btn-primary" id="addSubmitBtn">
                             <span id="addSubmitText"><i class="fa-solid fa-paper-plane me-1"></i> Submit</span>
                             <span id="addSubmitSpinner" class="d-none"><i class="fa fa-spinner fa-spin me-1"></i>
                                 Saving...</span>
@@ -112,7 +112,7 @@
                     </div>
                     <span id="editSubmitSpinner_success1"></span>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success" id="editSubmitBtn">
+                        <button type="submit" class="btn btn-primary" id="editSubmitBtn">
                             <span id="editSubmitText"><i class="fa-solid fa-save me-1"></i> Update</span>
                             <span id="editSubmitSpinner" class="d-none"><i class="fa fa-spinner fa-spin me-1"></i>
                                 Updating...</span>
@@ -226,7 +226,6 @@
                     processData: false,
                     contentType: false,
                     success: function() {
-                        $('#addDepartmentModal').modal('hide');
                         showToast('Department added successfully.');
                         setTimeout(() => location.reload(), 2000);
                     },

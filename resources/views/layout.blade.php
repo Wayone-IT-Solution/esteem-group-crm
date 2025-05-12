@@ -11,8 +11,8 @@
     <meta name="author" content="Esteem Group">
     <title>Esteem Group | Admin</title>
     <!-- Favicon icon-->
-    <link rel="icon" href="{{ asset('assets/images/favicon/favicon.png') }}" type="image/x-icon">
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon/favicon.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
@@ -25,19 +25,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/brands.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/solid.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/regular.css') }}">
-    <!-- Ico Icon css -->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/icon/icofont/icofont.css') }}">
-    <!-- Flag Icon css -->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flag-icon.css') }}">
-    <!-- Themify Icon css -->
+   
     <link rel="stylesheet" type="text/css"
         href="{{ asset('assets/css/vendors/themify-icons/themify-icons/css/themify.css') }}">
-    <!-- Animation css -->
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/animate.css/animate.css') }}">
-    <!-- Whether Icon css-->
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('assets/css/vendors/weather-icons/css/weather-icons.min.css') }}">
-    <!-- Apex Chart css-->
+    
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/apexcharts/dist/apexcharts.css') }}">
     <!-- Data Table css-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/simple-datatables/dist/style.css') }}">
@@ -259,18 +250,11 @@
     <script src="{{ asset('assets/js/sidebar.js') }}"></script>
     <!-- Apexchart js-->
     <script src="{{ asset('assets/js/vendors/apexcharts/dist/apexcharts.min.js') }}"></script>
-    <!-- Datatable js-->
-    <script src="{{ asset('assets/js/vendors/simple-datatables/dist/umd/simple-datatables.js') }}"></script>
-    <!-- dashboard 2 js-->
     <script src="{{ asset('assets/js/dashboard/dashboard-2.js') }}"></script>
     <!-- scrollbar js-->
     <script src="{{ asset('assets/js/scrollbar/simplebar.js') }}"></script>
     <script src="{{ asset('assets/js/scrollbar/custom.js') }}"></script>
     <!-- scrollable-->
-    <script src="{{ asset('assets/js/vendors/swiper/swiper-bundle.min.js') }}"></script>
-    <!-- customizer-->
-    {{-- <script src="{{ asset('assets/js/theme-customizer/customizer.js') }}"></script> --}}
-    <!-- custom script -->
     <script src="{{ asset('assets/js/script.js') }}"></script>
     {{-- Font Awsome --}}
     <script src="https://kit.fontawesome.com/71be5731d3.js" crossorigin="anonymous"></script>

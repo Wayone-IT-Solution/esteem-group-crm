@@ -43,12 +43,12 @@
                     <h5 class="mb-4 p-2 text-white bg-primary rounded">Add New User</h5>
                     <div class="row g-3">
 
-                        <!-- Unique ID -->
-                        <div class="col-md-6">
+                        <!-- Unique ID-->
+                        <!-- <div class="col-md-6">
                             <label for="unique_id" class="form-label">Unique ID</label>
                             <input type="text" class="form-control" id="unique_id" name="unique_id"
                                 placeholder="Enter Unique ID" required>
-                        </div>
+                        </div>  -->
 
                         <!-- Branch -->
                         <div class="col-md-6">
