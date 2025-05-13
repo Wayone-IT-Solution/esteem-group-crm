@@ -28,3 +28,5 @@ Route::post('/admin/users', [AlluserController::class, 'store'])->name('users.st
 Route::get('/admin/users/{user}/edit', [AlluserController::class, 'edit'])->name('users.edit');  // Edit user form
 Route::put('/admin/users/{user}', [AlluserController::class, 'update'])->name('users.update');  // Update user
 Route::delete('/admin/users/{user}', [AlluserController::class, 'destroy'])->name('users.destroy');  // Delete user
+Route::get('/company/{id}/roles', [AlluserController::class, 'getRoles']);
+Route::get('/company/{id}/departments', [AlluserController::class, 'getDepartmentsByCompany']);
