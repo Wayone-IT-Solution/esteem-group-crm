@@ -16,7 +16,7 @@ class AlluserController extends Controller
     private function validateUser($request, $id = null)
     {
         return $request->validate([
-            'role' => 'required|exists:roles,id',
+            'role' => 'required|string',  // Ensure role is a string (name)
             'company_id' => 'required|exists:companies,id',
             'department_id' => 'required|exists:departments,id',
             'name' => 'required|string|max:255',
@@ -70,15 +70,29 @@ class AlluserController extends Controller
     {
         $validatedData = $this->validateUser($request);
 
-        // Hash the password
-        $validatedData['password'] = Hash::make($validatedData['password']);
+        // Find role by name and set role name
+        $role = Role::where('role', $validatedData['role'])->first();
+        if ($role) {
+            $validatedData['role'] = $role->role;  // Store the role name instead of ID
+        }
+
+        // Find department by ID and set department name
+        $department = Department::find($validatedData['department_id']);
+        if ($department) {
+            $validatedData['department'] = $department->department;  // Store the department name
+        }
+
+        // Hash the password if provided
+        if ($request->filled('password')) {
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        }
 
         // Handle file upload for ID proof
         if ($request->hasFile('id_proof')) {
             $validatedData['id_proof'] = $request->file('id_proof')->store('id_proofs', 'public');
         }
 
-        // Create a new user
+        // Store the user data
         User::create($validatedData);
 
         return redirect()->route('company.Alluser')->with('success', 'User added successfully.');
@@ -103,7 +117,19 @@ class AlluserController extends Controller
         // Validate input
         $validatedData = $this->validateUser($request, $id);
 
-        // If password is provided, hash it
+        // Find role by name and set role name
+        $role = Role::where('role', $validatedData['role'])->first();
+        if ($role) {
+            $validatedData['role'] = $role->role; // Store the role name instead of ID
+        }
+
+        // Find department by ID and set department name
+        $department = Department::find($validatedData['department_id']);
+        if ($department) {
+            $validatedData['department'] = $department->department; // Store the department name
+        }
+
+        // Hash password if provided
         if ($request->filled('password')) {
             $validatedData['password'] = Hash::make($request->password);
         } else {

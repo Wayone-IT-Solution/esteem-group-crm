@@ -11,7 +11,7 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained()->onDelete('cascade'); // Foreign key to companies table
-            $table->foreignId('role_id')->constrained()->onDelete('cascade'); // Foreign key to roles table
+            $table->trings('role'); // Foreign key to roles table
             $table->foreignId('department_id')->constrained()->onDelete('cascade'); // Foreign key to departments table
             $table->string('name');
             $table->string('email')->unique();

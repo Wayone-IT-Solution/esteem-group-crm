@@ -27,10 +27,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/brands.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/solid.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/vendors/fortawesome/fontawesome-free/css/regular.css') }}">
-   
+
     <link rel="stylesheet" type="text/css"
         href="{{ asset('assets/css/vendors/themify-icons/themify-icons/css/themify.css') }}">
-    
+
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/apexcharts/dist/apexcharts.css') }}">
     <!-- Data Table css-->
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/simple-datatables/dist/style.css') }}">
@@ -180,7 +180,7 @@
                             </a>
                             <ul class="sidebar-submenu" style="display: none;">
                                 <li>
-                                    <a href="{{ route('admin.all_users') }}">
+                                    <a href="{{ route('company.Alluser') }}">
                                         <i class="fa-solid fa-user-group me-2"></i> All Users
                                     </a>
                                 </li>
@@ -234,6 +234,7 @@
                                 </span>
                             </a>
                         </li>
+                        {{-- role management --}}
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ route('admin.roles') }}">
                                 <span>
@@ -242,6 +243,16 @@
                                 </span>
                             </a>
                         </li>
+                        {{-- status management --}}
+                        <li class="sidebar-list">
+                            <a class="sidebar-link" href="{{ route('admin.status.index') }}">
+                                <span>
+                                    <i class="fa-solid fa-toggle-on me-2"></i>
+                                    Status Management
+                                </span>
+                            </a>
+                        </li>
+
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ url('auth/logout') }}">
                                 <span>
