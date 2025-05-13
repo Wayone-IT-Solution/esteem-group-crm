@@ -129,4 +129,7 @@ class AlluserController extends Controller
 
         return redirect()->route('company.Alluser')->with('success', 'User deleted successfully.');
     }
+
+  
+
 }

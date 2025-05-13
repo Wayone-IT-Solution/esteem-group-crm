@@ -10,6 +10,8 @@
     <meta name="keywords" content="Esteem Group">
     <meta name="author" content="Esteem Group">
     <title>Esteem Group | Admin</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Favicon icon-->
     <link rel="icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
     <link rel="shortcut icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
@@ -189,6 +191,40 @@
                                 </li>
                             </ul>
                         </li>
+
+
+
+                        <li class="sidebar-list">
+                            <a class="sidebar-link d-flex align-items-center justify-content-between"
+                                href="javascript:void(0)">
+                                <span class="d-flex align-items-center text-nowrap">
+                                    <i class="fa-solid fa-users-rectangle me-2"></i>
+                                    Leads
+                                </span>
+                                <i class="fa-solid fa-angle-down toggle-icon"></i>
+                            </a>
+                            <ul class="sidebar-submenu" style="display: none;">
+                                <li>
+                                    <a href="{{ route('all-leads') }}">
+                                        <i class="fa-solid fa-user-group me-2"></i> All Leads
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="">
+                                        <i class="fa-solid fa-building-user me-2"></i> Today Leads
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+
+
+
+
+
+
+
 
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ route('admin.companies') }}">

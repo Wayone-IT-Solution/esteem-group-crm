@@ -6,6 +6,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\AlluserController;
+use App\Http\Controllers\leadController;
 
 // Auth routes
 Route::get('/', [AuthController::class, 'index']);
@@ -29,4 +30,11 @@ Route::get('/admin/users/{user}/edit', [AlluserController::class, 'edit'])->name
 Route::put('/admin/users/{user}', [AlluserController::class, 'update'])->name('users.update');  // Update user
 Route::delete('/admin/users/{user}', [AlluserController::class, 'destroy'])->name('users.destroy');  // Delete user
 Route::get('/company/{id}/roles', [AlluserController::class, 'getRoles']);
+
 Route::get('/company/{id}/departments', [AlluserController::class, 'getDepartmentsByCompany']);
+
+Route::get('/admin/leads', [LeadController::class, 'showallleads'])->name('all-leads');
+
+Route::get('/admin/leads/add', [LeadController::class, 'addleads'])->name('add-leads');
+
+
