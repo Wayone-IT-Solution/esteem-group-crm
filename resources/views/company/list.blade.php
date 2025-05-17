@@ -90,7 +90,7 @@
     }
 </style>
 
-<div class="page-body card" style="margin-top: 44px;">
+<div class="page-body card" style="background-color: white; margin-top: 40px;">
     <div class="container-fluid">
         <div class="row page-title">
             <div class="col-sm-6">
@@ -154,57 +154,50 @@
     <div class="container-fluid table-space basic_table">
         <div class="row">
             <div class="col-sm-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
-                                <thead class="bg-light">
-                                    <tr class="b-b-primary">
-                                        <th class="text-center" style="width: 10%;">Sr.N</th>
-                                        <th style="width: 40%;">Company</th>
-                                        <th class="text-center" style="width: 30%;">Logo</th>
-                                        <th class="text-center" style="width: 20%;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($companies as $company)
-                                    <tr>
-                                        <td class="text-center">{{ $loop->iteration }}</td>
-                                        <td>{{ $company->name }}</td>
-                                        <td class="text-center">
-                                            @if ($company->logo)
-                                            <img src="{{ asset( $company->logo) }}" alt="Logo"
-                                                width="200" height="50" style="object-fit: contain;">
-                                            @else
-                                            <span class="text-muted">No Logo</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a href="#" class="btn btn-sm btn-warning edit-company-btn"
-                                                    data-id="{{ $company->id }}" data-name="{{ $company->name }}"
-                                                    data-logo="{{ asset( $company->logo) }}"
-                                                    data-update-url="{{ route('company.update', $company->id) }}">
-                                                    <i class="fa-solid fa-pen"></i>
-                                                </a>
-                                                <form action="{{ route('company.destroy', $company->id) }}"
-                                                    method="POST" style="display:inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger"
-                                                        onclick="return confirm('Are you sure?')">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="bg-light">
+                            <tr class="b-b-primary">
+                                <th class="text-center" style="width: 10%;">Sr.N</th>
+                                <th style="width: 40%;">Company</th>
+                                <th class="text-center" style="width: 30%;">Logo</th>
+                                <th class="text-center" style="width: 20%;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($companies as $company)
+                            <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td>{{ $company->name }}</td>
+                                <td class="text-center">
+                                    @if ($company->logo)
+                                    <img src="{{ asset( $company->logo) }}" alt="Logo"
+                                        width="200" height="50" style="object-fit: contain;">
+                                    @else
+                                    <span class="text-muted">No Logo</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <a href="#" class="btn btn-sm btn-warning edit-company-btn"
+                                            data-id="{{ $company->id }}" data-name="{{ $company->name }}"
+                                            data-logo="{{ asset( $company->logo) }}"
+                                            data-update-url="{{ route('company.update', $company->id) }}">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="CommanDelete('delete','companies','{{ $company->id }}')">
+                                            <i class="fa-solid fa-trash" style="font-size: 14px;"></i>
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
+
             </div>
         </div>
     </div>
@@ -319,12 +312,14 @@
                 processData: false,
                 contentType: false,
                 success: function(result) {
-                    $('#primarthide').show();
-                    setTimeout(() => $('#addCompanyModal').modal('hide'), 3000);
-                    $btn.prop('disabled', false);
-                    $('#addSubmitText').removeClass('d-none');
-                    $('#addSubmitSpinner').addClass('d-none');
-                    location.reload();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Company added successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = window.location.href;
+                    });
                 },
                 error: function(error) {
                     $btn.prop('disabled', false);
@@ -350,10 +345,14 @@
             processData: false,
             contentType: false,
             success: function() {
-                $('#primarthide2').show();
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Company updated successfully',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = window.location.href;
+                });
             },
             error: function(xhr) {
                 const errors = xhr.responseJSON?.errors;

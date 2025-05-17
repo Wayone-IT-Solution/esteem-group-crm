@@ -14907,8 +14907,8 @@ ul li {
 }
 
 .btn-primary {
-  background-color: #43B9B2;
-  border: 1px solid #43B9B2;
+  background-color: #26477a;
+  border: 1px solid #26477a;
   border-radius: 5px;
   color: #ffffff;
 }
@@ -20498,7 +20498,7 @@ ul li {
 }
 
 .bg-primary {
-  background-color: #43B9B2 !important;
+  background-color: #26477a !important;
   color: var(--white);
 }
 [data-theme=dark] .bg-primary span {
@@ -50608,7 +50608,7 @@ rect {
 }
 .page-sidebar li {
   display: block;
-  padding: 0 16px;
+  padding: 0 10px;
 }
 .page-sidebar[sidebar-layout=iconcolor-sidebar] .sidebar-menu li:nth-child(8n+1) .stroke-icon, .page-sidebar.iconcolor-sidebar .sidebar-menu li:nth-child(8n+1) .stroke-icon {
   stroke: #fd4516;
@@ -51069,10 +51069,10 @@ rect {
   font-size: 16px;
   font-weight: 600;
   padding: 0 40px;
-  margin-bottom: 15px;
+  /* margin-bottom: 15px; */
   display: block;
   text-transform: uppercase;
-  color: var(--theme-default);
+  color: #969696;
 }
 @media (max-width: 767.98px) {
   .page-sidebar .sidebar-main-title {
@@ -51123,7 +51123,7 @@ rect {
   font-size: 16px;
   display: block;
   padding-left: 8px;
-  color: var(--light-font);
+  color: white;
 }
 .page-sidebar .sidebar-submenu a.active {
   color: var(--theme-default);
@@ -51156,7 +51156,7 @@ rect {
   color: var(--theme-default);
 }
 .page-sidebar .sidebar-link.active {
-  background-color: rgba(67, 185, 178, 0.1);
+  background-color: rgb(38 71 122);
 }
 .page-sidebar .sidebar-link.active svg {
   stroke: var(--theme-default);
@@ -56212,4 +56212,9 @@ html[dir=rtl] .job-cards-view .radio-primary {
   transition: color 0.3s;
 }
 /*# sourceMappingURL=style.css.map */
+
+
+.swal2-styled.swal2-confirm{
+  
+}
 

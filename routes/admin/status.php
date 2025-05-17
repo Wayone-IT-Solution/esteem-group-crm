@@ -14,4 +14,5 @@ Route::middleware(['auth'])->prefix('admin/status')->group(function () {
     Route::get('/{status}/edit', [StatusController::class, 'edit'])->name('status.edit');
     Route::put('/{status}', [StatusController::class, 'update'])->name('status.update');
     Route::delete('/{status}', [StatusController::class, 'destroy'])->name('status.destroy');
+    Route::post('/filter', [StatusController::class, 'filter'])->name('admin.status.filter');
 });

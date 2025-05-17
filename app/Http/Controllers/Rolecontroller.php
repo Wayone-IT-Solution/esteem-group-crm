@@ -13,17 +13,17 @@ class RoleController extends Controller
     //     // Fetch all roles with company name as plain text
     //      $roles = Role::with('company')->get();
     //     $companies = Company::all();
-        
+
     //     return view('company.roles', compact('roles', 'companies'));
     // }
     public function index()
-{
-    // Fetch roles with associated company and paginate results
-    $roles = Role::with('company')->paginate(10); // Show 10 roles per page
-    $companies = Company::all();
-    
-    return view('company.roles', compact('roles', 'companies'));
-}
+    {
+        // Fetch roles with associated company and paginate results
+        $roles = Role::with('company')->orderBy('id','desc')->paginate(10); // Show 10 roles per page
+        $companies = Company::all();
+
+        return view('company.roles', compact('roles', 'companies'));
+    }
 
 
     public function create()
@@ -71,5 +71,20 @@ class RoleController extends Controller
     {
         $role->delete();
         return redirect()->route('admin.roles')->with('success', 'Role deleted successfully!');
+    }
+
+
+    public function filter(Request $request)
+    {
+        $roles = Role::with('company'); // Show 10 roles per page
+
+
+        if ($request->company_id) {
+            $roles->where('company_id', $request->company_id);
+        }
+
+        $roles = $roles->orderby('id','desc')->paginate(40);
+
+        return view('company.roles.filter', compact('roles'));
     }
 }

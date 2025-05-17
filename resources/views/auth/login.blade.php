@@ -58,7 +58,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-xl-7 login_one_image"><img class="bg-img-cover bg-center"
-                    src="{{ asset('assets/images/crm.png') }}" alt="looginpage"></div>
+                    src="https://img.freepik.com/free-photo/customer-relationship-management-concept_23-2150038402.jpg?semt=ais_hybrid&w=740" alt="looginpage"></div>
             <div class="col-xl-5 p-0">
                 <div class="login-card login-dark login-bg">
                     <div>

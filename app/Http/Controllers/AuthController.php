@@ -25,4 +25,10 @@ class AuthController extends Controller
         }
         return response()->json(['code' => 422, 'errors' => ['password' => ['Wrong Credentials']]], 422);
     }
+
+    public function  logout()
+    {
+        Auth::logout();
+      return redirect('/');
+    }
 }

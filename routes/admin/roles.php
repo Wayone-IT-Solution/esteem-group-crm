@@ -11,5 +11,6 @@ Route::post('/', [RoleController::class, 'store'])->name('role.store');  // Stor
 Route::get('/{role}/edit', [RoleController::class, 'edit'])->name('role.edit');  // Edit role form
 Route::put('/{role}', [RoleController::class, 'update'])->name('role.update');  // Update role
 Route::delete('/{role}', [RoleController::class, 'destroy'])->name('role.destroy');  // Delete role
+Route::post('filter',[RoleController::class,'filter']   )->name('admin.roles.filter');
 
 });

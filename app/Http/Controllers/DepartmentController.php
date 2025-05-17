@@ -13,7 +13,7 @@ class DepartmentController extends Controller
     {
         $companies = Company::all();
         // Ensure correct casing of the model name (Department is capitalized)
-        $departments = Department::all();
+        $departments = Department::orderBy('id', 'desc')->get();
 
         return view('company.department', compact('companies', 'departments'));
     }
@@ -55,7 +55,7 @@ class DepartmentController extends Controller
     {
         // Validate the incoming request with exception handling for uniqueness (excluding the current department)
         $request->validate([
-            'department' => 'required|string|max:255|unique:department,department,' . $department->id,
+            'department' => 'required|string|max:255|unique:departments,department,' . $department->id,
             'company_id' => 'required|exists:companies,id', // Ensure the company_id exists
         ]);
 
@@ -73,5 +73,16 @@ class DepartmentController extends Controller
     {
         $department->delete(); // Delete the department record
         return redirect()->route('admin.department')->with('success', 'Department deleted successfully!');
+    }
+    public function filter(Request $request)
+    {
+        $query = Department::query();
+        if ($request->company_id) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        $departments = $query->get();
+
+        return view('company.department.filter', compact('departments'));
     }
 }

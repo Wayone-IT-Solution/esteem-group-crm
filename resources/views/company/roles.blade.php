@@ -23,25 +23,53 @@
     }
 </style>
 
-<div class="page-body card" style="margin-top: 44px;">
+<div class="page-body card" style="background-color: white; margin-top: 40px;">
 
     <div class="container-fluid">
-        <div class="row page-title">
-            <div class="col-sm-6">
+
+        <div class="row page-title align-items-center">
+            <div class="col-sm-2">
                 <h3>All Roles</h3>
             </div>
-            <div class="col-sm-6">
-                <nav>
-                    <ol class="breadcrumb justify-content-sm-end align-items-center mb-3">
-                        <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal"
-                            data-bs-target="#addRoleModal">
-                            <i class="fa-solid fa-building"></i>
-                           &nbsp; Add Role
+
+            <div class="col-md-8">
+                <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex flex-wrap gap-3 align-items-end">
+                    <div class="col-md-6">
+                        <select class="form-select" name="company_id" id="filterCompany">
+                            <option value="">Filter by Company</option>
+                            @foreach($companies as $companyOption)
+                            <option value="{{ $companyOption->id }}">{{ $companyOption->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+
+
+
+
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100" id="applyFilterBtn">
+                            <span class="default-text"><i class="fa-solid fa-filter me-1"></i> Filter</span>
+                            <span class="loading-text d-none"><i class="fa-solid fa-spinner fa-spin me-1"></i>Wait...</span>
                         </button>
-                    </ol>
-                </nav>
+                    </div>
+                </form>
+            </div>
+
+
+
+            <div class="col-sm-2 text-end">
+                <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal"
+                    data-bs-target="#addRoleModal">
+                    <i class="fa-solid fa-building"></i>
+                    &nbsp; Add Role
+                </button>
             </div>
         </div>
+
+
+
+
     </div>
 
 
@@ -149,141 +177,136 @@
 
     <!-- Role Table -->
     <div class="container-fluid table-space basic_table card p-3">
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
-                        <thead class="bg-light">
-                            <tr class="b-b-primary">
-                                <th class="text-center">Sr.No</th>
-                                <th>Company Name</th>
-                                <th>Role Name</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($roles as $role)
-                            <tr>
-                                <td class="text-center">{{ ($roles->currentPage() - 1) * $roles->perPage() + $loop->iteration }}</td>
-                                <td>{{ $role->company->name ?? '' }}</td>
-                                <td>{{ $role->role }}</td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <button type="button" class="btn btn-sm btn-warning edit-role-btn"
-                                            data-id="{{ $role->id }}" data-role="{{ $role->role }}"
-                                            data-company-id="{{ $role->company_id }}"
-                                            data-name="{{ $role->name }}"
-                                            data-update-url="{{ route('role.update', $role->id) }}">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </button>
-                                        <form action="{{ route('role.destroy', $role->id) }}" method="POST"
-                                            class="delete-role-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fa-solid fa-trash"></i>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="rolesTable" class="table table-striped table-bordered">
+                            <thead class="bg-light">
+                                <tr class="b-b-primary">
+                                    <th class="text-center">Sr.No</th>
+                                    <th>Company Name</th>
+                                    <th>Role Name</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($roles as $role)
+                                <tr>
+                                    <td class="text-center">{{ ($roles->currentPage() - 1) * $roles->perPage() + $loop->iteration }}</td>
+                                    <td>{{ $role->company->name ?? '' }}</td>
+                                    <td>{{ $role->role }}</td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <button type="button" class="btn btn-sm btn-warning edit-role-btn"
+                                                data-id="{{ $role->id }}" data-role="{{ $role->role }}"
+                                                data-company-id="{{ $role->company_id }}"
+                                                data-name="{{ $role->name }}"
+                                                data-update-url="{{ route('role.update', $role->id) }}">
+                                                <i class="fa-solid fa-pen"></i>
                                             </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
- <!-- Pagination (Right-Aligned) -->
-<div class="mt-3 d-flex justify-content-end">
-    <div class="pagination">
-        {{-- Previous Link --}}
-        @if ($roles->onFirstPage())
-            <span class="disabled">Previous</span>
-        @else
-            <a href="{{ $roles->previousPageUrl() }}">Previous</a>
-        @endif
+                                            
+                                               <button type="submit" class="btn btn-sm btn-danger" onclick="CommanDelete('delete','roles','{{ $role->id }}')">
+                                                <i class="fa-solid fa-trash" style="font-size: 14px;"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <!-- Pagination (Right-Aligned) -->
+                        <div class="mt-3 d-flex justify-content-end">
+                            <div class="pagination">
+                                {{-- Previous Link --}}
+                                @if ($roles->onFirstPage())
+                                <span class="disabled">Previous</span>
+                                @else
+                                <a href="{{ $roles->previousPageUrl() }}">Previous</a>
+                                @endif
 
-        {{-- Page Numbers --}}
-        @for ($i = 1; $i <= $roles->lastPage(); $i++)
-            <a href="{{ $roles->url($i) }}" class="{{ $roles->currentPage() == $i ? 'active' : '' }}">{{ $i }}</a>
-        @endfor
+                                {{-- Page Numbers --}}
+                                @for ($i = 1; $i <= $roles->lastPage(); $i++)
+                                    <a href="{{ $roles->url($i) }}" class="{{ $roles->currentPage() == $i ? 'active' : '' }}">{{ $i }}</a>
+                                    @endfor
 
-        {{-- Next Link --}}
-        @if ($roles->hasMorePages())
-            <a href="{{ $roles->nextPageUrl() }}">Next</a>
-        @else
-            <span class="disabled">Next</span>
-        @endif
-    </div>
-</div>
+                                    {{-- Next Link --}}
+                                    @if ($roles->hasMorePages())
+                                    <a href="{{ $roles->nextPageUrl() }}">Next</a>
+                                    @else
+                                    <span class="disabled">Next</span>
+                                    @endif
+                            </div>
+                        </div>
 
-<!-- Pagination Styles -->
-<style>
-.pagination {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
+                        <!-- Pagination Styles -->
+                        <style>
+                            .pagination {
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 4px;
+                            }
 
-.pagination a,
-.pagination span.disabled {
-    color: black;
-    padding: 8px 14px;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
+                            .pagination a,
+                            .pagination span.disabled {
+                                color: black;
+                                padding: 8px 14px;
+                                text-decoration: none;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                transition: background-color 0.3s;
+                            }
 
-.pagination a.active {
-    background-color: dodgerblue;
-    color: white;
-    border-color: dodgerblue;
-}
+                            .pagination a.active {
+                                background-color: dodgerblue;
+                                color: white;
+                                border-color: dodgerblue;
+                            }
 
-.pagination a,
-.pagination span.disabled {
-    color: rgb(67, 185, 178);
-    padding: 8px 14px;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-    margin: 0 2px;
-}
+                            .pagination a,
+                            .pagination span.disabled {
+                                color: rgb(67, 185, 178);
+                                padding: 8px 14px;
+                                text-decoration: none;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                transition: background-color 0.3s;
+                                margin: 0 2px;
+                            }
 
-.pagination a.active {
-    background-color: rgb(67, 185, 178);
-    color: white;
-    border-color: rgb(67, 185, 178);
-}
+                            .pagination a.active {
+                                background-color: rgb(67, 185, 178);
+                                color: white;
+                                border-color: rgb(67, 185, 178);
+                            }
 
-.pagination a:hover:not(.active) {
-    background-color: rgba(67, 185, 178, 0.1);
-    color: rgb(67, 185, 178);
-    border-color: rgb(67, 185, 178);
-}
+                            .pagination a:hover:not(.active) {
+                                background-color: rgba(67, 185, 178, 0.1);
+                                color: rgb(67, 185, 178);
+                                border-color: rgb(67, 185, 178);
+                            }
 
-.pagination span.disabled {
-    color: rgb(200, 200, 200);
-    background-color: #f9f9f9;
-    cursor: not-allowed;
-    border-color: #ddd;
-}
-
-</style>
-
+                            .pagination span.disabled {
+                                color: rgb(200, 200, 200);
+                                background-color: #f9f9f9;
+                                cursor: not-allowed;
+                                border-color: #ddd;
+                            }
+                        </style>
 
 
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
 </div>
 
 
-      
+
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -343,11 +366,14 @@
                 contentType: false,
                 success: function() {
 
-                    showToast('Role added successfully.');
-                    setTimeout(() => {
-                        $('#addRoleModal').modal('hide');
-                        location.reload();
-                    }, 2000);
+                     Swal.fire({
+                        title: 'Success!',
+                        text: 'Role added successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = window.location.href;
+                    });
                 },
                 error: function(xhr) {
                     const errors = xhr.responseJSON?.errors;
@@ -380,11 +406,14 @@
                 processData: false,
                 contentType: false,
                 success: function() {
-                    showToast1('Role updated successfully.');
-                    setTimeout(() => {
-                        $('#editRoleModal').modal('hide');
-                        location.reload();
-                    }, 2000);
+                     Swal.fire({
+                        title: 'Success!',
+                        text: 'Role updated successfully',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = window.location.href;
+                    });
                 },
                 error: function(xhr) {
                     const errors = xhr.responseJSON?.errors;
@@ -400,22 +429,39 @@
             });
         });
 
-        $('.delete-role-form').on('submit', function(e) {
-            e.preventDefault();
-            if (!confirm('Are you sure?')) return;
-            const $form = $(this);
-            $.ajax({
-                url: $form.attr('action'),
-                method: 'POST',
-                data: $form.serialize(),
-                success: function() {
-                    showToast('Role deleted successfully.');
-                    setTimeout(() => location.reload(), 1000);
-                },
-                error: function() {
-                    showToast('Failed to delete role.', 'error');
-                }
-            });
+       
+    });
+
+     $('#userFilterForm').submit(function(e) {
+        e.preventDefault();
+
+        // UI: show loading
+        $('#applyFilterBtn .default-text').addClass('d-none');
+        $('#applyFilterBtn .loading-text').removeClass('d-none');
+
+        // Prepare filter parameters
+        const company_id = $('#filterCompany').val();
+
+        $.ajax({
+            url: `{{ route('admin.roles.filter') }}`, // Make sure this route exists in web.php
+            method: 'POST',
+            data: {
+                company_id,
+                _token: "{{ csrf_token() }}",
+            },
+            success: function(response) {
+                $('#rolesTable').html(response);
+                $('.pagination').hide();
+
+                // Reset button
+                $('#applyFilterBtn .default-text').removeClass('d-none');
+                $('#applyFilterBtn .loading-text').addClass('d-none');
+            },
+            error: function() {
+                alert('Failed to apply filter.');
+                $('#applyFilterBtn .default-text').removeClass('d-none');
+                $('#applyFilterBtn .loading-text').addClass('d-none');
+            }
         });
     });
 </script>

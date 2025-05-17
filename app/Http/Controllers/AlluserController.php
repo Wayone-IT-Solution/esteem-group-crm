@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Company;
 use App\Models\Role;
 use App\Models\Department;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -33,12 +34,23 @@ class AlluserController extends Controller
     // Display all users with their related data (company, role, department)
     public function index()
     {
-        $data['users'] = User::with(['company', 'role', 'department'])->get();
+        $data['users'] = User::with(['company', 'role', 'department'])->where('role', '!=', 'admin')->orderBy('id', 'desc')->paginate(50);
         $data['roles'] = Role::all();
         $data['companies'] = Company::all();
         $data['departments'] = Department::all();
+        $data['designations'] = Role::all();
 
-        return view('company.Alluser', $data);
+        return view('users.list', $data);
+    }
+    public function getuser(Request $request)
+    {
+        $data['users'] = User::with(['company', 'role', 'department'])->where('role', '!=', 'admin')->where('company_id',$request->id)->orderBy('id', 'desc')->paginate(50);
+        $data['roles'] = Role::all();
+        $data['companies'] = Company::all();
+        $data['departments'] = Department::all();
+        $data['designations'] = Role::all();
+
+        return view('users.list', $data);
     }
 
     // Get roles based on selected company
@@ -52,7 +64,8 @@ class AlluserController extends Controller
     public function getDepartmentsByCompany($id)
     {
         $departments = Department::where('company_id', $id)->get();
-        return response()->json($departments);
+        $roles = Role::where('company_id', $id)->get();
+        return response()->json(['roles' => $roles, 'departments' => $departments]);
     }
 
     // Show form for creating a new user
@@ -62,7 +75,7 @@ class AlluserController extends Controller
         $roles = Role::all();
         $departments = Department::all();
 
-        return view('company.Alluser_create', compact('companies', 'roles', 'departments'));
+        return view('users.add', compact('companies', 'roles', 'departments'));
     }
 
     // Store a new user in the database
@@ -94,8 +107,7 @@ class AlluserController extends Controller
 
         // Store the user data
         User::create($validatedData);
-
-        return redirect()->route('company.Alluser')->with('success', 'User added successfully.');
+        return response()->json(['code' => 200, 'message' => $request->role . ' created successfully!']);
     }
 
     // Show the edit form for an existing user
@@ -106,7 +118,7 @@ class AlluserController extends Controller
         $roles = Role::all();
         $departments = Department::all();
 
-        return view('company.users.edit', compact('user', 'companies', 'roles', 'departments'));
+        return view('users.edit', compact('user', 'companies', 'roles', 'departments'));
     }
 
     // Update an existing user in the database
@@ -143,8 +155,7 @@ class AlluserController extends Controller
 
         // Update the user record
         $user->update($validatedData);
-
-        return redirect()->route('company.Alluser')->with('success', 'User updated successfully.');
+        return response()->json(['code' => 200, 'message' => $request->role . ' updated successfully!']);
     }
 
     // Delete a user from the database
@@ -156,6 +167,35 @@ class AlluserController extends Controller
         return redirect()->route('company.Alluser')->with('success', 'User deleted successfully.');
     }
 
-  
+    public function commanDelete(Request $request)
+    {
+        $type = $request->type;
+        $table = $request->table;
+        $id = $request->id;
+        if ($type == 'delete') {
+            DB::table($table)->whereId($id)->delete();
 
+            return response()->json(['code' => 200, 'message' => $table . ' deleted successfully!']);
+        }
+    }
+    public function filter(Request $request)
+    {
+        $users = User::query();
+
+        if ($request->company_id) {
+            $users->where('company_id', $request->company_id);
+        }
+
+        if ($request->department_id) {
+            $users->where('department_id', $request->department_id);
+        }
+
+        if ($request->designation) {
+            $users->where('role', $request->designation);
+        }
+
+         $users = $users->where('role','!=','admin')->get();
+
+        return view('users.filter', compact('users'));
+    }
 }

@@ -13,7 +13,7 @@ class StatusController extends Controller
     {
         // Get all companies and statuses with relationships
         $companies = Company::all();
-       $status = Status::with('company')->get(); // Make sure Status model has a 'company' relationship
+        $status = Status::with('company')->orderby('id','desc')->get(); // Make sure Status model has a 'company' relationship
 
         return view('company.status', compact('companies', 'status'));
     }
@@ -69,5 +69,15 @@ class StatusController extends Controller
     {
         $status->delete();
         return redirect()->route('admin.status.index')->with('success', 'Status deleted successfully!');
+    }
+
+    public function filter(Request $request)
+    {
+        $status = Status::with('company');
+        if ($request->company_id) {
+            $status->where('company_id', $request->company_id);
+        }
+        $status = $status->orderby('id','desc')->get();
+        return view('company.status.filter', compact('status'));
     }
 }

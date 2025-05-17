@@ -1,21 +1,4 @@
-/*!-----------------------------------------------------------------------------------
- Template Name: Edmin
- Template URI: themes.pixelstrap.com/Edmin
- Description: This is Admin Template
- Author: Pixelstrap
- Author URI: https://themeforest.net/user/pixelstrap
- -----------------------------------------------------------------------------------
-01. Loader js
-02. Tap to top js
-03. Header DropDown Toggle js
-04. Header search js
-05. Dark Mode js 
-06. Bookmark js
-07. Search menu dropdown js
-08. Background Image js
-09. Touchpin js
-11. card-header cart close js
-*/
+
 (function () {
   const body = document.querySelector("body");
   const HTML = document.querySelector("html");

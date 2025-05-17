@@ -21,6 +21,8 @@ require __DIR__.'/admin/roles.php';
 require __DIR__.'/admin/department.php';
 require __DIR__.'/admin/status.php';
 require __DIR__.'/admin/alluser.php';
+require __DIR__.'/admin/request.php';
+require __DIR__.'/admin/leads.php';
 
 
 
@@ -31,8 +33,6 @@ Route::get('/company/{id}/roles', [AlluserController::class, 'getRoles']);
 
 Route::get('/company/{id}/departments', [AlluserController::class, 'getDepartmentsByCompany']);
 
-Route::get('/admin/leads', [LeadController::class, 'showallleads'])->name('all-leads');
 
-Route::get('/admin/leads/add', [LeadController::class, 'addleads'])->name('add-leads');
 
 

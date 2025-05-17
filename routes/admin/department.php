@@ -13,4 +13,5 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/departments')->gro
     Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('department.edit');
     Route::put('/{department}', [DepartmentController::class, 'update'])->name('department.update');
     Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('department.destroy');
+    Route::post('/filter', [DepartmentController::class, 'filter'])->name('admin.department.filter');
 });

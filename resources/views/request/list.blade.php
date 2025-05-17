@@ -27,10 +27,10 @@
     <div class="container-fluid">
         <div class="row page-title align-items-center">
             <div class="col-sm-3">
-                <h3>All Departments</h3>
+                <h3>All Request Type</h3>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex flex-wrap gap-3 align-items-end">
                     <div class="col-md-6">
                         <select class="form-select" name="company_id" id="filterCompany">
@@ -56,10 +56,10 @@
 
 
 
-            <div class="col-sm-3 text-end">
+            <div class="col-sm-2 text-end">
                 <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal"
                     data-bs-target="#addDepartmentModal">
-                    <i class="fa-solid fa-building me-2"></i> Add Department
+                    <i class="fa-solid fa-building me-2"></i>  Request
                 </button>
             </div>
         </div>
@@ -72,11 +72,11 @@
     <div class="modal fade" id="addDepartmentModal" tabindex="-1" aria-labelledby="addDepartmentModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form id="addDepartmentForm" action="{{ route('department.store') }}" method="POST"
+            <form id="addDepartmentForm" action="{{ route('request.store') }}" method="POST"
                 class="modal-content shadow-lg rounded-3">
                 @csrf
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title text-white"><i class="fa-solid fa-building me-2"></i> Add Department</h5>
+                    <h5 class="modal-title text-white"><i class="fa-solid fa-building me-2"></i> Add Request For</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -91,9 +91,9 @@
                         <label for="companyName">Company Name</label>
                     </div>
                     <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="departmentName" name="department"
-                            placeholder="Enter Department" required>
-                        <label for="departmentName">Department</label>
+                        <input type="text" class="form-control" id="request" name="request"
+                            placeholder="Enter request" required>
+                        <label for="request">Request For</label>
                     </div>
                 </div>
                 <span id="editSubmitSpinner_success"></span>
@@ -118,7 +118,7 @@
                 @csrf
                 @method('PUT')
                 <div class="modal-header bg-warning text-white">
-                    <h5 class="modal-title text-white"><i class="fa-solid fa-pen me-2"></i> Edit Department</h5>
+                    <h5 class="modal-title text-white"><i class="fa-solid fa-pen me-2"></i> Edit Request</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
@@ -134,9 +134,9 @@
                         <label for="editCompanyName">Company Name</label>
                     </div>
                     <div class="mb-3 form-floating">
-                        <input type="text" class="form-control" id="editDepartmentName" name="department"
-                            placeholder="Enter Department" required>
-                        <label for="editDepartmentName">Department</label>
+                        <input type="text" class="form-control" id="editDepartmentName" name="request"
+                            placeholder="Enter Request" required>
+                        <label for="editDepartmentName">Request</label>
                     </div>
                 </div>
                 <span id="editSubmitSpinner_success1"></span>
@@ -164,28 +164,28 @@
                                 <tr class="b-b-primary">
                                     <th class="text-center">Sr.No</th>
                                     <th>Company Name</th>
-                                    <th>Department</th>
+                                    <th>Request For</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($departments as $department)
+                                @foreach ($requests as $department)
                                 <tr>
                                     <td class="text-center">{{ $loop->iteration }}</td>
                                     <td>{{ $department->company->name ?? '' }}</td>
-                                    <td>{{ $department->department }}</td>
+                                    <td>{{ $department->request }}</td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-2">
                                             <button type="button"
                                                 class="btn btn-sm btn-warning edit-department-btn"
                                                 data-id="{{ $department->id }}"
-                                                data-department="{{ $department->department }}"
+                                                data-department="{{ $department->request }}"
                                                 data-company-id="{{ $department->company_id }}"
-                                                data-update-url="{{ route('department.update', $department->id) }}">
+                                                data-update-url="{{ route('request.update', $department->id) }}">
                                                 <i class="fa-solid fa-pen"></i>
                                             </button>
 
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="CommanDelete('delete','departments','{{ $department->id }}')">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="CommanDelete('delete','requests','{{ $department->id }}')">
                                                 <i class="fa-solid fa-trash" style="font-size: 14px;"></i>
                                             </button>
 
@@ -255,7 +255,7 @@
 
                     Swal.fire({
                         title: 'Success!',
-                        text: 'Department added successfully',
+                        text: 'Request added successfully',
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
@@ -296,7 +296,7 @@
 
                     Swal.fire({
                         title: 'Success!',
-                        text: 'Department updated successfully',
+                        text: 'Request updated successfully',
                         icon: 'success',
                         confirmButtonText: 'OK'
                     }).then(() => {
@@ -332,7 +332,7 @@
         const company_id = $('#filterCompany').val();
 
         $.ajax({
-            url: `{{ route('admin.department.filter') }}`, // Make sure this route exists in web.php
+            url: `{{ route('admin.request.filter') }}`, // Make sure this route exists in web.php
             method: 'POST',
             data: {
                 company_id,

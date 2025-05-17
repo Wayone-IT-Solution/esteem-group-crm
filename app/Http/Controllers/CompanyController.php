@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Company;
+use App\Models\RequestModel;
+use App\Models\Status;
+use App\Models\User;
 
 class CompanyController extends Controller
 {
@@ -118,5 +121,13 @@ class CompanyController extends Controller
         $company->delete();
 
         return redirect()->route('admin.companies')->with('success', 'Company deleted successfully!');
+    }
+
+    public function status(Request $request){
+     $statuses=   Status::where('company_id',$request->id)->get();
+     $requests=   RequestModel::where('company_id',$request->id)->get();
+     $users  =  User::where('company_id',$request->id)->where('role','!=','admin')->get();
+
+     return response()->json(['code'=>200,'statuses'=>$statuses,'requests'=>$requests,'users'=>$users]);
     }
 }

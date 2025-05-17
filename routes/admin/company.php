@@ -11,4 +11,5 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/companies')->group
     Route::get('/{id}/edit', [CompanyController::class, 'edit'])->name('company.edit');
     Route::put('/{id}', [CompanyController::class, 'update'])->name('company.update');
     Route::delete('/{id}', [CompanyController::class, 'destroy'])->name('company.destroy');
+    Route::get('/get-statuses/{id}', [CompanyController::class, 'status']);
 });
