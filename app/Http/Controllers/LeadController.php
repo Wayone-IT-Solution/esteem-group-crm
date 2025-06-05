@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\LeadAssignedMail;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class LeadController extends Controller
 {
@@ -24,7 +25,7 @@ class LeadController extends Controller
     if ($user->role == 'admin') {
       $leads = LeadModel::with(['company', 'user', 'assinges'])
         ->orderBy("created_at", "desc")
-        ->paginate(10);
+        ->paginate(40);
     } else {
       // Dusre users ko sirf assigned leads dikhani hain
       $leads = LeadModel::with(['company', 'user', 'assinges'])
@@ -32,7 +33,7 @@ class LeadController extends Controller
           $query->where('user_id', $user->id);
         })
         ->orderBy("created_at", "desc")
-        ->paginate(10);
+        ->paginate(40);
     }
 
     $companies = Company::all();
@@ -64,7 +65,7 @@ class LeadController extends Controller
       });
     }
 
-    $leads = $query->paginate(10);
+    $leads = $query->paginate(40);
     $companies = Company::all();
 
     return view('leads.list', compact('leads', 'companies'));
@@ -80,7 +81,7 @@ class LeadController extends Controller
     // }
 
     if ($request->filled('user_id')) {
-    $query->where('user_id', $request->user_id);
+      $query->where('user_id', $request->user_id);
     }
 
     $user = auth()->user();
@@ -92,7 +93,7 @@ class LeadController extends Controller
     }
 
 
-    $leads = $query->orderBy("created_at", "desc")->paginate(10);
+    $leads = $query->orderBy("created_at", "desc")->paginate(40);
     $companies = Company::all();
 
     return view('leads.list', compact('leads', 'companies'));
@@ -101,7 +102,7 @@ class LeadController extends Controller
   public function getallcompanyleads(Request $request)
   {
 
-        $user = auth()->user();
+    $user = auth()->user();
 
     $query = LeadModel::with(['company', 'user', 'assinges']);
 
@@ -113,14 +114,14 @@ class LeadController extends Controller
     // $query->where('user_id', $request->user_id);
     // }
 
-    
+
     if ($user->role !== 'admin') {
       $query->whereHas('assinges', function ($q) use ($user) {
         $q->where('user_id', $user->id);
       });
     }
 
-    $leads = $query->orderBy("created_at", "desc")->paginate(10);
+    $leads = $query->orderBy("created_at", "desc")->paginate(40);
     $companies = Company::all();
 
     return view('leads.list', compact('leads', 'companies'));
@@ -311,5 +312,80 @@ class LeadController extends Controller
     $leadCon =  LeadFollowup::with('user')->where('lead_id', $request->id)->orderby('id', 'desc')->get();
 
     return view('leads.canvas', compact('leadCon'));
+  }
+
+  public function import(Request $request)
+  {
+    $request->validate([
+      'company_id' => 'required|exists:companies,id',
+      'excel_file' => 'required|file|mimes:xlsx,xls',
+    ]);
+
+    try {
+      $file = $request->file('excel_file');
+      $reader = IOFactory::createReaderForFile($file);
+      $reader->setReadDataOnly(true); // ✅ Avoid formulas, styles
+      $spreadsheet = $reader->load($file);
+      $sheet = $spreadsheet->getActiveSheet();
+      $rows = $sheet->toArray(null, true, true, true);
+    } catch (\Throwable $e) {
+      return back()->with('error', 'Error reading the Excel file. Please check the format.');
+    }
+
+    // ✅ Expected header keys
+    $expectedHeaders = [
+      "S. No",
+      "Platform",
+      "Full Name",
+      "Phone ",
+      "Email",
+      "City",
+      "what_is_your_earning_criteria_?",
+      "which_type_of_licence_you_are_holding?",
+      "what_is_the_source_of_your_income?",
+      "what_is_the_required_amount_of_your_loan?",
+      "please_share_your_license/_version_number_with_us.",
+    ];
+
+    $headerRow = array_shift($rows); // Get and remove first row (header)
+    $headerValues = array_values($headerRow);
+    $cleanHeader = array_slice($headerValues, 0, count($expectedHeaders));
+
+    $normalize = fn($arr) => array_map(fn($v) => strtolower(trim((string)$v)), $arr);
+
+    if ($normalize($cleanHeader) !== $normalize($expectedHeaders)) {
+      return back()->with('error', 'Excel header mismatch. Please use the correct template.');
+    }
+
+    foreach ($rows as $row) {
+      $values = array_values($row);
+
+      // ✅ Skip completely empty/null rows
+      if (!array_filter($values)) {
+        continue;
+      }
+
+      $rowData = array_slice($values, 0, count($expectedHeaders));
+
+      LeadModel::insert([
+        'company_id' => $request->company_id,
+        'source' => $rowData[1] ?? null,
+        'name' => $rowData[2] ?? null,
+        'mobile_number' => $rowData[3] ?? null,
+        'email' => $rowData[4] ?? null,
+        'state' => $rowData[5] ?? null,
+        'earning_criteria' => $rowData[6] ?? null,
+        'status' => ($rowData[6] === 'b)_above_500_$') ? 'Qualified lead' : 'Enquiry',
+        'license_type' => $rowData[7] ?? null,
+        'income_source' => $rowData[8] ?? null,
+        'required_amount' => $rowData[9] ?? null,
+        'license_version' => $rowData[10] ?? null,
+        'add_by' => Auth::id(),
+        'created_at' => now(),
+        'unique_id' => $this->getlastGFCode('lead_models'),
+      ]);
+    }
+
+    return back()->with('success', 'Leads imported successfully!');
   }
 }

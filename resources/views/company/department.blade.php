@@ -161,7 +161,7 @@
                     <div class="table-responsive">
                         <table id="daparmentTable" class="table table-striped table-bordered">
                             <thead class="bg-light">
-                                <tr class="b-b-primary">
+                                <tr class="b-b-primary table-head">
                                     <th class="text-center">Sr.No</th>
                                     <th>Company Name</th>
                                     <th>Department</th>

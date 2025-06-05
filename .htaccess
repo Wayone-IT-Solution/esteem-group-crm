@@ -1,0 +1,10 @@
+
+
+VITE_APP_NAME="${APP_NAME}"
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect to public directory
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>

@@ -26,8 +26,8 @@
 
     .card {
         background-color: #f8f9fa;
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        /* border-radius: 15px; */
+        /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
     }
 
     .card-header {
@@ -66,7 +66,7 @@
 
     .table th,
     .table td {
-        padding: 10px 6px;
+        padding: 5px;
         text-align: center;
         vertical-align: middle;
     }
@@ -74,13 +74,13 @@
     .table td i {
         font-size: 0.9rem;
         vertical-align: middle;
-        margin-right: 4px;
+        /* margin-right: 4px; */
     }
 
     .table td small {
-        font-size: 0.85rem;
+        /* font-size: 0.85rem; */
         vertical-align: middle;
-        font-size: 12px !important;
+        font-size: 10px !important;
 
     }
 </style>
@@ -137,13 +137,13 @@
     </div>
 
     <!-- User Table -->
-    <div class="container-fluid table-space basic_table mt-4">
+    <div class="container-fluid table-space basic_table mt-4 mb-4">
         <div class="row">
             <div class="col-sm-12">
                 <div class="table-responsive">
                     <table id="usersTable" class="table table-striped table-bordered">
                         <thead class="bg-light">
-                            <tr class="b-b-primary">
+                            <tr class="b-b-primary table-head">
                                 <th>Sr.N</th>
                                 <th>Name</th>
                                 <th>Email</th>
@@ -156,7 +156,7 @@
                         </thead>
                         <tbody>
                             @foreach ($users as $user)
-                            <tr>
+                            <tr class="table-head">
                                 <td>{{ $loop->iteration }}</td>
                                 <td><i class="fa-solid fa-user text-primary"></i> <small>{{ $user->name }}</small></td>
                                 <td><i class="fa-solid fa-envelope text-secondary"></i> <small>{{ $user->email }}</small></td>
@@ -164,38 +164,41 @@
                                 <td><i class="fa-solid fa-briefcase text-success"></i> <small>{{ ucfirst($user->role) }}</small></td>
                                 <td><i class="fa-solid fa-phone text-warning"></i> <small>{{ $user->mobile_number }}</small></td>
                                 <td><i class="fa-solid fa-location-dot text-danger"></i> <small>{{ $user->address }}</small></td>
-                              <td>
-    <div class="d-flex justify-content-center gap-2">
-        <!-- View Info Button -->
-        <button class="btn btn-info show-user-info" style="padding: 2px 9px;"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#userInfoCanvas"
-            data-name="{{ $user->name }}"
-            data-email="{{ $user->email }}"
-            data-company="{{ $user->company->name }}"
-            data-role="{{ ucfirst($user->role) }}"
-            data-phone="{{ $user->mobile_number }}"
-            data-address="{{ $user->address }}"
-            title="View Info">
-            <i class="fa-solid fa-eye" style="font-size: 12px;"></i>
-        </button>
+                                <td>
+                                    <div class="d-flex justify-content-center gap-1 action-buttons">
+                                        <!-- View Info -->
+                                        <button class="btn btn-sm btn-light text-info border show-user-info"
+                                            data-bs-toggle="offcanvas"
+                                            data-bs-target="#userInfoCanvas"
+                                            data-name="{{ $user->name }}"
+                                            data-email="{{ $user->email }}"
+                                            data-company="{{ $user->company->name }}"
+                                            data-role="{{ ucfirst($user->role) }}"
+                                            data-phone="{{ $user->mobile_number }}"
+                                            data-address="{{ $user->address }}"
+                                            title="View Info">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
 
-        <!-- Edit Button -->
-        <a href="{{ route('admin.users.edit', $user->id) }}"
-            class="btn btn-warning edit-company-btn" style="padding: 5px 9px;"
-            data-id="{{ $user->id }}"
-            data-name="{{ $user->name }}"
-            data-update-url="{{ route('company.update', $user->id) }}">
-            <i class="fa-solid fa-pen" style="font-size: 12px;"></i>
-        </a>
+                                        <!-- Edit -->
+                                        <a href="{{ route('admin.users.edit', $user->id) }}"
+                                            class="btn btn-sm btn-light text-warning border"
+                                            data-id="{{ $user->id }}"
+                                            data-name="{{ $user->name }}"
+                                            data-update-url="{{ route('company.update', $user->id) }}"
+                                            title="Edit User">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
 
-        <!-- Delete Button -->
-        <button type="submit" class="btn btn-danger"   style="padding: 5px 9px;"
-            onclick="CommanDelete('delete','users','{{ $user->id }}')">
-            <i class="fa-solid fa-trash" style="font-size: 12px;"></i>
-        </button>
-    </div>
-</td>
+                                        <!-- Delete -->
+                                        <button type="button" class="btn btn-sm btn-light text-danger border"
+                                            onclick="CommanDelete('delete','users','{{ $user->id }}')"
+                                            title="Delete User">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+
+                                </td>
 
 
                             </tr>

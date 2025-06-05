@@ -17,6 +17,7 @@ class User extends Authenticatable
         'department_id',
         'name',
         'email',
+        'role',
         'mobile_number',
         'emergency_mobile_number',
         'joining_date',

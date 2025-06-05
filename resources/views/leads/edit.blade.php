@@ -123,6 +123,29 @@
                             <strong class="text-dark">State:</strong>
                             <div class="text-muted">{{ $lead->state }}</div>
                         </div>
+                          <div class="col-6">
+                            <strong class="text-dark">State:</strong>
+                            <div class="text-muted">{{ $lead->state }}</div>
+                        </div>
+                        @if($lead->company->name =='Esteem Finance')
+                        <div class="col-6">
+                            <strong class="text-dark">Earning Criteria</strong>
+                            <div class="text-muted">{{ $lead->earning_criteria  ?? ''}}</div>
+                        </div>
+                        <div class="col-6">
+                            <strong class="text-dark">License Type</strong>
+                            <div class="text-muted">{{ $lead->license_type  ?? ''}}</div>
+                        </div>
+                        <div class="col-6">
+                            <strong class="text-dark">Income Source</strong>
+                            <div class="text-muted">{{ $lead->income_source  ?? ''}}</div>
+                        </div>
+                        <div class="col-6">
+                            <strong class="text-dark">Required Amount</strong>
+                            <div class="text-muted">{{ $lead->required_amount  ?? ''}}</div>
+                        </div>
+                        @endif()
+                      
 
                         <div class="col-6">
                             <strong class="text-dark">Address:</strong>
@@ -202,7 +225,7 @@
 
                         <div class="mb-3">
                             <label for="status" class="form-label">Assign Lead </label>
-                            <select name="user_id" id="user_id" class="form-select" >
+                            <select name="user_id" id="user_id" class="form-select">
                                 <option value="">Select Employee</option>
                                 @if(!empty($users))
                                 @foreach ($users as $list )
@@ -239,7 +262,7 @@
         <button type="button" class="btn-close text-reset text-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body" style="background-color: white;" id="canvasbody">
-        
+
     </div>
 </div>
 
@@ -250,7 +273,7 @@
             type: 'POST',
             data: {
                 id,
-              
+
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {

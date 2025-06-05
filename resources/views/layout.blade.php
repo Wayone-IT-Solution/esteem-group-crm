@@ -232,73 +232,69 @@
                         @endrole()
                         <hr>
                         <li class="sidebar-list">
-    <a class="sidebar-link d-flex align-items-center justify-content-between" href="javascript:void(0)" data-toggle="submenu">
-        <span class="d-flex align-items-center text-nowrap">
-            <i class="fa-solid fa-users-rectangle me-2"></i>
-            Enquiries
-        </span>
-        <i class="fa-solid fa-angle-down toggle-icon down"></i>
-    </a>
+                            <a class="sidebar-link d-flex align-items-center justify-content-between" href="javascript:void(0)" data-toggle="submenu">
+                                <span class="d-flex align-items-center text-nowrap">
+                                    <i class="fa-solid fa-users-rectangle me-2"></i>
+                                    Enquiries
+                                </span>
+                                <i class="fa-solid fa-angle-down toggle-icon down"></i>
+                            </a>
 
-    @php
-        use App\Models\Company;
-        use App\Models\LeadModel;
-        use Illuminate\Support\Facades\Auth;
-
-        $user = Auth::user();
-        $isAdmin = $user->role === 'admin';
-        $userId = $user->id;
-
-        $companies = Company::with('status')->get();
-    @endphp
-
-    <ul class="sidebar-submenu">
-        @foreach ($companies as $company)
-            @php
-                $companyName = $company->name ?? '';
-                $words = explode(' ', $companyName);
-                $displayName = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : $companyName;
-            @endphp
-
-            <li class="sidebar-list">
-                <a class="sidebar-link" href="javascript:void(0)">
-                    <i class="fa-solid fa-building-columns me-2"></i>
-                    <span>{{ $displayName }}</span>
-                </a>
-                <ul class="sidebar-submenu" style="display: none;">
-                    @if (!empty($company->status))
-                        @foreach ($company->status as $status)
                             @php
-                                $query = LeadModel::where('company_id', $company->id)
-                                                  ->where('status', $status->status);
+                            use App\Models\Company;
+                            use App\Models\LeadModel;
+                            use Illuminate\Support\Facades\Auth;
 
-                                if (!$isAdmin) {
-                                    $query->whereHas('assinges', function ($q) use ($userId) {
-                                        $q->where('user_id', $userId);
-                                    });
-                                }
+                            $user = Auth::user();
+                            $isAdmin = $user->role === 'admin';
+                            $userId = $user->id;
 
-                                $leadCount = $query->count();
+                            $companies = Company::with('status')->get();
                             @endphp
 
-                            <li>
-                                <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 13px;">
-                                    <i class="fa-solid fa-toggle-on me-2"></i>
-                                    {{ $status->status ?? '' }}
-                                    <span class="badge bg-warning ms-2">{{ $leadCount }}</span>
-                                </a>
-                            </li>
-                        @endforeach
-                    @endif
-                </ul>
-            </li>
-        @endforeach
-    </ul>
-</li>
+                            <ul class="sidebar-submenu">
+                                @foreach ($companies as $company)
+                                @php
+                                $companyName = $company->name ?? '';
+                                $words = explode(' ', $companyName);
+                                $displayName = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : $companyName;
+                                @endphp
 
+                                <li class="sidebar-list">
+                                    <a class="sidebar-link" href="javascript:void(0)">
+                                        <i class="fa-solid fa-building-columns me-2"></i>
+                                        <span>{{ $displayName }}</span>
+                                    </a>
+                                    <ul class="sidebar-submenu" style="display: none;">
+                                        @if (!empty($company->status))
+                                        @foreach ($company->status as $status)
+                                        @php
+                                        $query = LeadModel::where('company_id', $company->id)
+                                        ->where('status', $status->status);
 
+                                        if (!$isAdmin) {
+                                        $query->whereHas('assinges', function ($q) use ($userId) {
+                                        $q->where('user_id', $userId);
+                                        });
+                                        }
 
+                                        $leadCount = $query->count();
+                                        @endphp
 
+                                        <li>
+                                            <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 13px;width: 200px;">
+                                                <i class="fa-solid fa-toggle-on me-2"></i>
+                                                {{ $status->status ?? '' }}
+                                                <span class="badge bg-warning ms-2">{{ $leadCount }}</span>
+                                            </a>
+                                        </li>
+                                        @endforeach
+                                        @endif
+                                    </ul>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </li>
                         <hr>
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ url('auth/logout') }}">

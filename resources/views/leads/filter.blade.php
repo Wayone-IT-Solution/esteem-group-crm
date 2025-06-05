@@ -1,6 +1,5 @@
  <table id="leadsTable" class="table table-bordered table-striped">
-                <thead class="bg-light">
-                    <tr>
+                <thead class="bg-light"><tr class="table-head">
                         <th>SNO.</th>
                         <th>Lead Id</th>
                         <th>Lead Name</th>

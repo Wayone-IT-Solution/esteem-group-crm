@@ -19,7 +19,14 @@
         font-size: 1.25rem;
     }
 
-    .btn-add-lead {
+    .scroll-wrapper {
+        max-height: 80vh;
+        overflow-y: auto;
+        overflow-x: auto;
+        padding-right: 10px;
+    }
+
+    x .btn-add-lead {
         background-color: #198754;
         color: #fff;
         border-radius: 20px;
@@ -57,7 +64,7 @@
         transform: scale(1.1);
     }
 </style>
-<div class=" mt-4" style="background-color: white; margin-top: 40px; padding: 30px;">
+<div class=" mt-4" style="background-color: white; margin-top: 40px; padding: 10px 0px;">
 
     <div class="col-md-12">
         <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex flex-wrap gap-3 align-items-end">
@@ -91,24 +98,49 @@
     </div>
 </div>
 
-<div class="page-body card mt-4" style="background-color: white; margin-top: 40px; padding: 30px;">
+@if(session('error'))
+<div class="alert alert-danger">
+
+    <div style="color: white;">{{ session('error') }}</div>
+</div>
+@endif
+
+@if(session('success'))
+<div class="alert alert-success">
+    <div style="color: white;">{{ session('success') }}</div>
+</div>
+@endif
+
+
+<div class="page-body card mt-4" style="background-color: white; margin-top: 40px; padding: 10px 0px;">
     <div class="container-fluid">
-        <div class="row align-items-center mb-3">
-            <div class="col-md-8">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-3">
                 <h4 class="mb-0">All Enquiries</h4>
             </div>
 
-            <div class="col-md-4 text-end">
-                <a href="{{ route('admin.leads.create') }}" class="btn btn-primary">
-                    <i class="fa-solid fa-plus"></i> Add Enquiry
-                </a>
+            <div class="col-md-9 text-md-end mt-3 mt-md-0">
+                <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                    <a href="{{ asset('sample/sample.xlsx') }}" class="btn btn-success">
+                        <i class="fa-solid fa-download me-1"></i> Download Sample Lead
+                    </a>
+
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importLeadsModal">
+                        <i class="fa-solid fa-file-import me-1"></i> Import Leads
+                    </a>
+
+                    <a href="{{ route('admin.leads.create') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-plus me-1"></i> Add Enquiry
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="table-responsive">
+
+        <div class="table-responsive overflow-x overflow-y">
             <table id="leadsTable" class="table table-bordered table-striped">
                 <thead class="bg-light">
-                    <tr>
+                    <tr class="table-head">
                         <th>SNO.</th>
                         <th>Lead Id</th>
                         <th>Name</th>
@@ -126,7 +158,7 @@
                 </thead>
                 <tbody>
                     @foreach($leads as $lead)
-                    <tr>
+                    <tr class="table-head">
                         <td>{{ $loop->iteration }}</td>
                         <td> <a href="{{ route('admin.leads.edit', $lead->id) }}">{{ $lead->unique_id }}</a></td>
                         <td>{{ $lead->name }}</td>
@@ -174,6 +206,106 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <div class="row">
+                <div class="mt-4 d-flex justify-content-end">
+                    <div class="pagination-container">
+                        {{-- Previous Link --}}
+                        @if ($leads->onFirstPage())
+                        <span class="page-link disabled">Previous</span>
+                        @else
+                        <a href="{{ $leads->previousPageUrl() }}" class="page-link">Previous</a>
+                        @endif
+
+                        {{-- Page Numbers --}}
+                        @php
+                        $current = $leads->currentPage();
+                        $last = $leads->lastPage();
+                        $start = max(1, $current - 2);
+                        $end = min($last, $current + 2);
+                        @endphp
+
+                        {{-- Always show first page --}}
+                        @if ($start > 1)
+                        <a href="{{ $leads->url(1) }}" class="page-link {{ $current == 1 ? 'active' : '' }}">1</a>
+                        @if ($start > 2)
+                        <span class="page-link dots">...</span>
+                        @endif
+                        @endif
+
+                        {{-- Main loop --}}
+                        @for ($i = $start; $i <= $end; $i++)
+                            <a href="{{ $leads->url($i) }}" class="page-link {{ $current == $i ? 'active' : '' }}">{{ $i }}</a>
+                            @endfor
+
+                            {{-- Always show last page --}}
+                            @if ($end < $last)
+                                @if ($end < $last - 1)
+                                <span class="page-link dots">...</span>
+                                @endif
+                                <a href="{{ $leads->url($last) }}" class="page-link {{ $current == $last ? 'active' : '' }}">{{ $last }}</a>
+                                @endif
+
+                                {{-- Next Link --}}
+                                @if ($leads->hasMorePages())
+                                <a href="{{ $leads->nextPageUrl() }}" class="page-link">Next</a>
+                                @else
+                                <span class="page-link disabled">Next</span>
+                                @endif
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .pagination-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    padding: 8px 12px;
+                }
+
+                .page-link {
+                    padding: 8px 14px;
+                    background: white;
+                    color: #43b9b2;
+                    border: 1px solid #ddd;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: all 0.2s ease-in-out;
+                }
+
+                .page-link:hover:not(.active):not(.disabled) {
+                    background-color: rgba(67, 185, 178, 0.1);
+                    color: #43b9b2;
+                    border-color: #43b9b2;
+                }
+
+                .page-link.active {
+                    background-color: #43b9b2;
+                    color: white;
+                    border-color: #43b9b2;
+                }
+
+                .page-link.disabled {
+                    background-color: #f8f9fa;
+                    color: #ccc;
+                    cursor: not-allowed;
+                    border-color: #ddd;
+                }
+
+                .page-link.dots {
+                    cursor: default;
+                    background: transparent;
+                    border: none;
+                    color: #999;
+                    padding: 8px 10px;
+                }
+            </style>
+
+
+
+
         </div>
     </div>
 </div>
@@ -217,8 +349,48 @@
     </div>
 </div>
 
+<!-- Import Leads Modal -->
+<div class="modal fade" id="importLeadsModal" tabindex="-1" aria-labelledby="importLeadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ route('admin.leads.import') }}" method="POST" enctype="multipart/form-data" class="modal-content">
+            @csrf
+            <div class="modal-header">
+                <h5 class="modal-title" id="importLeadsModalLabel"><i class="fa-solid fa-file-import me-2"></i>Import Leads</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="company_id" class="form-label">Select Company</label>
+                    <select name="company_id" id="company_id" class="form-select" required>
+                        <option value="">Choose Company</option>
+                        @foreach($companies as $company)
+                        <option value="{{ $company->id }}">{{ $company->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="excel_file" class="form-label">Upload Excel File</label>
+                    <input type="file" name="excel_file" id="excel_file" accept=".xls,.xlsx" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" id="leadImportButton" onclick="changetext()"><i class="fa-solid fa-upload me-1"></i>Upload</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 <script>
     $(document).ready(function() {
+        function changetext() {
+            $('#leadImportButton').text('Please wait..');
+
+        }
         // Tooltip init
         $('[data-bs-toggle="tooltip"]').tooltip();
 

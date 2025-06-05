@@ -15,7 +15,8 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::post('/filter', [LeadController::class, 'filter'])->name('admin.leads.filter');
     Route::post('/canvas', [LeadController::class, 'canvas'])->name('admin.leads.canvas');
     Route::post('/description', [LeadController::class, 'description'])->name('leads.update.description');
-    Route::get('/{company_id}/{status}',[LeadController::class,'getleads']);
-    Route::get('/company/all/{company_id}',[LeadController::class,'getallcompanyleads']);
-    Route::get('/company/today/{company_id}',[LeadController::class,'todayleads']);
+    Route::get('/{company_id}/{status}', [LeadController::class, 'getleads']);
+    Route::get('/company/all/{company_id}', [LeadController::class, 'getallcompanyleads']);
+    Route::get('/company/today/{company_id}', [LeadController::class, 'todayleads']);
+    Route::post('/leads/import', [LeadController::class, 'import'])->name('admin.leads.import');
 });
