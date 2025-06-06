@@ -67,7 +67,7 @@ class ApiController extends Controller
 public function botresponse(Request $request)
 {
     $data = $request->all();
-    Log::info('WATI Webhook Raw Body:', ['all' => $data]);
+    // Log::info('WATI Webhook Raw Body:', ['all' => $data]);
 
     $watiTimestamp = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp']) : now();
 
@@ -99,7 +99,7 @@ public function botresponse(Request $request)
             $botText = strtolower(trim($matchedBot->text));
             $userInput = strtolower(trim($message->text));
 
-            // ⛔️ Validate input based on question
+            // ⛔️ Validate input based on questionWhat Is The Amount Of  Loan  Required ?
             if (
                 (str_contains($botText, 'earning criteria') && !in_array($userInput, ['1', '2'])) ||
                 (str_contains($botText, 'license') && !in_array($userInput, ['1', '2', '3', '4'])) ||
@@ -183,7 +183,7 @@ private function createLeadFromBot($conversationId, $waId)
 
     // Map values
     $earning_criteria_text = match (trim($earning_criteria)) {
-        '1' => 'a)_less_than_500_₹',
+        '1' => 'a)_less_than_500_$',
         '2' => 'b)_above_500_$',
         default => $earning_criteria
     };
@@ -233,10 +233,10 @@ private function createLeadFromBot($conversationId, $waId)
     ];
 
     LeadModel::insert($leadData);
-    Log::info('✅ Lead created:', $leadData);
+    // Log::info('✅ Lead created:', $leadData);
 
     DB::table('wati_messages')->where('conversation_id', $conversationId)->delete();
-    Log::info("🗑️ Cleaned up conversation: {$conversationId}");
+    // Log::info("🗑️ Cleaned up conversation: {$conversationId}");
 }
 
 
