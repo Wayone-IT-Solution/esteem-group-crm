@@ -67,11 +67,9 @@ class ApiController extends Controller
 public function botresponse(Request $request)
 {
     $data = $request->all();
-    // Log::info('WATI Webhook Raw Body:', ['all' => $data]);
 
     $watiTimestamp = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp']) : now();
 
-    // Save message first
     $messageId = DB::table('wati_messages')->insertGetId([
         'message_id'      => $data['id'] ?? uniqid(),
         'conversation_id' => $data['conversationId'] ?? null,
@@ -99,7 +97,6 @@ public function botresponse(Request $request)
             $botText = strtolower(trim($matchedBot->text));
             $userInput = strtolower(trim($message->text));
 
-            // ⛔️ Validate input based on question
             if (
                 (str_contains($botText, 'earning criteria') && !in_array($userInput, ['1', '2'])) ||
                 (str_contains($botText, 'license') && !in_array($userInput, ['1', '2', '3', '4'])) ||
@@ -115,7 +112,6 @@ public function botresponse(Request $request)
                 return response()->json(['message' => 'Invalid reply skipped'], 200);
             }
 
-            // ✅ Match reply to bot message
             DB::table('wati_messages')
                 ->where('id', $message->id)
                 ->update(['matched_bot_message_id' => $matchedBot->id]);
@@ -125,7 +121,7 @@ public function botresponse(Request $request)
                 'bot_question' => $matchedBot->text
             ]);
 
-            if (stripos($matchedBot->text, 'which city do you belong to?') !== false) {
+            if (stripos($matchedBot->text, 'which city') !== false) {
                 $this->createLeadFromBot($message->conversation_id, $message->wa_id);
             }
         }
@@ -168,11 +164,9 @@ private function createLeadFromBot($conversationId, $waId)
             ->value('text');
 
         Log::debug("📌 Answer for '$question': " . ($answer ?? 'null'));
-
         $userAnswers[] = $answer;
     }
 
-    // Assign with fallback
     $earning_criteria   = $userAnswers[0] ?? null;
     $license_type       = $userAnswers[1] ?? null;
     $license_number     = $userAnswers[2] ?? null;
@@ -183,7 +177,6 @@ private function createLeadFromBot($conversationId, $waId)
     $email              = $userAnswers[7] ?? null;
     $city               = $userAnswers[8] ?? null;
 
-    // Map values
     $earning_criteria_text = match (trim($earning_criteria)) {
         '1' => 'a)_less_than_500_$',
         '2' => 'b)_above_500_$',
@@ -214,7 +207,6 @@ private function createLeadFromBot($conversationId, $waId)
         default => $required_amount
     };
 
-    // Insert lead
     $leadData = [
         'company_id'       => 7,
         'source'           => 'whatsapp',
@@ -235,10 +227,10 @@ private function createLeadFromBot($conversationId, $waId)
     ];
 
     LeadModel::insert($leadData);
-    // Log::info('✅ Lead created:', $leadData);
+    Log::info('✅ Lead created:', $leadData);
 
     DB::table('wati_messages')->where('conversation_id', $conversationId)->delete();
-    // Log::info("🗑️ Cleaned up conversation: {$conversationId}");
+    Log::info("🗑️ Cleaned up conversation: {$conversationId}");
 }
 
 
