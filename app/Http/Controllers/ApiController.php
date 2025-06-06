@@ -99,7 +99,7 @@ public function botresponse(Request $request)
             $botText = strtolower(trim($matchedBot->text));
             $userInput = strtolower(trim($message->text));
 
-            // ⛔️ Validate input based on questionWhat Is The Amount Of  Loan  Required ?
+            // ⛔️ Validate input based on question
             if (
                 (str_contains($botText, 'earning criteria') && !in_array($userInput, ['1', '2'])) ||
                 (str_contains($botText, 'license') && !in_array($userInput, ['1', '2', '3', '4'])) ||
@@ -144,10 +144,10 @@ private function createLeadFromBot($conversationId, $waId)
         'type of license',
         'license number',
         'version number',
-        'source of your income',
+        'income',
         'amount of loan',
         'full name',
-        'email address',
+        'email',
         'which city'
     ];
 
@@ -162,10 +162,12 @@ private function createLeadFromBot($conversationId, $waId)
                   ->from('wati_messages')
                   ->where('conversation_id', $conversationId)
                   ->where('is_bot', true)
-                  ->where('text', 'like', "%$question%");
+                  ->whereRaw("LOWER(text) LIKE ?", ['%' . strtolower($question) . '%']);
             })
             ->orderBy('wati_timestamp')
             ->value('text');
+
+        Log::debug("📌 Answer for '$question': " . ($answer ?? 'null'));
 
         $userAnswers[] = $answer;
     }
