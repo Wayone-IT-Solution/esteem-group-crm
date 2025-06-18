@@ -67,8 +67,8 @@
 <div class=" mt-4" style="background-color: white; margin-top: 40px; padding: 10px 0px;">
 
     <div class="col-md-12">
-        <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex flex-wrap gap-3 align-items-end">
-            <div class="col-md-3">
+        <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex align-items-end gap-2">
+            <div class="col-md-2">
                 <select class="form-select" name="company_id" id="filterCompany">
                     <option value="">All Companies</option>
                     @foreach($companies as $company)
@@ -77,15 +77,17 @@
                 </select>
             </div>
 
-
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="from_date" id="fromDate">
+            <div class="col-md-2">
+                <input type="text" class="form-control" name="search" id="searchInput" placeholder="Search name/mobile">
             </div>
 
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="to_date" id="toDate">
+            <div class="col-md-2">
+                <input type="date" class="form-control" name="from_date" id="fromDate" placeholder="From Date">
             </div>
 
+            <div class="col-md-2">
+                <input type="date" class="form-control" name="to_date" id="toDate" placeholder="To Date">
+            </div>
 
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100" id="applyFilterBtn">
@@ -413,6 +415,7 @@
 
             // Prepare filter parameters
             const company_id = $('#filterCompany').val();
+            const search = $('#searchInput').val();
             const fromDate = $('#fromDate').val();
             const toDate = $('#toDate').val();
 
@@ -421,6 +424,7 @@
                 method: 'POST',
                 data: {
                     company_id,
+                    search,
                     fromDate,
                     toDate,
                     _token: "{{ csrf_token() }}",

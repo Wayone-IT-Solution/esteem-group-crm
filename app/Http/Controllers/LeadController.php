@@ -221,6 +221,15 @@ class LeadController extends Controller
       $leads->where('status', $request->status);
     }
 
+    // Add search by name or mobile number
+    if ($request->filled('search')) {
+      $search = $request->search;
+      $leads->where(function ($query) use ($search) {
+        $query->where('name', 'like', '%' . $search . '%')
+          ->orWhere('mobile_number', 'like', '%' . $search . '%');
+      });
+    }
+
     // Handle different date scenarios
     if ($request->filled('fromDate') && $request->filled('toDate')) {
       $leads->whereBetween('created_at', [$request->fromDate, $request->toDate]);
@@ -240,11 +249,45 @@ class LeadController extends Controller
 
   public function edit(Request $request)
   {
-    $lead =   LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
+    $lead = LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
     $companies = Company::all();
-    $status =  Status::where('company_id', $lead->company_id)->get();
-    $users =  User::where('company_id', $lead->company_id)->get();
-    return view('leads.edit', compact('companies', 'lead', 'status', 'users'));
+    $status = Status::where('company_id', $lead->company_id)->get();
+    $users = User::where('company_id', $lead->company_id)->get();
+
+    // Initialize empty collections
+    $loansByStatus = collect();
+    $queriesByStatus = collect();
+
+    if ($lead && $lead->mobile_number) {
+      // Get all loan applications
+      $allLoans = DB::connection('mysql2')->table('loan_applications')
+        ->where('mobile', $lead->mobile_number)
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+      // Group loans by status
+      $loansByStatus = $allLoans->groupBy('status');
+
+      // Get all loan queries for these loans
+      $allQueries = DB::connection('mysql2')->table('loan_queries')
+        ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+      // Group queries by their own status
+      if ($allQueries->isNotEmpty()) {
+        $queriesByStatus = $allQueries->groupBy('status');
+      }
+    }
+
+    return view('leads.edit', compact(
+      'companies',
+      'lead',
+      'status',
+      'users',
+      'loansByStatus',
+      'queriesByStatus'
+    ));
   }
 
   public function update(Request $request, $id)
@@ -387,5 +430,11 @@ class LeadController extends Controller
     }
 
     return back()->with('success', 'Leads imported successfully!');
+  }
+
+
+  public function secondconnection()
+  {
+    return DB::connection('mysql2')->table('loan_applications')->get();
   }
 }
