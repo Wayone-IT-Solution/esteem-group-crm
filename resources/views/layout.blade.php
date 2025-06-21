@@ -250,6 +250,7 @@
                             $userId = $user->id;
 
                             $companies = Company::with('status')->get();
+                            
                             @endphp
 
                             <ul class="sidebar-submenu">
@@ -269,18 +270,24 @@
                                         @if (!empty($company->status))
                                         @foreach ($company->status as $status)
                                         @php
+                                         if ($status->status === 'Lead') {
+                                            $leadCount = DB::connection('mysql2')
+                                                ->table('loan_applications')->count();
+                                        }
+                                        else{
                                         $query = LeadModel::where('company_id', $company->id)
                                         ->where('status', $status->status);
-
+                                       
                                         if (!$isAdmin) {
                                         $query->whereHas('assinges', function ($q) use ($userId) {
                                         $q->where('user_id', $userId);
                                         });
                                         }
+                                    
 
                                         $leadCount = $query->count();
+                                    }
                                         @endphp
-
                                         <li>
                                             <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 13px;width: 200px;">
                                                 <i class="fa-solid fa-toggle-on me-2"></i>

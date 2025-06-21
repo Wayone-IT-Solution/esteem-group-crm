@@ -20,5 +20,11 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::get('/company/today/{company_id}', [LeadController::class, 'todayleads']);
     Route::post('/leads/import', [LeadController::class, 'import'])->name('admin.leads.import');
     Route::get('/secondconnection', [LeadController::class, 'secondconnection']);
+    Route::post('/update-status', [LeadController::class, 'updateStatus'])->name('updateStatus');
+    Route::post('/finance-filter', [LeadController::class, 'financeFilter'])->name('admin.finance.filter');
+    Route::post('/edit-update-status', [LeadController::class, 'editUpdateStatus'])->name('editUpdateStatus');
+
+
+
     
 });

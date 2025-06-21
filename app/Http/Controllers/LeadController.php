@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Company;
@@ -10,431 +9,523 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\LeadAssignedMail;
+use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class LeadController extends Controller
 {
-  //show leads table data
-  public function index()
-  {
-    $user = auth()->user();
+    //show leads table data
+    public function index()
+    {
+        $user = auth()->user();
 
-    // Admin ko sab leads dikhani hain
-    if ($user->role == 'admin') {
-      $leads = LeadModel::with(['company', 'user', 'assinges'])
-        ->orderBy("created_at", "desc")
-        ->paginate(40);
-    } else {
-      // Dusre users ko sirf assigned leads dikhani hain
-      $leads = LeadModel::with(['company', 'user', 'assinges'])
-        ->whereHas('assinges', function ($query) use ($user) {
-          $query->where('user_id', $user->id);
-        })
-        ->orderBy("created_at", "desc")
-        ->paginate(40);
+        // Admin ko sab leads dikhani hain
+        if ($user->role == 'admin') {
+            $leads = LeadModel::with(['company', 'user', 'assinges'])
+                ->orderBy("created_at", "desc")
+                ->paginate(40);
+        } else {
+            // Dusre users ko sirf assigned leads dikhani hain
+            $leads = LeadModel::with(['company', 'user', 'assinges'])
+                ->whereHas('assinges', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->orderBy("created_at", "desc")
+                ->paginate(40);
+        }
+
+        $companies = Company::all();
+
+        return view('leads.list', compact('leads', 'companies'));
     }
 
-    $companies = Company::all();
+    public function getleads(Request $request)
+    {
+        $user = auth()->user();
 
-    return view('leads.list', compact('leads', 'companies'));
-  }
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->orderBy("created_at", "desc");
 
+        // Company ID filter
+        // if ($request->filled('company_id')) {
+        $query->where('company_id', $request->company_id);
+        // }
+        $companies = Company::all();
 
-  public function getleads(Request $request)
-  {
-    $user = auth()->user();
+        // Status filter
 
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-      ->orderBy("created_at", "desc");
+        // check if the status is lead
 
-    // Company ID filter
-    // if ($request->filled('company_id')) {
-    $query->where('company_id', $request->company_id);
-    // }
+        $query->where('status', $request->status);
+        if ($request->status === 'Lead') {
 
-    // Status filter
-    $query->where('status', $request->status);
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    foreach ($columns as $column) {
+                        if ($column != 'deleted_at') {
+                            $q->orWhereNull($column);
 
+                        }
+                    }
+                })
+                ->paginate(40);
+            // return $leads;
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
 
-    // Role-based filtering
-    if ($user->role !== 'admin') {
-      $query->whereHas('assinges', function ($q) use ($user) {
-        $q->where('user_id', $user->id);
-      });
+            // todo check kro in second db ( mysql2 )in loan_queries that is their any feild that is empty
+
+            // reditrect to new view in the lead folder
+
+        }
+
+        // Role-based filtering
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', compact('leads', 'companies'));
     }
 
-    $leads = $query->paginate(40);
-    $companies = Company::all();
+    public function todayleads(Request $request)
+    {
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->whereDate('created_at', now());
 
-    return view('leads.list', compact('leads', 'companies'));
-  }
+        // if ($request->filled('company_id')) {
+        $query->where('company_id', $request->company_id);
+        // }
 
-  public function todayleads(Request $request)
-  {
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-      ->whereDate('created_at', now());
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
 
-    // if ($request->filled('company_id')) {
-    $query->where('company_id', $request->company_id);
-    // }
+        $user = auth()->user();
 
-    if ($request->filled('user_id')) {
-      $query->where('user_id', $request->user_id);
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+        $companies = Company::all();
+
+        return view('leads.list', compact('leads', 'companies'));
     }
 
-    $user = auth()->user();
+    public function getallcompanyleads(Request $request)
+    {
 
-    if ($user->role !== 'admin') {
-      $query->whereHas('assinges', function ($q) use ($user) {
-        $q->where('user_id', $user->id);
-      });
+        $user = auth()->user();
+
+        $query = LeadModel::with(['company', 'user', 'assinges']);
+
+        // if ($request->filled('company_id')) {
+        $query->where('company_id', $request->company_id);
+        // }
+
+        // if ($request->filled('user_id')) {
+        // $query->where('user_id', $request->user_id);
+        // }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+        $companies = Company::all();
+
+        return view('leads.list', compact('leads', 'companies'));
     }
 
-
-    $leads = $query->orderBy("created_at", "desc")->paginate(40);
-    $companies = Company::all();
-
-    return view('leads.list', compact('leads', 'companies'));
-  }
-
-  public function getallcompanyleads(Request $request)
-  {
-
-    $user = auth()->user();
-
-    $query = LeadModel::with(['company', 'user', 'assinges']);
-
-    // if ($request->filled('company_id')) {
-    $query->where('company_id', $request->company_id);
-    // }
-
-    // if ($request->filled('user_id')) {
-    // $query->where('user_id', $request->user_id);
-    // }
-
-
-    if ($user->role !== 'admin') {
-      $query->whereHas('assinges', function ($q) use ($user) {
-        $q->where('user_id', $user->id);
-      });
+    public function create()
+    {
+        $companies = Company::all();
+        return view('leads.add', compact('companies'));
     }
-
-    $leads = $query->orderBy("created_at", "desc")->paginate(40);
-    $companies = Company::all();
-
-    return view('leads.list', compact('leads', 'companies'));
-  }
-
-  public function create()
-  {
-    $companies = Company::all();
-    return view('leads.add', compact('companies'));
-  }
-  public function store(Request $request)
-  {
-    // Optional: Add validation if needed
-    $request->validate([
-      'name' => 'required|string|max:255',
-      'email' => 'required|email|max:255',
-      'mobile_number' => 'required|string|max:20',
-      'requestfor' => 'required|string|max:255',
-      'status' => 'required|string',
-      'state' => 'required|string',
-      'description' => 'nullable|string',
-    ]);
-
-    // Prepare data
-    $save = [
-      'name' => $request->name,
-      'email' => $request->email,
-      'address' => $request->address,
-      'email' => $request->email,
-      'mobile_number' => $request->mobile_number,
-      'request' => $request->requestfor,
-      'status' => $request->status,
-      'state' => $request->state,
-      'source' => $request->source,
-      'company_id' => $request->company_id,
-      'description' => $request->description,
-      'created_at' => now(),
-      'add_by' => Auth::user()->id,
-      'unique_id' => $this->getlastGFCode('lead_models'),
-    ];
-
-    // Example: Insert into DB
-    $leadId  =    DB::table('lead_models')->insertGetId($save);
-
-    if ($leadId) {
-      if (!empty($request->users)) {
-        DB::table('assign_leads')->insert([
-          'lead_id' => $leadId,
-          'status' => $request->status,
-          'user_id' => $request->users,
-          'created_at' => now(),
-          'add_by' => Auth::user()->id,
-
+    public function store(Request $request)
+    {
+        // Optional: Add validation if needed
+        $request->validate([
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|max:255',
+            'mobile_number' => 'required|string|max:20',
+            'requestfor'    => 'required|string|max:255',
+            'status'        => 'required|string',
+            'state'         => 'required|string',
+            'description'   => 'nullable|string',
         ]);
 
-        // $user = DB::table('users')->where('id', $request->users)->first();
-        // if ($user && $user->email) {
-        //   Mail::to($user->email)->send(new LeadAssignedMail($user->name));
-        // }
-      }
+        // Prepare data
+        $save = [
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'address'       => $request->address,
+            'email'         => $request->email,
+            'mobile_number' => $request->mobile_number,
+            'request'       => $request->requestfor,
+            'status'        => $request->status,
+            'state'         => $request->state,
+            'source'        => $request->source,
+            'company_id'    => $request->company_id,
+            'description'   => $request->description,
+            'created_at'    => now(),
+            'add_by'        => Auth::user()->id,
+            'unique_id'     => $this->getlastGFCode('lead_models'),
+        ];
+
+        // Example: Insert into DB
+        $leadId = DB::table('lead_models')->insertGetId($save);
+
+        if ($leadId) {
+            if (! empty($request->users)) {
+                DB::table('assign_leads')->insert([
+                    'lead_id'    => $leadId,
+                    'status'     => $request->status,
+                    'user_id'    => $request->users,
+                    'created_at' => now(),
+                    'add_by'     => Auth::user()->id,
+
+                ]);
+
+                // $user = DB::table('users')->where('id', $request->users)->first();
+                // if ($user && $user->email) {
+                //   Mail::to($user->email)->send(new LeadAssignedMail($user->name));
+                // }
+            }
+        }
+
+        // Return response
+        return response()->json(['code' => 200, 'message' => 'Lead Created successfully!']);
     }
 
-    // Return response
-    return response()->json(['code' => 200, 'message' => 'Lead Created successfully!']);
-  }
+    public function getlastGFCode($table)
+    {
+        $prefix = 'EG-';
+        if ($table === 'users') {
+            $prefix = 'EMGF-';
+        }
 
-  public function getlastGFCode($table)
-  {
-    $prefix = 'EG-';
-    if ($table === 'users') {
-      $prefix = 'EMGF-';
+        $lastEntry = DB::table($table)
+            ->orderByDesc('id')
+            ->select('unique_id')
+            ->first();
+
+        if (! empty($lastEntry) && ! empty($lastEntry->unique_id)) {
+            $lastNumber = (int) str_replace($prefix, '', $lastEntry->unique_id);
+            $newId      = $prefix . ($lastNumber + 1);
+        } else {
+            $newId = $prefix . '100';
+        }
+
+        return $newId;
     }
 
-    $lastEntry = DB::table($table)
-      ->orderByDesc('id')
-      ->select('unique_id')
-      ->first();
+    public function filter(Request $request)
+    {
+        $leads = LeadModel::with(['company', 'user', 'assinges']);
 
-    if (!empty($lastEntry) && !empty($lastEntry->unique_id)) {
-      $lastNumber = (int) str_replace($prefix, '', $lastEntry->unique_id);
-      $newId = $prefix . ($lastNumber + 1);
-    } else {
-      $newId = $prefix . '100';
+        if ($request->filled('company_id')) {
+            $leads->where('company_id', $request->company_id);
+        }
+
+        if ($request->filled('status')) {
+            $leads->where('status', $request->status);
+        }
+
+        // Add search by name or mobile number
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $leads->where(function ($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('mobile_number', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Handle different date scenarios
+        if ($request->filled('fromDate') && $request->filled('toDate')) {
+            $leads->whereBetween('created_at', [$request->fromDate, $request->toDate]);
+        } elseif ($request->filled('fromDate')) {
+            $leads->whereDate('created_at', $request->fromDate);
+        } elseif ($request->filled('toDate')) {
+            $leads->whereDate('created_at', '<=', $request->to_date);
+        }
+
+        $leads = $leads->latest()->get();
+        $table = view('leads.filter', compact('leads'))->render();
+
+        return response()->json(['code' => 200, 'table' => $table]);
     }
 
-    return $newId;
-  }
-  public function filter(Request $request)
-  {
-    $leads = LeadModel::with(['company', 'user', 'assinges']);
+    public function edit(Request $request)
+    {
 
-    if ($request->filled('company_id')) {
-      $leads->where('company_id', $request->company_id);
+        $lead      = LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
+        $companies = Company::all();
+        $status    = Status::where('company_id', $lead->company_id)->get();
+        $users     = User::where('company_id', $lead->company_id)->get();
+
+        // Initialize empty collections
+        $loansByStatus   = collect();
+        $queriesByStatus = collect();
+
+        if ($lead && $lead->mobile_number) {
+            // Get all loan applications
+            $allLoans = DB::connection('mysql2')->table('loan_applications')
+                ->where('mobile', $lead->mobile_number)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Group loans by status
+            $loansByStatus = $allLoans->groupBy('status');
+
+            // Get all loan queries for these loans
+            $allQueries = DB::connection('mysql2')->table('loan_queries')
+                ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Group queries by their own status
+            if ($allQueries->isNotEmpty()) {
+                $queriesByStatus = $allQueries->groupBy('status');
+            }
+        }
+        // return $loansByStatus;
+
+        return view('leads.edit', compact(
+            'companies',
+            'lead',
+            'status',
+            'users',
+            'loansByStatus',
+            'queriesByStatus'
+        ));
     }
 
-    if ($request->filled('status')) {
-      $leads->where('status', $request->status);
+    public function update(Request $request, $id)
+    {
+        $lead = LeadModel::findOrFail($id);
+
+        $request->validate([
+            'company_id'    => 'required',
+            'requestfor'    => 'required',
+            'status'        => 'required',
+            'name'          => 'required',
+            'email'         => 'required|email',
+            'mobile_number' => 'required',
+            'source'        => 'required',
+            'state'         => 'required',
+            'address'       => 'required',
+            'description'   => 'required',
+            'users'         => 'required',
+        ]);
+
+        $lead->update([
+            'company_id'    => $request->company_id,
+            'requestfor'    => $request->requestfor,
+            'status'        => $request->status,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'mobile_number' => $request->mobile_number,
+            'source'        => $request->source,
+            'state'         => $request->state,
+            'address'       => $request->address,
+            'description'   => $request->description,
+            'assigned_to'   => $request->users,
+        ]);
+
+        return redirect()->route('all-leads')->with('success', 'Lead updated successfully.');
     }
 
-    // Add search by name or mobile number
-    if ($request->filled('search')) {
-      $search = $request->search;
-      $leads->where(function ($query) use ($search) {
-        $query->where('name', 'like', '%' . $search . '%')
-          ->orWhere('mobile_number', 'like', '%' . $search . '%');
-      });
+    public function description(Request $request)
+    {
+        $save =
+            [
+            'lead_id'       => $request->lead_id,
+            'status'        => $request->status,
+            'add_by'        => Auth::user()->id,
+            'description'   => $request->description,
+            'next_followup' => $request->next_followup,
+            'created_at'    => now(),
+        ];
+        LeadFollowup::insert($save);
+        LeadModel::where('id', $request->lead_id)->update(['status' => $request->status, 'description' => $request->description]);
+
+        if ($request->filled('user_id')) {
+            // check if the same user exist with same lead or noit
+            $exist = DB::table('assign_leads')->where('lead_id', $request->lead_id)->where('user_id', $request->user_id)->first();
+
+            if (empty($exist)) {
+                DB::table('assign_leads')->insert(['lead_id' => $request->lead_id, 'status' => $request->status, 'user_id' => $request->user_id, 'created_at' => now(), 'add_by' => Auth::user()->id]);
+            }
+        }
+        return response()->json(['code' => 200, 'message' => 'Lead Status updated successfully!']);
     }
 
-    // Handle different date scenarios
-    if ($request->filled('fromDate') && $request->filled('toDate')) {
-      $leads->whereBetween('created_at', [$request->fromDate, $request->toDate]);
-    } elseif ($request->filled('fromDate')) {
-      $leads->whereDate('created_at', $request->fromDate);
-    } elseif ($request->filled('toDate')) {
-      $leads->whereDate('created_at', '<=', $request->to_date);
+    public function canvas(Request $request)
+    {
+        $leadCon = LeadFollowup::with('user')->where('lead_id', $request->id)->orderby('id', 'desc')->get();
+
+        return view('leads.canvas', compact('leadCon'));
     }
 
-    $leads = $leads->latest()->get();
-    $table = view('leads.filter', compact('leads'))->render();
+    public function import(Request $request)
+    {
+        $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'excel_file' => 'required|file|mimes:xlsx,xls',
+        ]);
 
-    return response()->json(['code' => 200, 'table' => $table]);
-  }
+        try {
+            $file   = $request->file('excel_file');
+            $reader = IOFactory::createReaderForFile($file);
+            $reader->setReadDataOnly(true); // ✅ Avoid formulas, styles
+            $spreadsheet = $reader->load($file);
+            $sheet       = $spreadsheet->getActiveSheet();
+            $rows        = $sheet->toArray(null, true, true, true);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Error reading the Excel file. Please check the format.');
+        }
 
+        // ✅ Expected header keys
+        $expectedHeaders = [
+            "S. No",
+            "Platform",
+            "Full Name",
+            "Phone ",
+            "Email",
+            "City",
+            "what_is_your_earning_criteria_?",
+            "which_type_of_licence_you_are_holding?",
+            "what_is_the_source_of_your_income?",
+            "what_is_the_required_amount_of_your_loan?",
+            "please_share_your_license/_version_number_with_us.",
+        ];
 
+        $headerRow    = array_shift($rows); // Get and remove first row (header)
+        $headerValues = array_values($headerRow);
+        $cleanHeader  = array_slice($headerValues, 0, count($expectedHeaders));
 
-  public function edit(Request $request)
-  {
-    $lead = LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
-    $companies = Company::all();
-    $status = Status::where('company_id', $lead->company_id)->get();
-    $users = User::where('company_id', $lead->company_id)->get();
+        $normalize = fn($arr) => array_map(fn($v) => strtolower(trim((string) $v)), $arr);
 
-    // Initialize empty collections
-    $loansByStatus = collect();
-    $queriesByStatus = collect();
+        if ($normalize($cleanHeader) !== $normalize($expectedHeaders)) {
+            return back()->with('error', 'Excel header mismatch. Please use the correct template.');
+        }
 
-    if ($lead && $lead->mobile_number) {
-      // Get all loan applications
-      $allLoans = DB::connection('mysql2')->table('loan_applications')
-        ->where('mobile', $lead->mobile_number)
-        ->orderBy('created_at', 'desc')
-        ->get();
+        foreach ($rows as $row) {
+            $values = array_values($row);
 
-      // Group loans by status
-      $loansByStatus = $allLoans->groupBy('status');
+            // ✅ Skip completely empty/null rows
+            if (! array_filter($values)) {
+                continue;
+            }
 
-      // Get all loan queries for these loans
-      $allQueries = DB::connection('mysql2')->table('loan_queries')
-        ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
-        ->orderBy('created_at', 'desc')
-        ->get();
+            $rowData = array_slice($values, 0, count($expectedHeaders));
 
-      // Group queries by their own status
-      if ($allQueries->isNotEmpty()) {
-        $queriesByStatus = $allQueries->groupBy('status');
-      }
+            LeadModel::insert([
+                'company_id'       => $request->company_id,
+                'source'           => $rowData[1] ?? null,
+                'name'             => $rowData[2] ?? null,
+                'mobile_number'    => $rowData[3] ?? null,
+                'email'            => $rowData[4] ?? null,
+                'state'            => $rowData[5] ?? null,
+                'earning_criteria' => $rowData[6] ?? null,
+                'status'           => ($rowData[6] === 'b)_above_500_$') ? 'Qualified lead' : 'Enquiry',
+                'license_type'     => $rowData[7] ?? null,
+                'income_source'    => $rowData[8] ?? null,
+                'required_amount'  => $rowData[9] ?? null,
+                'license_version'  => $rowData[10] ?? null,
+                'add_by'           => Auth::id(),
+                'created_at'       => now(),
+                'unique_id'        => $this->getlastGFCode('lead_models'),
+            ]);
+        }
+
+        return back()->with('success', 'Leads imported successfully!');
     }
 
-    return view('leads.edit', compact(
-      'companies',
-      'lead',
-      'status',
-      'users',
-      'loansByStatus',
-      'queriesByStatus'
-    ));
-  }
-
-  public function update(Request $request, $id)
-  {
-    $lead = LeadModel::findOrFail($id);
-
-    $request->validate([
-      'company_id' => 'required',
-      'requestfor' => 'required',
-      'status' => 'required',
-      'name' => 'required',
-      'email' => 'required|email',
-      'mobile_number' => 'required',
-      'source' => 'required',
-      'state' => 'required',
-      'address' => 'required',
-      'description' => 'required',
-      'users' => 'required',
-    ]);
-
-    $lead->update([
-      'company_id' => $request->company_id,
-      'requestfor' => $request->requestfor,
-      'status' => $request->status,
-      'name' => $request->name,
-      'email' => $request->email,
-      'mobile_number' => $request->mobile_number,
-      'source' => $request->source,
-      'state' => $request->state,
-      'address' => $request->address,
-      'description' => $request->description,
-      'assigned_to' => $request->users,
-    ]);
-
-    return redirect()->route('all-leads')->with('success', 'Lead updated successfully.');
-  }
-
-  public function description(Request $request)
-  {
-    $save  =
-      [
-        'lead_id' => $request->lead_id,
-        'status' => $request->status,
-        'add_by' => Auth::user()->id,
-        'description' => $request->description,
-        'next_followup' => $request->next_followup,
-        'created_at' => now(),
-      ];
-    LeadFollowup::insert($save);
-    LeadModel::where('id', $request->lead_id)->update(['status' => $request->status, 'description' => $request->description]);
-
-    if ($request->filled('user_id')) {
-      // check if the same user exist with same lead or noit
-      $exist =  DB::table('assign_leads')->where('lead_id', $request->lead_id)->where('user_id', $request->user_id)->first();
-
-      if (empty($exist)) {
-        DB::table('assign_leads')->insert(['lead_id' => $request->lead_id, 'status' => $request->status, 'user_id' => $request->user_id, 'created_at' => now(), 'add_by' => Auth::user()->id]);
-      }
-    }
-    return  response()->json(['code' => 200, 'message' => 'Lead Status updated successfully!']);
-  }
-
-  public function canvas(Request $request)
-  {
-    $leadCon =  LeadFollowup::with('user')->where('lead_id', $request->id)->orderby('id', 'desc')->get();
-
-    return view('leads.canvas', compact('leadCon'));
-  }
-
-  public function import(Request $request)
-  {
-    $request->validate([
-      'company_id' => 'required|exists:companies,id',
-      'excel_file' => 'required|file|mimes:xlsx,xls',
-    ]);
-
-    try {
-      $file = $request->file('excel_file');
-      $reader = IOFactory::createReaderForFile($file);
-      $reader->setReadDataOnly(true); // ✅ Avoid formulas, styles
-      $spreadsheet = $reader->load($file);
-      $sheet = $spreadsheet->getActiveSheet();
-      $rows = $sheet->toArray(null, true, true, true);
-    } catch (\Throwable $e) {
-      return back()->with('error', 'Error reading the Excel file. Please check the format.');
+    public function secondconnection()
+    {
+        return DB::connection('mysql2')->table('loan_applications')->get();
     }
 
-    // ✅ Expected header keys
-    $expectedHeaders = [
-      "S. No",
-      "Platform",
-      "Full Name",
-      "Phone ",
-      "Email",
-      "City",
-      "what_is_your_earning_criteria_?",
-      "which_type_of_licence_you_are_holding?",
-      "what_is_the_source_of_your_income?",
-      "what_is_the_required_amount_of_your_loan?",
-      "please_share_your_license/_version_number_with_us.",
-    ];
+    public function updateStatus(Request $request)
+    {
 
-    $headerRow = array_shift($rows); // Get and remove first row (header)
-    $headerValues = array_values($headerRow);
-    $cleanHeader = array_slice($headerValues, 0, count($expectedHeaders));
+        // dd($request->all());
 
-    $normalize = fn($arr) => array_map(fn($v) => strtolower(trim((string)$v)), $arr);
+        $request->validate([
+            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
+            'status' => 'required|string',
+        ]);
 
-    if ($normalize($cleanHeader) !== $normalize($expectedHeaders)) {
-      return back()->with('error', 'Excel header mismatch. Please use the correct template.');
+        DB::connection('mysql2')
+            ->table('loan_applications')
+            ->where('id', $request->id)
+            ->update([
+                'status'     => $request->status,
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->back()->with('success', 'Loan status updated successfully.');
     }
 
-    foreach ($rows as $row) {
-      $values = array_values($row);
+    public function financeFilter(Request $request)
+    {
+        $loanLeads = DB::connection('mysql2')->table('loan_applications');
 
-      // ✅ Skip completely empty/null rows
-      if (!array_filter($values)) {
-        continue;
-      }
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $loanLeads->where(function ($query) use ($search) {
+                $query->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+            });
+        }
 
-      $rowData = array_slice($values, 0, count($expectedHeaders));
+        if ($request->filled('fromDate') && $request->filled('toDate')) {
+            $loanLeads->whereBetween('created_at', [$request->fromDate, $request->toDate]);
+        } elseif ($request->filled('fromDate')) {
+            $loanLeads->whereDate('created_at', $request->fromDate);
+        } elseif ($request->filled('toDate')) {
+            $loanLeads->whereDate('created_at', '<=', $request->toDate);
+        }
 
-      LeadModel::insert([
-        'company_id' => $request->company_id,
-        'source' => $rowData[1] ?? null,
-        'name' => $rowData[2] ?? null,
-        'mobile_number' => $rowData[3] ?? null,
-        'email' => $rowData[4] ?? null,
-        'state' => $rowData[5] ?? null,
-        'earning_criteria' => $rowData[6] ?? null,
-        'status' => ($rowData[6] === 'b)_above_500_$') ? 'Qualified lead' : 'Enquiry',
-        'license_type' => $rowData[7] ?? null,
-        'income_source' => $rowData[8] ?? null,
-        'required_amount' => $rowData[9] ?? null,
-        'license_version' => $rowData[10] ?? null,
-        'add_by' => Auth::id(),
-        'created_at' => now(),
-        'unique_id' => $this->getlastGFCode('lead_models'),
-      ]);
+        if ($request->filled('status')) {
+            $loanLeads->where('status', $request->status);
+        }
+        $loanLeads = $loanLeads->latest()->get();
+
+        $table = view('leads.finance.filter', compact('loanLeads'))->render();
+
+        return response()->json(['code' => 200, 'table' => $table]);
     }
 
-    return back()->with('success', 'Leads imported successfully!');
-  }
+    public function editUpdateStatus(Request $request)
+    {
 
+        // dd($request->all());
 
-  public function secondconnection()
-  {
-    return DB::connection('mysql2')->table('loan_applications')->get();
-  }
+        $request->validate([
+            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
+            'status' => 'required|string',
+        ]);
+
+        DB::connection('mysql2')
+            ->table('loan_applications')
+            ->where('id', $request->id)
+            ->update([
+                'status'     => $request->status,
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->back()->with('success', 'Loan status updated successfully.');
+    }
+
 }
