@@ -22,7 +22,7 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::get('/secondconnection', [LeadController::class, 'secondconnection']);
     Route::post('/update-status', [LeadController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/finance-filter', [LeadController::class, 'financeFilter'])->name('admin.finance.filter');
-    Route::post('/edit-update-status', [LeadController::class, 'editUpdateStatus'])->name('editUpdateStatus');
+    Route::post('/edit-update-status', [LeadController::class, 'updateStatus'])->name('editUpdateStatus');
 
 
 

@@ -8,21 +8,30 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const statusModal = document.getElementById('statusModal');
-        statusModal.addEventListener('show.bs.modal', function (event) {
+        const statusSelect = document.getElementById('statusSelect');
+        const modalLoanId = document.getElementById('modalLoanId');
+
+        statusModal.addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
             const loanId = button.getAttribute('data-loan-id');
             const status = button.getAttribute('data-status');
+            if (status == 'Not Eligible') {
+                $('#reasondid').show();
+                $('#reasonname').prop('required', true);
+            } else {
+                $('#reasondid').hide();
+                $('#reasonname').prop('required', false);
 
-            // Set hidden input
-            document.getElementById('modalLoanId').value = loanId;
+            }
 
-            // Set selected status in dropdown
-            const statusSelect = document.getElementById('status');
+            modalLoanId.value = loanId;
+
+            // Set the selected status in the dropdown
             if (statusSelect) {
                 [...statusSelect.options].forEach(option => {
-                    option.selected = (option.value.toLowerCase() === status?.toLowerCase());
+                    option.selected = (option.value.toLowerCase() === status.toLowerCase());
                 });
             }
         });
@@ -94,13 +103,13 @@
                 <select class="form-select" name="company_id" id="filterCompany" disabled>
                     <option value="" {{ request('company_id') == '' ? 'selected' : '' }}>All Companies</option>
                     @foreach($companies as $company)
-                        <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
-                            {{ $company->name }}
-                        </option>
+                    <option value="{{ $company->id }}" {{ request('company_id') == $company->id ? 'selected' : '' }}>
+                        {{ $company->name }}
+                    </option>
                     @endforeach
                 </select>
             </div>
-            
+
             <div class="col-md-2 p-3">
                 <input type="text" class="form-control" name="search" id="searchInput" placeholder="Search name/mobile">
             </div>
@@ -125,7 +134,7 @@
                     <option value="won" {{ request('status') == 'won' ? 'selected' : '' }}>Won</option>
                 </select>
             </div>
-            
+
 
             <div class="col-md-2 p-3">
                 <button type="submit" class="btn btn-primary w-100" id="applyFilterBtn">
@@ -162,267 +171,285 @@
             {{-- <div class="col-md-9 text-md-end mt-3 mt-md-0">
                 <div class="d-flex flex-wrap justify-content-md-end gap-2">
                     <a href="{{ asset('sample/sample.xlsx') }}" class="btn btn-success">
-                        <i class="fa-solid fa-download me-1"></i> Download Sample Lead
-                    </a>
+            <i class="fa-solid fa-download me-1"></i> Download Sample Lead
+            </a>
 
-                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importLeadsModal">
-                        <i class="fa-solid fa-file-import me-1"></i> Import Leads
-                    </a>
+            <a href="javascript:void(0);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importLeadsModal">
+                <i class="fa-solid fa-file-import me-1"></i> Import Leads
+            </a>
 
-                    <a href="{{ route('admin.leads.create') }}" class="btn btn-primary">
-                        <i class="fa-solid fa-plus me-1"></i> Add Enquiry
-                    </a>
-                </div>
-            </div> --}}
+            <a href="{{ route('admin.leads.create') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus me-1"></i> Add Enquiry
+            </a>
         </div>
+    </div> --}}
+</div>
 
 
-        <div class="table-responsive overflow-x overflow-y">
-            <table id="leadsTable" class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>S.no</th>
-                        <th>Date</th>
-                        <th>Personal Info</th>
-                        <th>Loan Details</th>
-                        <th>Contact Info</th>
-                        <th>Address</th>
-                        <th>Employment</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if(!empty($leads))
-                    @foreach($leads as $loan)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>
-                            <div>{{ \Carbon\Carbon::parse($loan->created_at)->format('d M Y') }}</div>
-                            <small class="text-muted">{{ \Carbon\Carbon::parse($loan->created_at)->format('h:i A') }}</small>
-                        </td>
-                        <td>
-                            <div><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
-                            <div>DOB: {{ \Carbon\Carbon::parse($loan->date_of_birth)->format('d M Y') }}</div>
-                            <div>Marital: {{ $loan->marital_status }}</div>
-                            <div>Dependents: {{ $loan->no_of_dependents }}</div>
-                            <div>License: {{ $loan->driving_licence_type }}</div>
-                        </td>
-                        <td>
-                            <div>Amount: ${{ number_format($loan->loan_amount, 2) }}</div>
-                            <div>Weekly: ${{ number_format($loan->weekly_payment, 2) }}</div>
-                            <div>Term: {{ $loan->term_years }} years</div>
-                        </td>
-                        <td>
-                            <div>{{ $loan->country_code ?? '' }} {{ $loan->mobile }}</div>
-                            <div>{{ $loan->email }}</div>
-                            <div>Contact: {{ $loan->preferred_contact }}</div>
-                        </td>
-                        <td>
-                            <div>{{ $loan->street_address }}</div>
-                            <div>{{ $loan->address_line2 }}</div>
-                            <div>{{ $loan->city }}</div>
-                            <div>{{ $loan->postal_code }}</div>
-                            <div>Status: {{ $loan->property_status }}</div>
-                            <div>Time: {{ $loan->time_at_property_years }}y {{ $loan->time_at_property_months }}m</div>
-                            <div>Cost: ${{ number_format($loan->monthly_cost, 2) }}/month</div>
-                        </td>
-                        <td>
-                            <div>Status: {{ $loan->employment_status }}</div>
-                            <div>Title: {{ $loan->job_title }}</div>
-                            <div>Time: {{ $loan->time_at_employer_years }}y {{ $loan->time_at_employer_months }}m</div>
-                            <div>Resident: {{ $loan->residential_status }}</div>
-                        </td>
-                        <td>
-                            
-                            @if($loan->otp_verified)
-                                <span class="badge bg-success mt-1">OTP Verified</span>
-                            @else
-                                <span class="badge bg-danger mt-1">OTP Pending</span>
-                            @endif
-                            @php
-                                $statusColors = [
-                                    'eligible' => 'bg-success',
-                                    'not eligible' => 'bg-danger',
-                                    'pending' => 'bg-warning text-dark',
-                                    'lost' => 'bg-danger',
-                                    'working' => 'bg-info',
-                                    'progress' => 'bg-primary',
-                                    'no response' => 'bg-dark',
-                                    'won' => 'bg-success',
-                                ];
+<div class="table-responsive overflow-x overflow-y">
+    <table id="leadsTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>S.no</th>
+                <th>Date</th>
+                <th>Personal Info</th>
+                <th>Loan Details</th>
+                <th>Contact Info</th>
+                <th>Address</th>
+                <th>Employment</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(!empty($leads))
+            @foreach($leads as $loan)
+            <tr>
+                <td>{{ $loop->iteration }}</td>
+                <td>
+                    <div>{{ \Carbon\Carbon::parse($loan->created_at)->format('d M Y') }}</div>
+                    <small class="text-muted">{{ \Carbon\Carbon::parse($loan->created_at)->format('h:i A') }}</small>
+                </td>
+                <td>
+                    <div><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
+                    <div>DOB: {{ \Carbon\Carbon::parse($loan->date_of_birth)->format('d M Y') }}</div>
+                    <div>Marital: {{ $loan->marital_status }}</div>
+                    <div>Dependents: {{ $loan->no_of_dependents }}</div>
+                    <div>License: {{ $loan->driving_licence_type }}</div>
+                </td>
+                <td>
+                    <div>Amount: ${{ number_format($loan->loan_amount, 2) }}</div>
+                    <div>Weekly: ${{ number_format($loan->weekly_payment, 2) }}</div>
+                    <div>Term: {{ $loan->term_years }} years</div>
+                </td>
+                <td>
+                    <div>{{ $loan->country_code ?? '' }} {{ $loan->mobile }}</div>
+                    <div>{{ $loan->email }}</div>
+                    <div>Contact: {{ $loan->preferred_contact }}</div>
+                </td>
+                <td>
+                    <div>{{ $loan->street_address }}</div>
+                    <div>{{ $loan->address_line2 }}</div>
+                    <div>{{ $loan->city }}</div>
+                    <div>{{ $loan->postal_code }}</div>
+                    <div>Status: {{ $loan->property_status }}</div>
+                    <div>Time: {{ $loan->time_at_property_years }}y {{ $loan->time_at_property_months }}m</div>
+                    <div>Cost: ${{ number_format($loan->monthly_cost, 2) }}/month</div>
+                </td>
+                <td>
+                    <div>Status: {{ $loan->employment_status }}</div>
+                    <div>Title: {{ $loan->job_title }}</div>
+                    <div>Time: {{ $loan->time_at_employer_years }}y {{ $loan->time_at_employer_months }}m</div>
+                    <div>Resident: {{ $loan->residential_status }}</div>
+                </td>
+                <td>
 
-                                $statusKey = strtolower($loan->status); 
-                            @endphp
+                    @if($loan->otp_verified)
+                    <span class="badge bg-success mt-1">OTP Verified</span>
+                    @else
+                    <span class="badge bg-danger mt-1">OTP Pending</span>
+                    @endif
+                    @php
+                    $statusColors = [
+                    'eligible' => 'bg-success',
+                    'not eligible' => 'bg-danger',
+                    'pending' => 'bg-warning text-dark',
+                    'lost' => 'bg-danger',
+                    'working' => 'bg-info',
+                    'progress' => 'bg-primary',
+                    'no response' => 'bg-dark',
+                    'won' => 'bg-success',
+                    ];
 
-                            @if($loan->status)
-                                <div class="badge mt-1 {{ $statusColors[$statusKey] ?? 'bg-secondary' }}">
-                                    {{ ucfirst(str_replace('_', ' ', $loan->status)) }}
+                    $statusKey = strtolower($loan->status);
+                    @endphp
+
+                    @if($loan->status)
+                    <div class="badge mt-1 {{ $statusColors[$statusKey] ?? 'bg-secondary' }}">
+                        {{ ucfirst(str_replace('_', ' ', $loan->status)) }}
+                    </div>
+                    @endif
+
+                    @if($loan->disapproval_reason)
+                    <div class="text-danger mt-1 small">{{ $loan->disapproval_reason }}</div>
+                    @endif
+                </td>
+                <td>
+                    <a type="button"
+                        class="btn btn-sm btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#statusModal"
+                        data-loan-id="{{ $loan->id }}"
+                        data-status="{{ $loan->status }}">
+                        <i class="fa fa-circle-o-notch" aria-hidden="true"></i>
+                    </a>
+
+                </td>
+
+                <!-- Modal -->
+                <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <form method="POST" action="{{ route('updateStatus') }}">
+                            @csrf
+                            <input type="hidden" name="id" id="modalLoanId">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="statusModalLabel">Update Loan Status</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                            @endif
-
-                            @if($loan->disapproval_reason)
-                                <div class="text-danger mt-1 small">{{ $loan->disapproval_reason }}</div>
-                            @endif
-                        </td>
-                        <td>   
-                            <a type="button" 
-                            class="btn btn-sm btn-primary" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#statusModal" 
-                            data-loan-id="{{ $loan->id }}"
-                            data-status="{{ $loan->status }}"
-                         >
-                            <i class="fa fa-circle-o-notch" aria-hidden="true"></i>
-                         </a>
-                         
-                        </td>
-                        
-                        <!-- Modal -->
-                        <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                            <form method="POST"  action="{{ route('updateStatus') }}">
-                                @csrf
-                                <input type="hidden" name="id" id="modalLoanId">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="statusModalLabel">Update Loan Status</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="status" class="form-label">Select Status</label>
+                                        <select name="status" id="statusSelect" class="form-select" required>
+                                            <option value="">Select</option>
+                                            <option value="eligible">Eligible</option>
+                                            <option value="not eligible">Not Eligible</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="lost">Lost</option>
+                                            <option value="working">Working</option>
+                                            <option value="progress">Progress</option>
+                                            <option value="no response">No Response</option>
+                                            <option value="won">Won</option>
+                                        </select>
                                     </div>
-                                    <div class="modal-body">
+                                    <div id="reasondid" style="display: none;">
                                         <div class="mb-3">
-                                            <label for="status" class="form-label">Select Status</label>
-                                            <select name="status" id="status" class="form-select" required>
-                                                <option value="">Select</option>
-                                                <option value="eligible">Eligible</option>
-                                                <option value="not eligible">Not Eligible</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="lost">Lost</option>
-                                                <option value="working">Working</option>
-                                                <option value="progress">Progress</option>
-                                                <option value="no response">No Response</option>
-                                                <option value="won">Won</option>
-                                            </select>
+                                            <label>Reason </label>
+                                            <textarea class="form-control" id="reasonname" name="reason"></textarea>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <button type="submit" class="btn btn-success">Update</button>
-                                    </div>
+                                    <script>
+                                        $(function() {
+                                            $('#statusSelect').on('change', function() {
+                                                if (this.value === 'not eligible') {
+                                                    $('#reasondid').show();
+                                                    $('#reasonname').prop('required', true);
+                                                } else {
+                                                    $('#reasondid').hide();
+                                                    $('#reasonname').prop('required', false);
+                                                }
+                                            });
+                                        });
+                                    </script>
                                 </div>
-                            </form>
-                            </div>
-                        </div>
-                        
-                     </tr>
-
-                    @endforeach
-                    @endif()
-                </tbody>
-            </table>
-
-                                    <div class="row">
-                                        <div class="mt-4 d-flex justify-content-end">
-                                            <div class="pagination-container">
-                                                {{-- Previous Link --}}
-                                                @if ($leads->onFirstPage())
-                                                <span class="page-link disabled">Previous</span>
-                                                @else
-                                                <a href="{{ $leads->previousPageUrl() }}" class="page-link">Previous</a>
-                                                @endif
-
-                                                {{-- Page Numbers --}}
-                                                @php
-                                                $current = $leads->currentPage();
-                                                $last = $leads->lastPage();
-                                                $start = max(1, $current - 2);
-                                                $end = min($last, $current + 2);
-                                                @endphp
-
-                                                {{-- Always show first page --}}
-                                                @if ($start > 1)
-                                                <a href="{{ $leads->url(1) }}" class="page-link {{ $current == 1 ? 'active' : '' }}">1</a>
-                                                @if ($start > 2)
-                                                <span class="page-link dots">...</span>
-                                                @endif
-                                                @endif
-
-                                                {{-- Main loop --}}
-                                                @for ($i = $start; $i <= $end; $i++)
-                                                    <a href="{{ $leads->url($i) }}" class="page-link {{ $current == $i ? 'active' : '' }}">{{ $i }}</a>
-                                                    @endfor
-
-                                                    {{-- Always show last page --}}
-                                                    @if ($end < $last)
-                                                        @if ($end < $last - 1)
-                                                        <span class="page-link dots">...</span>
-                                                        @endif
-                                                        <a href="{{ $leads->url($last) }}" class="page-link {{ $current == $last ? 'active' : '' }}">{{ $last }}</a>
-                                                        @endif
-
-                                                        {{-- Next Link --}}
-                                                        @if ($leads->hasMorePages())
-                                                        <a href="{{ $leads->nextPageUrl() }}" class="page-link">Next</a>
-                                                        @else
-                                                        <span class="page-link disabled">Next</span>
-                                                        @endif
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <style>
-                                        .pagination-container {
-                                            display: flex;
-                                            flex-wrap: wrap;
-                                            gap: 6px;
-                                            padding: 8px 12px;
-                                        }
-
-                                        .page-link {
-                                            padding: 8px 14px;
-                                            background: white;
-                                            color: #43b9b2;
-                                            border: 1px solid #ddd;
-                                            border-radius: 5px;
-                                            text-decoration: none;
-                                            font-weight: 500;
-                                            transition: all 0.2s ease-in-out;
-                                        }
-
-                                        .page-link:hover:not(.active):not(.disabled) {
-                                            background-color: rgba(67, 185, 178, 0.1);
-                                            color: #43b9b2;
-                                            border-color: #43b9b2;
-                                        }
-
-                                        .page-link.active {
-                                            background-color: #43b9b2;
-                                            color: white;
-                                            border-color: #43b9b2;
-                                        }
-
-                                        .page-link.disabled {
-                                            background-color: #f8f9fa;
-                                            color: #ccc;
-                                            cursor: not-allowed;
-                                            border-color: #ddd;
-                                        }
-
-                                        .page-link.dots {
-                                            cursor: default;
-                                            background: transparent;
-                                            border: none;
-                                            color: #999;
-                                            padding: 8px 10px;
-                                        }
-                                    </style>
-
-
-
-
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-success">Update</button>
                                 </div>
                             </div>
-                        </div>
+                        </form>
+                    </div>
+                </div>
+
+            </tr>
+
+            @endforeach
+            @endif()
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="mt-4 d-flex justify-content-end">
+            <div class="pagination-container">
+                {{-- Previous Link --}}
+                @if ($leads->onFirstPage())
+                <span class="page-link disabled">Previous</span>
+                @else
+                <a href="{{ $leads->previousPageUrl() }}" class="page-link">Previous</a>
+                @endif
+
+                {{-- Page Numbers --}}
+                @php
+                $current = $leads->currentPage();
+                $last = $leads->lastPage();
+                $start = max(1, $current - 2);
+                $end = min($last, $current + 2);
+                @endphp
+
+                {{-- Always show first page --}}
+                @if ($start > 1)
+                <a href="{{ $leads->url(1) }}" class="page-link {{ $current == 1 ? 'active' : '' }}">1</a>
+                @if ($start > 2)
+                <span class="page-link dots">...</span>
+                @endif
+                @endif
+
+                {{-- Main loop --}}
+                @for ($i = $start; $i <= $end; $i++)
+                    <a href="{{ $leads->url($i) }}" class="page-link {{ $current == $i ? 'active' : '' }}">{{ $i }}</a>
+                    @endfor
+
+                    {{-- Always show last page --}}
+                    @if ($end < $last)
+                        @if ($end < $last - 1)
+                        <span class="page-link dots">...</span>
+                        @endif
+                        <a href="{{ $leads->url($last) }}" class="page-link {{ $current == $last ? 'active' : '' }}">{{ $last }}</a>
+                        @endif
+
+                        {{-- Next Link --}}
+                        @if ($leads->hasMorePages())
+                        <a href="{{ $leads->nextPageUrl() }}" class="page-link">Next</a>
+                        @else
+                        <span class="page-link disabled">Next</span>
+                        @endif
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .pagination-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 12px;
+        }
+
+        .page-link {
+            padding: 8px 14px;
+            background: white;
+            color: #43b9b2;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .page-link:hover:not(.active):not(.disabled) {
+            background-color: rgba(67, 185, 178, 0.1);
+            color: #43b9b2;
+            border-color: #43b9b2;
+        }
+
+        .page-link.active {
+            background-color: #43b9b2;
+            color: white;
+            border-color: #43b9b2;
+        }
+
+        .page-link.disabled {
+            background-color: #f8f9fa;
+            color: #ccc;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .page-link.dots {
+            cursor: default;
+            background: transparent;
+            border: none;
+            color: #999;
+            padding: 8px 10px;
+        }
+    </style>
+
+
+
+
+</div>
+</div>
+</div>
 
 <!-- Offcanvas for Lead Info -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="leadInfoCanvas" aria-labelledby="leadInfoCanvasLabel">
@@ -531,7 +558,7 @@
 
             const fromDate = $('#fromDate').val();
             const toDate = $('#toDate').val();
-        
+
             $.ajax({
                 url: `{{ route('admin.finance.filter') }}`,
                 method: 'POST',
@@ -542,20 +569,20 @@
                     toDate,
                     status: $('#status').val(),
                     _token: "{{ csrf_token() }}",
-                },  
-    success: function(response) {
-        $('#leadsTable').html(response.table);
+                },
+                success: function(response) {
+                    $('#leadsTable').html(response.table);
 
-        // Reset button
-        $('#applyFilterBtn .default-text').removeClass('d-none');
-        $('#applyFilterBtn .loading-text').addClass('d-none');
-    },
-    error: function() {
-        alert('Failed to apply filter.');
-        $('#applyFilterBtn .default-text').removeClass('d-none');
-        $('#applyFilterBtn .loading-text').addClass('d-none');
-    }
-});
+                    // Reset button
+                    $('#applyFilterBtn .default-text').removeClass('d-none');
+                    $('#applyFilterBtn .loading-text').addClass('d-none');
+                },
+                error: function() {
+                    alert('Failed to apply filter.');
+                    $('#applyFilterBtn .default-text').removeClass('d-none');
+                    $('#applyFilterBtn .loading-text').addClass('d-none');
+                }
+            });
 
         });
     });

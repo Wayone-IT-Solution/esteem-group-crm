@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Company;
@@ -9,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -65,7 +67,6 @@ class LeadController extends Controller
                     foreach ($columns as $column) {
                         if ($column != 'deleted_at') {
                             $q->orWhereNull($column);
-
                         }
                     }
                 })
@@ -348,13 +349,13 @@ class LeadController extends Controller
     {
         $save =
             [
-            'lead_id'       => $request->lead_id,
-            'status'        => $request->status,
-            'add_by'        => Auth::user()->id,
-            'description'   => $request->description,
-            'next_followup' => $request->next_followup,
-            'created_at'    => now(),
-        ];
+                'lead_id'       => $request->lead_id,
+                'status'        => $request->status,
+                'add_by'        => Auth::user()->id,
+                'description'   => $request->description,
+                'next_followup' => $request->next_followup,
+                'created_at'    => now(),
+            ];
         LeadFollowup::insert($save);
         LeadModel::where('id', $request->lead_id)->update(['status' => $request->status, 'description' => $request->description]);
 
@@ -466,6 +467,13 @@ class LeadController extends Controller
             'status' => 'required|string',
         ]);
 
+
+        $loanApplication =  DB::connection('mysql2')
+            ->table('loan_applications')
+            ->where('id', $request->id)->first();
+
+
+        // check the status that is comming
         DB::connection('mysql2')
             ->table('loan_applications')
             ->where('id', $request->id)
@@ -473,6 +481,53 @@ class LeadController extends Controller
                 'status'     => $request->status,
                 'updated_at' => now(),
             ]);
+
+        $accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNGM4OTU5NS1jNGZlLTQwZWUtYWYwNy05ODVmYTVkMDUyODIiLCJ1bmlxdWVfbmFtZSI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsIm5hbWVpZCI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsImVtYWlsIjoiZXN0ZWVtZmluYW5jZTdAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDQvMDMvMjAyNSAwNzo0NToxOSIsInRlbmFudF9pZCI6IjQyNTMyMiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.sfPB9WoIoxjNoqE5ku1TVmHgSSDnCn31xlFT5Vakvvc";
+        $accountId   = '425322'; // default fallback
+        $baseUrl     = 'https://live-mt-server.wati.io';
+
+        $countryCode = ltrim((string) ($loanApplication->country_code ?? ''), '+');
+
+        // Now build the full E.164-style number
+        $fullPhone   = $countryCode . $loanApplication->mobile;           // ← use "." not "+"
+        $mobile = $fullPhone;
+
+        $status  =  $request->status;
+        $url = "{$baseUrl}/{$accountId}/api/v1/sendTemplateMessage?whatsappNumber={$mobile}";
+        $trackingUrl = 'https://esteemfinance.co.nz/apply-for-car-loan?id=' . $request->id;
+
+        $payload = [];
+        $name = $loanApplication->title  . ' ' . $loanApplication->first_name . ' ' . $loanApplication->last_name;
+        $reason =  $request->reason ?? '';
+
+        if ($status === 'eligible') {
+            $payload = [
+                'template_name'  => 'sent_form',
+                'broadcast_name' => 'sent_form_' . now()->format('dmYHi'),
+                'parameters'     => [
+                    ['name' => 'name',         'value' => $name],
+                    ['name' => 'tracking_url', 'value' => $trackingUrl],
+                ],
+            ];
+        } else {
+
+            $payload = [
+                'template_name'  => 'notekigible_with_reason',
+                'broadcast_name' => 'notekigible_with_reason_' . now()->format('dmYHi'),
+                'parameters'     => [
+                    ['name' => 'name',         'value' => $name],
+                    ['name' => 'order_number', 'value' => $reason],
+                ],
+            ];
+        }
+
+        if (in_array($status, ['not eligible', 'eligible'])) {
+
+            $response = Http::withToken($accessToken)
+                ->post($url, $payload);
+        }
+
+
 
         return redirect()->back()->with('success', 'Loan status updated successfully.');
     }
@@ -527,5 +582,4 @@ class LeadController extends Controller
 
         return redirect()->back()->with('success', 'Loan status updated successfully.');
     }
-
 }

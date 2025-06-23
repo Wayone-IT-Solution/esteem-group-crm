@@ -1,6 +1,11 @@
 @extends('layout')
 
 @section('content')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <div class="row">
     <div class="col-md-10"></div>
     <div class="col-md-2">
@@ -124,7 +129,7 @@
                             <strong class="text-dark">State:</strong>
                             <div class="text-muted">{{ $lead->state }}</div>
                         </div>
-                          <div class="col-6">
+                        <div class="col-6">
                             <strong class="text-dark">State:</strong>
                             <div class="text-muted">{{ $lead->state }}</div>
                         </div>
@@ -146,7 +151,7 @@
                             <div class="text-muted">{{ $lead->required_amount  ?? ''}}</div>
                         </div>
                         @endif()
-                      
+
 
                         <div class="col-6">
                             <strong class="text-dark">Address:</strong>
@@ -187,7 +192,7 @@
             </div>
         </div>
 
-      
+
 
         <!-- Form to Update Status & Description -->
         <div class="col-md-6">
@@ -257,225 +262,245 @@
 
         <!-- Dynamic Loan Applications Sections -->
         @if($loansByStatus && $loansByStatus->isNotEmpty())
-            @foreach($loansByStatus as $status => $loans)
-                @if($loans->isNotEmpty())
-                    <div class="col-12 mt-4">
-                        <div class="card shadow-sm border-0" style="border-radius: 16px;">
-                            @php
-                                $statusClassMap = [
-                                    'eligible' => 'bg-success',
-                                    'not eligible' => 'bg-danger',
-                                    'pending' => 'bg-warning text-dark',
-                                    'lost' => 'bg-danger',
-                                    'working' => 'bg-info',
-                                    'progress' => 'bg-primary',
-                                    'no response' => 'bg-dark',
-                                    'won' => 'bg-success',
-                                ];
-                                $statusNormalized = strtolower(trim($status));
-                                $headerClass = $statusClassMap[$statusNormalized] ?? 'bg-dark';
-                            @endphp
-                        <div class="card-header {{ $headerClass }}">
-                            <h5 class="mb-0 text-white" >{{ ucfirst($status) }} Enquiries</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Personal Info</th>
-                                            <th>Loan Details</th>
-                                            <th>Contact Info</th>
-                                            <th>Address</th>
-                                            <th>Employment</th>
-                                            <th>Status</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($loans as $loan)
-                                        <tr>
-                                            <td>
-                                                <div>{{ \Carbon\Carbon::parse($loan->created_at)->format('d M Y') }}</div>
-                                                <small class="text-muted">{{ \Carbon\Carbon::parse($loan->created_at)->format('h:i A') }}</small>
-                                            </td>
-                                            <td>
-                                                <div><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
-                                                <div>DOB: {{ \Carbon\Carbon::parse($loan->date_of_birth)->format('d M Y') }}</div>
-                                                <div>Marital: {{ $loan->marital_status }}</div>
-                                                <div>Dependents: {{ $loan->no_of_dependents }}</div>
-                                                <div>License: {{ $loan->driving_licence_type }}</div>
-                                            </td>
-                                            <td>
-                                                <div>Amount: ${{ number_format($loan->loan_amount, 2) }}</div>
-                                                <div>Weekly: ${{ number_format($loan->weekly_payment, 2) }}</div>
-                                                <div>Term: {{ $loan->term_years }} years</div>
-                                            </td>
-                                            <td>
-                                                <div>{{ $loan->country_code ?? '' }} {{ $loan->mobile }}</div>
-                                                <div>{{ $loan->email }}</div>
-                                                <div>Contact: {{ $loan->preferred_contact }}</div>
-                                            </td>
-                                            <td>
-                                                <div>{{ $loan->street_address }}</div>
-                                                <div>{{ $loan->address_line2 }}</div>
-                                                <div>{{ $loan->city }}</div>
-                                                <div>{{ $loan->postal_code }}</div>
-                                                <div>Status: {{ $loan->property_status }}</div>
-                                                <div>Time: {{ $loan->time_at_property_years }}y {{ $loan->time_at_property_months }}m</div>
-                                                <div>Cost: ${{ number_format($loan->monthly_cost, 2) }}/month</div>
-                                            </td>
-                                            <td>
-                                                <div>Status: {{ $loan->employment_status }}</div>
-                                                <div>Title: {{ $loan->job_title }}</div>
-                                                <div>Time: {{ $loan->time_at_employer_years }}y {{ $loan->time_at_employer_months }}m</div>
-                                                <div>Resident: {{ $loan->residential_status }}</div>
-                                            </td>
-                                            <td>
-                                                @php
-                                                $statusColors = [
-                                                    'eligible' => 'bg-success',
-                                                    'not eligible' => 'bg-danger',
-                                                    'pending' => 'bg-warning text-dark',
-                                                    'lost' => 'bg-danger',
-                                                    'working' => 'bg-info',
-                                                    'progress' => 'bg-primary',
-                                                    'no response' => 'bg-dark',
-                                                    'won' => 'bg-success',
-                                                ];
-                
-                                                $statusKey = strtolower($loan->status); 
-                                            @endphp
-                
-                                            @if($loan->status)
-                                                <div class="badge mt-1 {{ $statusColors[$statusKey] ?? 'bg-secondary' }}">
-                                                    {{ ucfirst(str_replace('_', ' ', $loan->status)) }}
-                                                </div>
-                                            @endif
-                                                @if($loan->otp_verified)
-                                                    <span class="badge bg-success mt-1">OTP Verified</span>
-                                                @else
-                                                    <span class="badge bg-danger mt-1">OTP Pending</span>
-                                                @endif
-                                                @if($loan->disapproval_reason)
-                                                    <div class="text-danger mt-1 small">{{ $loan->disapproval_reason }}</div>
-                                                @endif
-                                            </td>
-                                            <td>   
-                                                <a type="button" 
-                                                    class="btn btn-sm btn-primary" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#statusModal" 
-                                                    data-loan-id="{{ $loan->id }}"
-                                                    data-status="{{ strtolower($loan->status) }}">
-                                                    {{-- data-status="{{ $loan->status }}" --}}
-                                                    
-                                                    <i class="fa fa-circle-o-notch" aria-hidden="true"></i>
-                                                </a>
-                                            </td>
-                                            
-                                            <!-- Modal -->
-                                            <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <form method="POST" action="{{ route('editUpdateStatus') }}">
-                                                        @csrf
-                                                        <input type="hidden" name="id" id="modalLoanId">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="statusModalLabel">Update Loan Status</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div class="mb-3">
-                                                                    <label for="status" class="form-label">Select Status</label>
-                                                                    <select name="status" id="statusSelect" class="form-select" required>
-                                                                        <option value="">Select</option>
-                                                                        <option value="eligible">Eligible</option>
-                                                                        <option value="not eligible">Not Eligible</option>
-                                                                        <option value="pending">Pending</option>
-                                                                        <option value="lost">Lost</option>
-                                                                        <option value="working">Working</option>
-                                                                        <option value="progress">Progress</option>
-                                                                        <option value="no response">No Response</option>
-                                                                        <option value="won">Won</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-success">Update</button>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
+        @foreach($loansByStatus as $status => $loans)
+        @if($loans->isNotEmpty())
+        <div class="col-12 mt-4">
+            <div class="card shadow-sm border-0" style="border-radius: 16px;">
+                @php
+                $statusClassMap = [
+                'eligible' => 'bg-success',
+                'not eligible' => 'bg-danger',
+                'pending' => 'bg-warning text-dark',
+                'lost' => 'bg-danger',
+                'working' => 'bg-info',
+                'progress' => 'bg-primary',
+                'no response' => 'bg-dark',
+                'won' => 'bg-success',
+                ];
+                $statusNormalized = strtolower(trim($status));
+                $headerClass = $statusClassMap[$statusNormalized] ?? 'bg-dark';
+                @endphp
+                <div class="card-header {{ $headerClass }}">
+                    <h5 class="mb-0 text-white">{{ ucfirst($status) }} Enquiries</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Personal Info</th>
+                                    <th>Loan Details</th>
+                                    <th>Contact Info</th>
+                                    <th>Address</th>
+                                    <th>Employment</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($loans as $loan)
+                                <tr>
+                                    <td>
+                                        <div>{{ \Carbon\Carbon::parse($loan->created_at)->format('d M Y') }}</div>
+                                        <small class="text-muted">{{ \Carbon\Carbon::parse($loan->created_at)->format('h:i A') }}</small>
+                                    </td>
+                                    <td>
+                                        <div><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
+                                        <div>DOB: {{ \Carbon\Carbon::parse($loan->date_of_birth)->format('d M Y') }}</div>
+                                        <div>Marital: {{ $loan->marital_status }}</div>
+                                        <div>Dependents: {{ $loan->no_of_dependents }}</div>
+                                        <div>License: {{ $loan->driving_licence_type }}</div>
+                                    </td>
+                                    <td>
+                                        <div>Amount: ${{ number_format($loan->loan_amount, 2) }}</div>
+                                        <div>Weekly: ${{ number_format($loan->weekly_payment, 2) }}</div>
+                                        <div>Term: {{ $loan->term_years }} years</div>
+                                    </td>
+                                    <td>
+                                        <div>{{ $loan->country_code ?? '' }} {{ $loan->mobile }}</div>
+                                        <div>{{ $loan->email }}</div>
+                                        <div>Contact: {{ $loan->preferred_contact }}</div>
+                                    </td>
+                                    <td>
+                                        <div>{{ $loan->street_address }}</div>
+                                        <div>{{ $loan->address_line2 }}</div>
+                                        <div>{{ $loan->city }}</div>
+                                        <div>{{ $loan->postal_code }}</div>
+                                        <div>Status: {{ $loan->property_status }}</div>
+                                        <div>Time: {{ $loan->time_at_property_years }}y {{ $loan->time_at_property_months }}m</div>
+                                        <div>Cost: ${{ number_format($loan->monthly_cost, 2) }}/month</div>
+                                    </td>
+                                    <td>
+                                        <div>Status: {{ $loan->employment_status }}</div>
+                                        <div>Title: {{ $loan->job_title }}</div>
+                                        <div>Time: {{ $loan->time_at_employer_years }}y {{ $loan->time_at_employer_months }}m</div>
+                                        <div>Resident: {{ $loan->residential_status }}</div>
+                                    </td>
+                                    <td>
+                                        @php
+                                        $statusColors = [
+                                        'eligible' => 'bg-success',
+                                        'not eligible' => 'bg-danger',
+                                        'pending' => 'bg-warning text-dark',
+                                        'lost' => 'bg-danger',
+                                        'working' => 'bg-info',
+                                        'progress' => 'bg-primary',
+                                        'no response' => 'bg-dark',
+                                        'won' => 'bg-success',
+                                        ];
 
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                                        $statusKey = strtolower($loan->status);
+                                        @endphp
+
+                                        @if($loan->status)
+                                        <div class="badge mt-1 {{ $statusColors[$statusKey] ?? 'bg-secondary' }}">
+                                            {{ ucfirst(str_replace('_', ' ', $loan->status)) }}
+                                        </div>
+                                        @endif
+                                        @if($loan->otp_verified)
+                                        <span class="badge bg-success mt-1">OTP Verified</span>
+                                        @else
+                                        <span class="badge bg-danger mt-1">OTP Pending</span>
+                                        @endif
+                                        @if($loan->disapproval_reason)
+                                        <div class="text-danger mt-1 small">{{ $loan->disapproval_reason }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a type="button"
+                                            class="btn btn-sm btn-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#statusModal"
+                                            data-loan-id="{{ $loan->id }}"
+                                            data-status="{{ strtolower($loan->status) }}">
+                                            {{-- data-status="{{ $loan->status }}" --}}
+
+                                            <i class="fa fa-circle-o-notch" aria-hidden="true"></i>
+                                        </a>
+                                    </td>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <form method="POST" action="{{ route('editUpdateStatus') }}">
+                                                @csrf
+                                                <input type="hidden" name="id" id="modalLoanId">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="statusModalLabel">Update Loan Status</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="status" class="form-label">Select Status</label>
+                                                            <select name="status" id="statusSelect" class="form-select" required>
+                                                                <option value="">Select</option>
+                                                                <option value="eligible">Eligible</option>
+                                                                <option value="not eligible">Not Eligible</option>
+                                                                <option value="pending">Pending</option>
+                                                                <option value="lost">Lost</option>
+                                                                <option value="working">Working</option>
+                                                                <option value="progress">Progress</option>
+                                                                <option value="no response">No Response</option>
+                                                                <option value="won">Won</option>
+                                                            </select>
+                                                        </div>
+                                                          <div id="reasondid" style="display: none;">
+                                                        <div class="mb-3">
+                                                            <label>Reason </label>
+                                                            <textarea class="form-control" id="reasonname" name="reason"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <script>
+                                                        $(function() {
+                                                            $('#statusSelect').on('change', function() {
+                                                                if (this.value === 'not eligible' || this.value =='Not Eligible') {
+                                                                    $('#reasondid').show();
+                                                                    $('#reasonname').prop('required', true);
+                                                                } else {
+                                                                    $('#reasondid').hide();
+                                                                    $('#reasonname').prop('required', false);
+                                                                }
+                                                            });
+                                                        });
+                                                    </script>
+                                                    </div>
+                                                  
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-success">Update</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                @endif
-            @endforeach
+            </div>
+        </div>
+        @endif
+        @endforeach
         @endif
 
         <!-- Loan Queries Section -->
         @if($queriesByStatus && $queriesByStatus->isNotEmpty())
-            @foreach($queriesByStatus as $status => $queries)
-                <div class="card shadow-sm border-0" style="border-radius: 16px;">
-                    <div class="card-header {{ $status == 'Approved' ? 'bg-success' : ($status == 'Pending' ? 'bg-warning' : 'bg-danger') }} text-white">
-                        <h5 class="mb-0 text-white">{{ $status }} Leads</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Loan Details</th>
-                                        <th>Personal Info</th>
-                                        <th>Financial Info</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($queries as $query)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-muted small">Loan ID: {{ $query->loan_application_id }}</span>
-                                                    <span class="text-muted small">Created: {{ \Carbon\Carbon::parse($query->created_at)->format('d M Y H:i') }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-muted small">Name: {{ $query->name }}</span>
-                                                    <span class="text-muted small">Mobile: {{ $query->mobile }}</span>
-                                                    <span class="text-muted small">Email: {{ $query->email }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="text-muted small">Income: ${{ number_format($query->income, 2) }}</span>
-                                                    <span class="text-muted small">Employment: {{ $query->employment_type }}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge {{ $query->status == 'Approved' ? 'bg-success' : ($query->status == 'Pending' ? 'bg-warning' : 'bg-danger') }}">
-                                                    {{ $query->status }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        @foreach($queriesByStatus as $status => $queries)
+        <div class="card shadow-sm border-0" style="border-radius: 16px;">
+            <div class="card-header {{ $status == 'Approved' ? 'bg-success' : ($status == 'Pending' ? 'bg-warning' : 'bg-danger') }} text-white">
+                <h5 class="mb-0 text-white">{{ $status }} Leads</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Loan Details</th>
+                                <th>Personal Info</th>
+                                <th>Financial Info</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($queries as $query)
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted small">Loan ID: {{ $query->loan_application_id }}</span>
+                                        <span class="text-muted small">Created: {{ \Carbon\Carbon::parse($query->created_at)->format('d M Y H:i') }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted small">Name: {{ $query->name }}</span>
+                                        <span class="text-muted small">Mobile: {{ $query->mobile }}</span>
+                                        <span class="text-muted small">Email: {{ $query->email }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted small">Income: ${{ number_format($query->income, 2) }}</span>
+                                        <span class="text-muted small">Employment: {{ $query->employment_type }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {{ $query->status == 'Approved' ? 'bg-success' : ($query->status == 'Pending' ? 'bg-warning' : 'bg-danger') }}">
+                                        {{ $query->status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-            @endforeach
+            </div>
+        </div>
+        @endforeach
         @endif
 
     </div>
@@ -492,27 +517,35 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const statusModal = document.getElementById('statusModal');
-    const statusSelect = document.getElementById('statusSelect');
-    const modalLoanId = document.getElementById('modalLoanId');
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusModal = document.getElementById('statusModal');
+        const statusSelect = document.getElementById('statusSelect');
+        const modalLoanId = document.getElementById('modalLoanId');
 
-    statusModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const loanId = button.getAttribute('data-loan-id');
-        const status = button.getAttribute('data-status');
+        statusModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const loanId = button.getAttribute('data-loan-id');
+            const status = button.getAttribute('data-status');
 
-        modalLoanId.value = loanId;
+            if (status == 'Not Eligible' ||  status =='not eligible') {
+                $('#reasondid').show();
+                $('#reasonname').prop('required', true);
+            } else {
+                $('#reasondid').hide();
+                $('#reasonname').prop('required', false);
 
-        // Set the selected status in the dropdown
-        if (statusSelect) {
-            [...statusSelect.options].forEach(option => {
-                option.selected = (option.value.toLowerCase() === status.toLowerCase());
-            });
-        }
+            }
+
+            modalLoanId.value = loanId;
+
+            // Set the selected status in the dropdown
+            if (statusSelect) {
+                [...statusSelect.options].forEach(option => {
+                    option.selected = (option.value.toLowerCase() === status.toLowerCase());
+                });
+            }
+        });
     });
-});
-
 </script>
 
 <script>
