@@ -70,7 +70,7 @@ class LeadController extends Controller
                         }
                     }
                 })
-                ->paginate(40);
+                ->orderby('id','desc')->paginate(40);
             // return $leads;
             return view('leads.finance.loanqueries', compact('leads', 'companies'));
 
