@@ -17,6 +17,26 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 class LeadController extends Controller
 {
     //show leads table data
+
+
+    public  function todaysection(){
+          $companies = Company::all();
+
+
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    foreach ($columns as $column) {
+                        if ($column != 'deleted_at') {
+                            $q->orWhereNull($column);
+                        }
+                    }
+                })
+                ->whereDate('created_at',now())->orderby('id','desc')->paginate(40);
+            // return $leads;
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+
+    }
     public function index()
     {
         $user = auth()->user();

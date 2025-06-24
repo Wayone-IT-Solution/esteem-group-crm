@@ -335,7 +335,27 @@
                             <div class="stat-label">
                                 <a href="{{ url('admin/leads/company/today/'.$list->id) }}">Today's Leads</a>
                             </div>
+
                         </div>
+                        @if($list->name =='Esteem Finance')
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="ri-file-list-line"></i>
+                            </div>
+                            @php
+                            $leadcount = DB::connection('mysql2')
+                            ->table('loan_applications')
+                            ->whereDate('created_at',now())->count();
+                            @endphp
+                            <div class="stat-value">
+                                <a href="{{ url('admin/leads/'.$list->id.'/Lead/today') }}">{{ $leadcount ?? 0 }}</a>
+                            </div>
+                            <div class="stat-label">
+                                <a href="{{ url('admin/leads/'.$list->id.'/Lead/today') }}">Today Apply Loan</a>
+                            </div>
+
+                        </div>
+                        @endif()
                         <!-- <div class="stat-card">
                             <div class="stat-icon warning">
                                 <i class="ri-time-line"></i>
@@ -368,19 +388,19 @@
                             @if(!empty($list->status))
                             @foreach ($list->status as $status)
                             @php
-                                if (auth()->user()->role == 'admin') {
-        $leadcount = DB::table('lead_models')
-            ->where('company_id', $list->id)
-            ->where('status', $status->status)
-            ->count();
-    } else {
-        $leadcount = DB::table('lead_models')
-            ->join('assign_leads', 'assign_leads.lead_id', '=', 'lead_models.id')
-            ->where('lead_models.company_id', $list->id)
-            ->where('lead_models.status', $status->status)
-            ->where('assign_leads.user_id', auth()->id()) // optional: only assigned to this user
-            ->count();
-    }
+                            if (auth()->user()->role == 'admin') {
+                            $leadcount = DB::table('lead_models')
+                            ->where('company_id', $list->id)
+                            ->where('status', $status->status)
+                            ->count();
+                            } else {
+                            $leadcount = DB::table('lead_models')
+                            ->join('assign_leads', 'assign_leads.lead_id', '=', 'lead_models.id')
+                            ->where('lead_models.company_id', $list->id)
+                            ->where('lead_models.status', $status->status)
+                            ->where('assign_leads.user_id', auth()->id()) // optional: only assigned to this user
+                            ->count();
+                            }
 
 
 
@@ -389,7 +409,19 @@
                             @endphp
                             <div class="col-6 col-md-3">
                                 <div class="status-item">
-                                    <span class="status-label">{{ $status->status ?? '' }}</span>
+                                    <span class="status-label">
+                                        @if ($status->status === 'Lead')
+                                        @php
+                                        $leadcount = DB::connection('mysql2')
+                                        ->table('loan_applications')->count();
+
+                                        @endphp
+                                        @endif()
+
+                                        {{ $status->status ?? '' }}
+
+
+                                    </span>
                                     <span class="status-value">{{ $leadcount ?? 0 }}</span>
                                     <small class="status-today">
                                         <a href="{{ url('admin/leads/'.$list->id.'/'.$status->status) }}">View</a>
