@@ -151,6 +151,54 @@
                             <div class="text-muted">{{ $lead->required_amount  ?? ''}}</div>
                         </div>
                         @endif()
+                        @if($lead->company->name =='We Care Auto Repairs')
+                        @if(!empty($lead->survey_question) || !empty($lead->survey_answer))
+                        <div class="col-6">
+                            <strong class="text-dark">{{ $lead->survey_question ?? '' }}</strong>
+                            <div class="text-muted">{{ $lead->survey_answer ?? '' }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->when_do_you_like_to_avail_the_service))
+                        <div class="col-6">
+                            <strong class="text-dark">When Do you like to avail the service?</strong>
+                            <div class="text-muted">{{ $lead->when_do_you_like_to_avail_the_service }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->car_rego_number))
+                        <div class="col-6">
+                            <strong class="text-dark">Car Rego Number</strong>
+                            <div class="text-muted">{{ $lead->car_rego_number }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->car_type))
+                        <div class="col-6">
+                            <strong class="text-dark">Small / Medium / Large Car</strong>
+                            <div class="text-muted">{{ $lead->car_type }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->buget_tyres))
+                        <div class="col-6">
+                            <strong class="text-dark">Budget Tyres / Branded Tyres</strong>
+                            <div class="text-muted">{{ $lead->buget_tyres }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->tyre_size))
+                        <div class="col-6">
+                            <strong class="text-dark">Tyre Size</strong>
+                            <div class="text-muted">{{ $lead->tyre_size }}</div>
+                        </div>
+                        @endif
+
+
+
+
+
+                        @endif()
 
 
                         <div class="col-6">
@@ -406,27 +454,27 @@
                                                                 <option value="won">Won</option>
                                                             </select>
                                                         </div>
-                                                          <div id="reasondid" style="display: none;">
-                                                        <div class="mb-3">
-                                                            <label>Reason </label>
-                                                            <textarea class="form-control" id="reasonname" name="reason"></textarea>
+                                                        <div id="reasondid" style="display: none;">
+                                                            <div class="mb-3">
+                                                                <label>Reason </label>
+                                                                <textarea class="form-control" id="reasonname" name="reason"></textarea>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <script>
-                                                        $(function() {
-                                                            $('#statusSelect').on('change', function() {
-                                                                if (this.value === 'not eligible' || this.value =='Not Eligible') {
-                                                                    $('#reasondid').show();
-                                                                    $('#reasonname').prop('required', true);
-                                                                } else {
-                                                                    $('#reasondid').hide();
-                                                                    $('#reasonname').prop('required', false);
-                                                                }
+                                                        <script>
+                                                            $(function() {
+                                                                $('#statusSelect').on('change', function() {
+                                                                    if (this.value === 'not eligible' || this.value == 'Not Eligible') {
+                                                                        $('#reasondid').show();
+                                                                        $('#reasonname').prop('required', true);
+                                                                    } else {
+                                                                        $('#reasondid').hide();
+                                                                        $('#reasonname').prop('required', false);
+                                                                    }
+                                                                });
                                                             });
-                                                        });
-                                                    </script>
+                                                        </script>
                                                     </div>
-                                                  
+
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                                                         <button type="submit" class="btn btn-success">Update</button>
@@ -527,7 +575,7 @@
             const loanId = button.getAttribute('data-loan-id');
             const status = button.getAttribute('data-status');
 
-            if (status == 'Not Eligible' ||  status =='not eligible') {
+            if (status == 'Not Eligible' || status == 'not eligible') {
                 $('#reasondid').show();
                 $('#reasonname').prop('required', true);
             } else {
