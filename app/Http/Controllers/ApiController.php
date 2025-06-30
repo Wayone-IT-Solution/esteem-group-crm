@@ -56,6 +56,8 @@ class ApiController extends Controller
             'car_type' => $request->car_type ?? null,
             'car_rego_number' => $request->car_rego_number ?? null,
             'license_number' => $request->license_number ?? null,
+            'buget_tyres' => $request->buget_tyres ?? null,
+            'tyre_size' => $request->tyre_size ?? null,
             'status' => 'Pending',
             'add_by' => 4,
             'created_at' => now(),
