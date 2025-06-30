@@ -39,6 +39,36 @@ class ApiController extends Controller
         }
     }
 
+
+    // for we care auto repairs
+    public function pannelBt(Request $request)
+    {
+        $data = [
+            'company_id' => 9,
+            'source' => 'fb',
+            'name' => $request->name,
+            'mobile_number' => $request->mobile,
+            'email' =>  $request->email,
+            'state' => $request->state,
+            'survey_question' => $request->survey_question,
+            'survey_answer' => $request->survey_answer,
+            'when_do_you_like_to_avail_the_service' => $request->when_do_you_like_to_avail_the_service,
+            'car_rego_number' => $request->car_rego_number,
+            'license_number' => $request->license_number,
+            'status' => 'Pending',
+            'add_by' => 4,
+            'created_at' => now(),
+            'unique_id' => $this->getlastGFCode('lead_models'),
+        ];
+
+        $query =    LeadModel::insert($data);
+        if ($query) {
+            return response()->json(['message' => 'Lead Added successfully'], 201);
+        } else {
+            return response()->json(['message' => 'Something went wrong'], 500);
+        }
+    }
+
     public function getlastGFCode($table)
     {
         $prefix = 'EG-';
@@ -163,7 +193,6 @@ class ApiController extends Controller
             DB::table('wati_messages')
                 ->where('id', $message->id)
                 ->update(['text' => $cleaned]);
-
         }
 
 
