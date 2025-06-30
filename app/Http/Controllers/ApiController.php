@@ -46,20 +46,22 @@ class ApiController extends Controller
         $data = [
             'company_id' => 9,
             'source' => 'fb',
-            'name' => $request->name,
-            'mobile_number' => $request->mobile_number,
-            'email' =>  $request->email,
-            'state' => $request->state,
-            'survey_question' => 'Insured or not insured',
-            'survey_answer' => $request->survey_answer,
-            'when_do_you_like_to_avail_the_service' => $request->when_do_you_like_to_avail_the_service,
-            'car_rego_number' => $request->car_rego_number,
-            'license_number' => $request->license_number,
+            'name' => $request->name ?? null,
+            'mobile_number' => $request->mobile_number ?? null,
+            'email' => $request->email ?? null,
+            'state' => $request->state ?? null,
+            'survey_question' => $request->survey_question ?? 'Insured or not insured',
+            'survey_answer' => $request->survey_answer ?? null,
+            'when_do_you_like_to_avail_the_service' => $request->when_do_you_like_to_avail_the_service ?? null,
+            'car_type' => $request->car_type ?? null,
+            'car_rego_number' => $request->car_rego_number ?? null,
+            'license_number' => $request->license_number ?? null,
             'status' => 'Pending',
             'add_by' => 4,
             'created_at' => now(),
             'unique_id' => $this->getlastGFCode('lead_models'),
         ];
+
 
         $query =    LeadModel::insert($data);
         if ($query) {
