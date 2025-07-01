@@ -201,6 +201,54 @@
                         @endif()
 
 
+                        {{-- 👇 Conditional display for Esteem Cars only --}}
+                        @if(!empty($lead->company) && strtolower($lead->company->name ?? '') == 'esteem cars')
+
+                        @if(!empty($lead->survey_question))
+                        <div class="col-6">
+                            <strong class="text-dark">Survey Question</strong>
+                            <div class="text-muted">{{ $lead->survey_question }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->survey_answer))
+                        <div class="col-6">
+                            <strong class="text-dark">Survey Answer</strong>
+                            <div class="text-muted">{{ $lead->survey_answer }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->when_do_you_like_to_avail_the_service))
+                        <div class="col-6">
+                            <strong class="text-dark">When you are planning to buy?</strong>
+                            <div class="text-muted">{{ $lead->when_do_you_like_to_avail_the_service }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->preferred_budget))
+                        <div class="col-6">
+                            <strong class="text-dark">Preferred Budget</strong>
+                            <div class="text-muted">{{ $lead->preferred_budget }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->brand_model))
+                        <div class="col-6">
+                            <strong class="text-dark">Brand / Model</strong>
+                            <div class="text-muted">{{ $lead->brand_model }}</div>
+                        </div>
+                        @endif
+
+                        @if(!empty($lead->fuel_type))
+                        <div class="col-6">
+                            <strong class="text-dark">Fuel Type</strong>
+                            <div class="text-muted">{{ $lead->fuel_type }}</div>
+                        </div>
+                        @endif
+
+                        @endif
+
+
                         <div class="col-6">
                             <strong class="text-dark">Address:</strong>
                             <div class="text-muted">{{ $lead->address }}</div>
