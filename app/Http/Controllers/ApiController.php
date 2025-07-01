@@ -73,6 +73,38 @@ class ApiController extends Controller
         }
     }
 
+
+
+    public function esteemcars(Request $request)
+    {
+        $data = [
+            'company_id' => 8,
+            'source' => 'fb',
+            'name' => $request->name ?? null,
+            'mobile_number' => $request->mobile_number ?? null,
+            'email' => $request->email ?? null,
+            'state' => $request->state ?? null,
+            'survey_question' => $request->survey_question ?? 'Insured or not insured',
+            'survey_answer' => $request->survey_answer ?? null,
+            'car_type' => $request->car_type ?? null,
+            'when_do_you_like_to_avail_the_service' => $request->when_do_you_like_to_avail_the_service ?? null,
+            'preferred_budget' => $request->preferred_budget ?? null,
+            'brand_model' => $request->brand_model ?? null,
+            'fuel_type' => $request->fuel_type ?? null,
+            'status' => 'Enquiry',
+            'add_by' => 4,
+            'created_at' => now(),
+            'unique_id' => $this->getlastGFCode('lead_models'),
+        ];
+
+
+        $query =    LeadModel::insert($data);
+        if ($query) {
+            return response()->json(['message' => 'Lead Added successfully'], 201);
+        } else {
+            return response()->json(['message' => 'Something went wrong'], 500);
+        }
+    }
     public function getlastGFCode($table)
     {
         $prefix = 'EG-';
