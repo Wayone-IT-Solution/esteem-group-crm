@@ -170,11 +170,40 @@
                         <td>{{ $lead->address }}</td>
                         <td>{{ $lead->description }}</td>
                         <td>{{ $lead->source }}</td>
+                        @php
+                        $statusColors = [
+                        'not interested' => 'danger',
+                        'interested' => 'info',
+                        'pending' => 'secondary',
+                        'refused enquiry' => 'dark',
+                        'epa' => 'primary',
+                        'car sold' => 'success',
+                        'loan approved' => 'success',
+                        'qualified prospect' => 'info',
+                        'refused prospect' => 'danger',
+                        'refused lead' => 'danger',
+                        'qualified lead' => 'primary',
+                        'lead' => 'secondary',
+                        'enquiry' => 'warning',
+                        'won' => 'success',
+                        'no response' => 'secondary',
+                        'progress' => 'info',
+                        'working' => 'primary',
+                        'lost' => 'danger',
+                        'converted' => 'success',
+                        'contacted' => 'warning',
+                        ];
+
+                        $status = strtolower($lead->status);
+                        $badgeColor = $statusColors[$status] ?? 'light';
+                        @endphp
+
                         <td>
-                            <span class="badge bg-{{ $lead->status == 'converted' ? 'success' : ($lead->status == 'contacted' ? 'warning' : 'secondary') }}">
+                            <span class="badge bg-{{ $badgeColor }}">
                                 {{ ucfirst($lead->status) }}
                             </span>
                         </td>
+
                         <td>{{ date('d-m-Y', strtotime($lead->created_at)) }}</td>
                         <td>
                             <div class="d-flex justify-content-center gap-1">
