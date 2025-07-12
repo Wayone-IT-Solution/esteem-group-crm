@@ -284,6 +284,15 @@
                         <i class="fa fa-circle-o-notch" aria-hidden="true"></i>
                     </a>
 
+                    <a href="javascript:void(0);"
+                        class="btn btn-sm btn-secondary view-comments-btn"
+                        data-loan-id="{{ $loan->id }}"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#commentsCanvas">
+                        <i class="fa-solid fa-comments"></i>
+                    </a>
+
+
                 </td>
 
                 <!-- Modal -->
@@ -316,6 +325,12 @@
                                         <div class="mb-3">
                                             <label>Reason </label>
                                             <textarea class="form-control" id="reasonname" name="reason"></textarea>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="mb-3">
+                                            <label>Comment If Any ? </label>
+                                            <textarea class="form-control" name="description"></textarea>
                                         </div>
                                     </div>
                                     <script>
@@ -451,6 +466,19 @@
 </div>
 </div>
 
+<div class="offcanvas offcanvas-end" tabindex="-1" id="commentsCanvas" aria-labelledby="commentsCanvasLabel">
+    <div class="offcanvas-header bg-primary text-white">
+        <h5 class="mb-0 text-white"><i class="fa-solid fa-comments me-2 text-white"></i> Loan Comments</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body bg-light p-3">
+        <div id="commentsContainer">
+            <div class="text-center text-muted">Loading comments...</div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Offcanvas for Lead Info -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="leadInfoCanvas" aria-labelledby="leadInfoCanvasLabel">
     <div class="offcanvas-header bg-success text-white">
@@ -526,7 +554,39 @@
 </div>
 
 
+
 <script>
+    $(document).on('click', '.view-comments-btn', function () {
+    const loanId = $(this).data('loan-id');
+    $('#commentsContainer').html('<div class="text-center text-muted">Loading comments...</div>');
+
+    $.ajax({
+        url: `/admin/leads/loan/${loanId}/comments`, // route to be defined
+        method: 'GET',
+        success: function (data) {
+            if (data.comments && data.comments.length > 0) {
+                let html = '';
+                data.comments.forEach(comment => {
+                    html += `
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <p class="mb-1">${comment.description}</p>
+                                <small class="text-muted">By ${comment.user_name ?? 'Unknown'} on ${comment.created_at}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#commentsContainer').html(html);
+            } else {
+                $('#commentsContainer').html('<div class="text-center text-muted">No comments found.</div>');
+            }
+        },
+        error: function () {
+            $('#commentsContainer').html('<div class="text-danger text-center">Failed to load comments.</div>');
+        }
+    });
+});
+
     $(document).ready(function() {
         function changetext() {
             $('#leadImportButton').text('Please wait..');

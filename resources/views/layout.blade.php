@@ -253,62 +253,85 @@
 
                             @endphp
 
-                            <ul class="sidebar-submenu">
-                                @foreach ($companies as $company)
-                                @php
-                                $companyName = $company->name ?? '';
-                                $words = explode(' ', $companyName);
-                                $displayName = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : $companyName;
-                                @endphp
+                           <ul class="sidebar-submenu">
+    @foreach ($companies as $company)
+        @php
+            $companyName = $company->name ?? '';
+            $words = explode(' ', $companyName);
+            $displayName = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : $companyName;
+        @endphp
 
-                                <li class="sidebar-list">
-                                    <a class="sidebar-link" href="javascript:void(0)">
-                                        <i class="fa-solid fa-building-columns me-2"></i>
-                                        <span>{{ $displayName }}</span>
-                                    </a>
-                                    <ul class="sidebar-submenu" style="display: none;">
-                                        @if (!empty($company->status))
-                                        @foreach ($company->status as $status)
-                                        @php
-                                        if ($status->status === 'Lead') {
-                                        $leadCount = DB::connection('mysql2')
-                                        ->table('loan_applications')->count();
-                                        }elseif($status->status =='Loan'){
-                                        $leadCount = DB::connection('mysql2')
-                                        ->table('loan_queries')->count();
+        <li class="sidebar-list">
+            <a class="sidebar-link" href="javascript:void(0)">
+                <i class="fa-solid fa-building-columns me-2"></i>
+                <span>{{ $displayName }}</span>
+            </a>
 
+            <ul class="sidebar-submenu" style="display: none;">
+                @if (!empty($company->status))
+                    @foreach ($company->status as $status)
+                        @php
+                            $leadCount = 0;
+
+                            if ($status->status === 'Lead') {
+                                $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
+                                $excluded = ['deleted_at', 'disapproval_reason'];
+
+                                $leadCount = DB::connection('mysql2')->table('loan_applications')
+                                    ->where(function ($query) use ($columns, $excluded) {
+                                        foreach ($columns as $column) {
+                                            if (!in_array($column, $excluded)) {
+                                                $query->orWhereNull($column);
+                                            }
                                         }
-                                        else{
+                                    })
+                                    ->count();
 
+                            } elseif ($status->status === 'Qualified lead') {
+                                $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
+                                $excluded = ['deleted_at', 'disapproval_reason'];
 
+                                $leadCount = DB::connection('mysql2')->table('loan_applications')
+                                    ->where(function ($query) use ($columns, $excluded) {
+                                        foreach ($columns as $column) {
+                                            if (!in_array($column, $excluded)) {
+                                                $query->whereNotNull($column);
+                                            }
+                                        }
+                                    })
+                                    ->count();
 
+                            } elseif ($status->status === 'Loan') {
+                                $leadCount = DB::connection('mysql2')->table('loan_queries')->count();
 
-                                        $query = LeadModel::where('company_id', $company->id)
-                                        ->where('status', $status->status);
+                            } else {
+                                $query = \App\Models\LeadModel::where('company_id', $company->id)
+                                    ->where('status', $status->status);
 
-                                        if (!$isAdmin) {
-                                        $query->whereHas('assinges', function ($q) use ($userId) {
+                                if (!$isAdmin) {
+                                    $query->whereHas('assinges', function ($q) use ($userId) {
                                         $q->where('user_id', $userId);
-                                        });
-                                        }
+                                    });
+                                }
 
+                                $leadCount = $query->count();
+                            }
+                        @endphp
 
-                                        $leadCount = $query->count();
-                                        }
-                                        @endphp
-                                        <li>
-                                            <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 13px;width: 200px;">
-                                                <i class="fa-solid fa-toggle-on me-2"></i>
-                                                {{ $status->status ?? '' }}
-                                                <span class="badge bg-warning ms-2">{{ $leadCount }}</span>
-                                            </a>
-                                        </li>
-                                        @endforeach
-                                        @endif
-                                    </ul>
-                                </li>
-                                @endforeach
-                            </ul>
+                        <li>
+                            <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 14px;width: 200px;">
+                                <i class="fa-solid fa-toggle-on me-2"></i>
+                                {{ $status->status ?? '' }}
+                                <span class="badge bg-warning ms-2">{{ $leadCount }}</span>
+                            </a>
+                        </li>
+                    @endforeach
+                @endif
+            </ul>
+        </li>
+    @endforeach
+</ul>
+
                         </li>
                         <hr>
                         <li class="sidebar-list">

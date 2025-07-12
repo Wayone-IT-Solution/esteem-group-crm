@@ -6,7 +6,7 @@
                         <th>Company</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Address</th>
+                        <!-- <th>Address</th> -->
                         <th>Description</th>
                         <th>Source</th>
                         <th>Status</th>
@@ -24,7 +24,7 @@
                         <td>{{ $lead->company->name ?? 'N/A' }}</td>
                         <td>{{ $lead->email }}</td>
                         <td>{{ $lead->mobile_number }}</td>
-                        <td>{{ $lead->address }}</td>
+                        <!-- <td>{{ $lead->address }}</td> -->
                         <td>{{ $lead->description }}</td>
                         <td>{{ $lead->source }}</td>
                         <td>

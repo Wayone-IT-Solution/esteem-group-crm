@@ -19,23 +19,23 @@ class LeadController extends Controller
     //show leads table data
 
 
-    public  function todaysection(){
-          $companies = Company::all();
+    public  function todaysection()
+    {
+        $companies = Company::all();
 
 
-            $leads = DB::connection('mysql2')->table('loan_applications')
-                ->where(function ($q) {
-                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
-                    foreach ($columns as $column) {
-                        if ($column != 'deleted_at') {
-                            $q->orWhereNull($column);
-                        }
+        $leads = DB::connection('mysql2')->table('loan_applications')
+            ->where(function ($q) {
+                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                foreach ($columns as $column) {
+                    if ($column != 'deleted_at') {
+                        $q->orWhereNull($column);
                     }
-                })
-                ->whereDate('created_at',now())->orderby('id','desc')->paginate(40);
-            // return $leads;
-            return view('leads.finance.loanqueries', compact('leads', 'companies'));
-
+                }
+            })
+            ->whereDate('created_at', now())->orderby('id', 'desc')->paginate(40);
+        // return $leads;
+        return view('leads.finance.loanqueries', compact('leads', 'companies'));
     }
     public function index()
     {
@@ -84,13 +84,44 @@ class LeadController extends Controller
             $leads = DB::connection('mysql2')->table('loan_applications')
                 ->where(function ($q) {
                     $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
+
                     foreach ($columns as $column) {
-                        if ($column != 'deleted_at') {
+                        if (!in_array($column, $excluded)) {
                             $q->orWhereNull($column);
                         }
                     }
                 })
-                ->orderby('id','desc')->paginate(40);
+                ->orderBy('id', 'desc')
+                ->paginate(40);
+
+
+            // return $leads;
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+
+            // todo check kro in second db ( mysql2 )in loan_queries that is their any feild that is empty
+
+            // reditrect to new view in the lead folder
+
+        }
+
+        if ($request->status === 'Qualified lead') {
+
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+
+                    foreach ($columns as $column) {
+                        if (!in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
+                    }
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
+
+
             // return $leads;
             return view('leads.finance.loanqueries', compact('leads', 'companies'));
 
@@ -502,6 +533,15 @@ class LeadController extends Controller
                 'updated_at' => now(),
             ]);
 
+        // check if request has comment
+        if ($request->has('description')) {
+            DB::connection('mysql2')
+                ->table('loan_queries_comment')->insert(['description' => $request->description, 'user_id' => Auth::user()->id, 'created_at' => now(),'loan_id'=>$request->id]);
+        }
+
+
+
+
         $accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNGM4OTU5NS1jNGZlLTQwZWUtYWYwNy05ODVmYTVkMDUyODIiLCJ1bmlxdWVfbmFtZSI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsIm5hbWVpZCI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsImVtYWlsIjoiZXN0ZWVtZmluYW5jZTdAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDQvMDMvMjAyNSAwNzo0NToxOSIsInRlbmFudF9pZCI6IjQyNTMyMiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.sfPB9WoIoxjNoqE5ku1TVmHgSSDnCn31xlFT5Vakvvc";
         $accountId   = '425322'; // default fallback
         $baseUrl     = 'https://live-mt-server.wati.io';
@@ -530,15 +570,16 @@ class LeadController extends Controller
                 ],
             ];
         } else {
-
-            $payload = [
-                'template_name'  => 'notekigible_with_reason',
-                'broadcast_name' => 'notekigible_with_reason_' . now()->format('dmYHi'),
-                'parameters'     => [
-                    ['name' => 'name',         'value' => $name],
-                    ['name' => 'order_number', 'value' => $reason],
-                ],
-            ];
+            if ($status === 'not eligible') {
+                $payload = [
+                    'template_name'  => 'notekigible_with_reason',
+                    'broadcast_name' => 'notekigible_with_reason_' . now()->format('dmYHi'),
+                    'parameters'     => [
+                        ['name' => 'name',         'value' => $name],
+                        ['name' => 'order_number', 'value' => $reason],
+                    ],
+                ];
+            }
         }
 
         if (in_array($status, ['not eligible', 'eligible'])) {
@@ -601,5 +642,30 @@ class LeadController extends Controller
             ]);
 
         return redirect()->back()->with('success', 'Loan status updated successfully.');
+    }
+
+
+    public function loanComments(Request $request)
+    {
+        $comments = DB::connection('mysql2')->table('loan_queries_comment')
+            ->where('loan_id', $request->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        // Get user IDs
+        $userIds = $comments->pluck('user_id')->filter()->unique()->toArray();
+
+        // Get user names from default connection
+        $users = DB::table('users')
+            ->whereIn('id', $userIds)
+            ->pluck('name', 'id');
+
+        // Attach user names to comments
+        $comments->transform(function ($comment) use ($users) {
+            $comment->user_name = $users[$comment->user_id] ?? 'Unknown';
+            return $comment;
+        });
+
+        return response()->json(['comments' => $comments]);
     }
 }

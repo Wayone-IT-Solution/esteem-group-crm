@@ -24,6 +24,7 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::post('/finance-filter', [LeadController::class, 'financeFilter'])->name('admin.finance.filter');
     Route::post('/edit-update-status', [LeadController::class, 'updateStatus'])->name('editUpdateStatus');
     Route::get('7/Lead/today',[LeadController::class, 'todaysection'])->name('editUpdateStatus');
+    Route::get('loan/{id}/comments',[LeadController::class, 'loanComments']);
 
 
 

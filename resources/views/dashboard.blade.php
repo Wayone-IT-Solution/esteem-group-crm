@@ -380,58 +380,80 @@
                         </div> -->
                     </div>
 
-                    <div class="status-section">
-                        <h4 class="status-title mb-3">
-                            <i class="ri-bar-chart-line"></i> Lead Status Overview
-                        </h4>
-                        <div class="row g-3">
-                            @if(!empty($list->status))
-                            @foreach ($list->status as $status)
-                            @php
-                            if (auth()->user()->role == 'admin') {
-                            $leadcount = DB::table('lead_models')
-                            ->where('company_id', $list->id)
-                            ->where('status', $status->status)
+                   <div class="status-section">
+    <h4 class="status-title mb-3">
+        <i class="ri-bar-chart-line"></i> Lead Status Overview
+    </h4>
+    <div class="row g-3">
+        @if (!empty($list->status))
+            @foreach ($list->status as $status)
+                @php
+                    $leadcount = 0;
+
+                    if ($status->status === 'Lead') {
+                        // Count incomplete leads (any null field except excluded ones)
+                        $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
+                        $excluded = ['deleted_at', 'disapproval_reason'];
+
+                        $leadcount = DB::connection('mysql2')->table('loan_applications')
+                            ->where(function ($query) use ($columns, $excluded) {
+                                foreach ($columns as $column) {
+                                    if (!in_array($column, $excluded)) {
+                                        $query->orWhereNull($column);
+                                    }
+                                }
+                            })
                             ->count();
-                            } else {
-                            $leadcount = DB::table('lead_models')
-                            ->join('assign_leads', 'assign_leads.lead_id', '=', 'lead_models.id')
-                            ->where('lead_models.company_id', $list->id)
-                            ->where('lead_models.status', $status->status)
-                            ->where('assign_leads.user_id', auth()->id()) // optional: only assigned to this user
+
+
+                    } elseif ($status->status === 'Qualified lead') {
+                        // Count fully filled leads (all fields not null except excluded ones)
+                        $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
+                        $excluded = ['deleted_at', 'disapproval_reason'];
+
+                        $leadcount = DB::connection('mysql2')->table('loan_applications')
+                            ->where(function ($query) use ($columns, $excluded) {
+                                foreach ($columns as $column) {
+                                    if (!in_array($column, $excluded)) {
+                                        $query->whereNotNull($column);
+                                    }
+                                }
+                            })
                             ->count();
-                            }
 
+                    } else {
+                        // Default lead_models table count
+                        if (auth()->user()->role === 'admin') {
+                            $leadcount = DB::table('lead_models')
+                                ->where('company_id', $list->id)
+                                ->where('status', $status->status)
+                                ->count();
+                        } else {
+                            $leadcount = DB::table('lead_models')
+                                ->join('assign_leads', 'assign_leads.lead_id', '=', 'lead_models.id')
+                                ->where('lead_models.company_id', $list->id)
+                                ->where('lead_models.status', $status->status)
+                                ->where('assign_leads.user_id', auth()->id())
+                                ->count();
+                        }
+                    }
+                @endphp
 
-
-                            $statusLabels[] = $status->status;
-                            $statusCounts[] = $leadcount;
-                            @endphp
-                            <div class="col-6 col-md-3">
-                                <div class="status-item">
-                                    <span class="status-label">
-                                        @if ($status->status === 'Lead')
-                                        @php
-                                        $leadcount = DB::connection('mysql2')
-                                        ->table('loan_applications')->count();
-
-                                        @endphp
-                                        @endif()
-
-                                        {{ $status->status ?? '' }}
-
-
-                                    </span>
-                                    <span class="status-value">{{ $leadcount ?? 0 }}</span>
-                                    <small class="status-today">
-                                        <a href="{{ url('admin/leads/'.$list->id.'/'.$status->status) }}">View</a>
-                                    </small>
-                                </div>
-                            </div>
-                            @endforeach
-                            @endif
-                        </div>
+                <div class="col-6 col-md-3">
+                    <div class="status-item">
+                        <span class="status-label">{{ $status->status ?? '' }}</span>
+                        <span class="status-value">{{ $leadcount }}</span>
+                        <small class="status-today">
+                            <a href="{{ url('admin/leads/' . $list->id . '/' . $status->status) }}">View</a>
+                        </small>
                     </div>
+                </div>
+            @endforeach
+        @endif
+    </div>
+</div>
+
+
 
                     @if(!empty($statusLabels))
                     <div class="charts-container">

@@ -80,7 +80,7 @@
     .table td small {
         /* font-size: 0.85rem; */
         vertical-align: middle;
-        font-size: 10px !important;
+        font-size: 13px !important;
 
     }
 </style>

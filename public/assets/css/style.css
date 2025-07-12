@@ -15906,7 +15906,7 @@ hr {
 }
 
 a {
-  font-size: 12px;
+  font-size: 15px;
   text-decoration: none;
   color: var(--body-font-color);
   transition: 0.5s all;
@@ -60180,7 +60180,7 @@ rect {
 }
 
 .page-sidebar .sidebar-link span {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 400;
   margin: -2px 0;
 }
