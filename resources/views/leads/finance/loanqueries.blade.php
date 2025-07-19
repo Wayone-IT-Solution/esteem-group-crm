@@ -211,7 +211,7 @@
                     <small class="text-muted">{{ \Carbon\Carbon::parse($loan->created_at)->format('h:i A') }}</small>
                 </td>
                 <td>
-                    <div><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
+                    <div><a href="{{ route('admin.leads.finance.edit', $loan->id) }}"><strong>{{ $loan->title }} {{ $loan->first_name }} {{ $loan->last_name }}</strong></div>
                     <div>DOB: {{ \Carbon\Carbon::parse($loan->date_of_birth)->format('d M Y') }}</div>
                     <div>Marital: {{ $loan->marital_status }}</div>
                     <div>Dependents: {{ $loan->no_of_dependents }}</div>
