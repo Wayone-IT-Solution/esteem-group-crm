@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Company;
@@ -18,11 +17,9 @@ class LeadController extends Controller
 {
     //show leads table data
 
-
-    public  function todaysection()
+    public function todaysection()
     {
         $companies = Company::all();
-
 
         $leads = DB::connection('mysql2')->table('loan_applications')
             ->where(function ($q) {
@@ -73,7 +70,7 @@ class LeadController extends Controller
         $query->where('company_id', $request->company_id);
         // }
         $companies = Company::all();
-
+        // return $companies;
         // Status filter
 
         // check if the status is lead
@@ -82,12 +79,13 @@ class LeadController extends Controller
         if ($request->status === 'Lead') {
 
             $leads = DB::connection('mysql2')->table('loan_applications')
+            // ->where('lead_status', '!=', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
 
                     foreach ($columns as $column) {
-                        if (!in_array($column, $excluded)) {
+                        if (! in_array($column, $excluded)) {
                             $q->orWhereNull($column);
                         }
                     }
@@ -95,32 +93,26 @@ class LeadController extends Controller
                 ->orderBy('id', 'desc')
                 ->paginate(40);
 
-
-            // return $leads;
             return view('leads.finance.loanqueries', compact('leads', 'companies'));
-
-            // todo check kro in second db ( mysql2 )in loan_queries that is their any feild that is empty
-
-            // reditrect to new view in the lead folder
 
         }
 
         if ($request->status === 'Qualified lead') {
 
             $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                     foreach ($columns as $column) {
-                        if (!in_array($column, $excluded)) {
+                        if (! in_array($column, $excluded)) {
                             $q->orWhereNotNull($column);
                         }
                     }
                 })
                 ->orderBy('id', 'desc')
                 ->paginate(40);
-
 
             // return $leads;
             return view('leads.finance.loanqueries', compact('leads', 'companies'));
@@ -149,7 +141,7 @@ class LeadController extends Controller
             ->whereDate('created_at', now());
 
         // if ($request->filled('company_id')) {
-        $query->where('company_id', $request->company_id);
+        $query->where('company_id', $request->company_id)->whereDate('created_at', now());
         // }
 
         if ($request->filled('user_id')) {
@@ -400,13 +392,13 @@ class LeadController extends Controller
     {
         $save =
             [
-                'lead_id'       => $request->lead_id,
-                'status'        => $request->status,
-                'add_by'        => Auth::user()->id,
-                'description'   => $request->description,
-                'next_followup' => $request->next_followup,
-                'created_at'    => now(),
-            ];
+            'lead_id'       => $request->lead_id,
+            'status'        => $request->status,
+            'add_by'        => Auth::user()->id,
+            'description'   => $request->description,
+            'next_followup' => $request->next_followup,
+            'created_at'    => now(),
+        ];
         LeadFollowup::insert($save);
         LeadModel::where('id', $request->lead_id)->update(['status' => $request->status, 'description' => $request->description]);
 
@@ -518,11 +510,9 @@ class LeadController extends Controller
             'status' => 'required|string',
         ]);
 
-
-        $loanApplication =  DB::connection('mysql2')
+        $loanApplication = DB::connection('mysql2')
             ->table('loan_applications')
             ->where('id', $request->id)->first();
-
 
         // check the status that is comming
         DB::connection('mysql2')
@@ -536,11 +526,8 @@ class LeadController extends Controller
         // check if request has comment
         if ($request->has('description')) {
             DB::connection('mysql2')
-                ->table('loan_queries_comment')->insert(['description' => $request->description, 'user_id' => Auth::user()->id, 'created_at' => now(),'loan_id'=>$request->id]);
+                ->table('loan_queries_comment')->insert(['description' => $request->description, 'user_id' => Auth::user()->id, 'created_at' => now(), 'loan_id' => $request->id]);
         }
-
-
-
 
         $accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxNGM4OTU5NS1jNGZlLTQwZWUtYWYwNy05ODVmYTVkMDUyODIiLCJ1bmlxdWVfbmFtZSI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsIm5hbWVpZCI6ImVzdGVlbWZpbmFuY2U3QGdtYWlsLmNvbSIsImVtYWlsIjoiZXN0ZWVtZmluYW5jZTdAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDQvMDMvMjAyNSAwNzo0NToxOSIsInRlbmFudF9pZCI6IjQyNTMyMiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.sfPB9WoIoxjNoqE5ku1TVmHgSSDnCn31xlFT5Vakvvc";
         $accountId   = '425322'; // default fallback
@@ -548,24 +535,24 @@ class LeadController extends Controller
 
         $countryCode = ltrim((string) ($loanApplication->country_code ?? ''), '+');
 
-        // Now build the full E.164-style number
-        $fullPhone   = $countryCode . $loanApplication->mobile;           // ← use "." not "+"
-        $mobile = $fullPhone;
+                                                              // Now build the full E.164-style number
+        $fullPhone = $countryCode . $loanApplication->mobile; // ← use "." not "+"
+        $mobile    = $fullPhone;
 
-        $status  =  $request->status;
-        $url = "{$baseUrl}/{$accountId}/api/v1/sendTemplateMessage?whatsappNumber={$mobile}";
+        $status      = $request->status;
+        $url         = "{$baseUrl}/{$accountId}/api/v1/sendTemplateMessage?whatsappNumber={$mobile}";
         $trackingUrl = 'https://esteemfinance.co.nz/apply-for-car-loan?id=' . $request->id;
 
         $payload = [];
-        $name = $loanApplication->title  . ' ' . $loanApplication->first_name . ' ' . $loanApplication->last_name;
-        $reason =  $request->reason ?? '';
+        $name    = $loanApplication->title . ' ' . $loanApplication->first_name . ' ' . $loanApplication->last_name;
+        $reason  = $request->reason ?? '';
 
         if ($status === 'eligible') {
             $payload = [
                 'template_name'  => 'sent_form',
                 'broadcast_name' => 'sent_form_' . now()->format('dmYHi'),
                 'parameters'     => [
-                    ['name' => 'name',         'value' => $name],
+                    ['name' => 'name', 'value' => $name],
                     ['name' => 'tracking_url', 'value' => $trackingUrl],
                 ],
             ];
@@ -575,7 +562,7 @@ class LeadController extends Controller
                     'template_name'  => 'notekigible_with_reason',
                     'broadcast_name' => 'notekigible_with_reason_' . now()->format('dmYHi'),
                     'parameters'     => [
-                        ['name' => 'name',         'value' => $name],
+                        ['name' => 'name', 'value' => $name],
                         ['name' => 'order_number', 'value' => $reason],
                     ],
                 ];
@@ -587,8 +574,6 @@ class LeadController extends Controller
             $response = Http::withToken($accessToken)
                 ->post($url, $payload);
         }
-
-
 
         return redirect()->back()->with('success', 'Loan status updated successfully.');
     }
@@ -644,7 +629,6 @@ class LeadController extends Controller
         return redirect()->back()->with('success', 'Loan status updated successfully.');
     }
 
-
     public function loanComments(Request $request)
     {
         $comments = DB::connection('mysql2')->table('loan_queries_comment')
@@ -668,4 +652,62 @@ class LeadController extends Controller
 
         return response()->json(['comments' => $comments]);
     }
+
+    public function editLeads($id)
+    {
+        // Fetch loan data from mysql2
+        $loan = DB::connection('mysql2')->table('loan_applications')->where('id', $id)->first();
+
+        if (! $loan) {
+            return redirect()->back()->with('error', 'Loan not found.');
+        }
+
+        $companies = Company::all();
+        // return $loan;
+
+        return view('leads.finance.edit', compact('loan', 'companies'));
+    }
+
+    public function updateLoan(Request $request, $id)
+    {
+
+        $request->validate([
+            'first_name'     => 'required|string|max:255',
+            'last_name'      => 'required|string|max:255',
+            'email'          => 'nullable|email',
+            'mobile'         => 'nullable|string|max:20',
+            'loan_amount'    => 'nullable|numeric',
+            'weekly_payment' => 'nullable|numeric',
+            'term_years'     => 'nullable|numeric',
+            'title'          => 'nullable|string|max:255',
+            'date_of_birth'  => 'nullable|date',
+            // 'company_id'     => 'nullable|integer',
+            'status'         => 'nullable|string|max:100',
+        ]);
+
+        $updated = DB::connection('mysql2')->table('loan_applications')
+            ->where('id', $id)
+            ->update([
+                'first_name'     => $request->first_name,
+                'last_name'      => $request->last_name,
+                'email'          => $request->email,
+                'mobile'         => $request->mobile,
+                'loan_amount'    => $request->loan_amount !== '' ? $request->loan_amount : null,
+                'weekly_payment' => $request->weekly_payment !== '' ? $request->weekly_payment : null,
+                'term_years'     => $request->term_years !== '' ? $request->term_years : null,
+                'title'          => $request->title,
+                'date_of_birth'  => $request->date_of_birth,
+                // 'company_id'     => $request->company_id !== '' ? $request->company_id : null,
+                'status'         => $request->status,
+                'updated_at'     => now(),
+            ]);
+
+        if ($updated) {
+            return redirect()->route('admin.leads.finance.edit', $id)
+                ->with('success', 'Loan updated successfully!');
+        } else {
+            return redirect()->back()->with('error', 'No changes made or update failed.');
+        }
+    }
+
 }

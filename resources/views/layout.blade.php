@@ -292,6 +292,7 @@
                                 $excluded = ['deleted_at', 'disapproval_reason'];
 
                                 $leadCount = DB::connection('mysql2')->table('loan_applications')
+                                    ->where('lead_status', 'Qualified Lead')
                                     ->where(function ($query) use ($columns, $excluded) {
                                         foreach ($columns as $column) {
                                             if (!in_array($column, $excluded)) {
