@@ -13,6 +13,8 @@ class ApiController extends Controller
 {
     public function webhook(Request $request)
     {
+        Log::info('Webhook hit: /v1/webhook', ['payload' => $request->all()]);
+
         $data = [
             'company_id' => 7,
             'source' => 'fb',
@@ -43,6 +45,8 @@ class ApiController extends Controller
     // for we care auto repairs
     public function pannelBt(Request $request)
     {
+        Log::info('Webhook hit: /v1/webhook/we-care-auto-repairs-add-pannel-bt', ['payload' => $request->all()]);
+
         $data = [
             'company_id' => 9,
             'source' => 'fb',
@@ -77,6 +81,8 @@ class ApiController extends Controller
 
     public function esteemcars(Request $request)
     {
+        Log::info('Webhook hit: /v1/webhook/esteemcars', ['payload' => $request->all()]);
+
         $data = [
             'company_id' => 8,
             'source' => 'fb',
@@ -132,6 +138,8 @@ class ApiController extends Controller
 
     public function botresponse(Request $request)
     {
+        Log::info('Bot Webhook Received', ['payload' => $request->all()]);
+
         $data = $request->all();
 
         $watiTimestamp = isset($data['timestamp']) ? Carbon::createFromTimestamp($data['timestamp']) : now();
