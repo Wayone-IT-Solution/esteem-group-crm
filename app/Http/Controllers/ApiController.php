@@ -17,7 +17,7 @@ class ApiController extends Controller
             'company_id' => 7,
             'source' => 'fb',
             'name' => $request->name,
-            'mobile_number' => $request->mobile,
+            'mobile_number' => $request->mobile_number,
             'email' =>  $request->email,
             'state' => $request->state,
             'earning_criteria' => $request->earning_criteria,
