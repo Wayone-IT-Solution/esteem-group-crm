@@ -13,6 +13,7 @@ class ApiController extends Controller
 {
     public function webhook(Request $request)
     {
+        
         Log::info('Webhook hit: /v1/webhook', ['payload' => $request->all()]);
 
         $data = [
