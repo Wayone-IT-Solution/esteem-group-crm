@@ -26,5 +26,7 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::get('loan/{id}/comments', [LeadController::class, 'loanComments']);
     Route::get('loan/{loan}/edit', [LeadController::class, 'editLeads'])->name('admin.leads.finance.edit');
     Route::put('/loan-applications/{id}', [LeadController::class, 'updateLoan'])->name('loan.update');
+    Route::post('/filter-enquires', [LeadController::class, 'filterEnquires'])->name('admin.leads.filterEnquires');
+
 
 });
