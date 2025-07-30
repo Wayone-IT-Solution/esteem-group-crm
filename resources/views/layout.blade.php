@@ -17,9 +17,11 @@
     <!-- Google font-->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/themify-icons/themify-icons/css/themify.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('assets/css/vendors/themify-icons/themify-icons/css/themify.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/apexcharts/dist/apexcharts.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/simple-datatables/dist/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/scrollbar.css') }}">
@@ -99,9 +101,11 @@
     <main class="page-wrapper compact-wrapper" id="pageWrapper">
         <header class="page-header row">
             <div class="logo-wrapper d-flex align-items-center col-auto">
-                <a href="{{url('admin')}}">
-                    <img class="for-light" src="{{ asset('assets/images/logo.png') }}" style="width: 110px;" alt="logo">
-                    <img class="for-dark" src="{{ asset('assets/images/logo.png') }}" style="width: 110px;" alt="logo">
+                <a href="{{ url('admin') }}">
+                    <img class="for-light" src="{{ asset('assets/images/logo.png') }}" style="width: 110px;"
+                        alt="logo">
+                    <img class="for-dark" src="{{ asset('assets/images/logo.png') }}" style="width: 110px;"
+                        alt="logo">
                 </a>
                 <a class="close-btn" href="javascript:void(0)">
                     <div class="toggle-sidebar">
@@ -117,7 +121,8 @@
                     <ul class="header-right">
                         <li class="profile-dropdown custom-dropdown" style="position: relative;">
                             <div class="d-flex align-items-center" style="cursor: pointer;">
-                                <img style="width: 100px; height: 60px;" src="{{ asset('assets/images/logo.png') }}" alt="">
+                                <img style="width: 100px; height: 60px;" src="{{ asset('assets/images/logo.png') }}"
+                                    alt="">
                                 <div class="flex-grow-1">
                                     <h5>{{ Auth::user()->name ?? '' }}</h5>
                                     <span>{{ Auth::user()->role ?? '' }}</span>
@@ -179,60 +184,61 @@
                             </a>
                         </li>
                         @role('admin')
-                        <hr>
+                            <hr>
 
 
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.users.all') }}">
-                                <span>
-                                    <i class="fa-solid fa-users-rectangle me-2"></i>
-                                    All Users
-                                </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.companies') }}">
-                                <span>
-                                    <i class="fa-solid fa-building-columns me-2"></i>
-                                    Companies
-                                </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.department') }}">
-                                <span>
-                                    <i class="fa-solid fa-building-user me-2"></i> Departments
-                                </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.roles') }}">
-                                <span>
-                                    <i class="fa-solid fa-user-shield me-2"></i>
-                                    Role Management
-                                </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.status.index') }}">
-                                <span>
-                                    <i class="fa-solid fa-toggle-on me-2"></i>
-                                    Status Management
-                                </span>
-                            </a>
-                        </li>
-                        <li class="sidebar-list">
-                            <a class="sidebar-link" href="{{ route('admin.request.all') }}">
-                                <span>
-                                    <i class=" fa-solid fa-paper-plane me-2"></i>
-                                    Request Management
-                                </span>
-                            </a>
-                        </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.users.all') }}">
+                                    <span>
+                                        <i class="fa-solid fa-users-rectangle me-2"></i>
+                                        All Users
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.companies') }}">
+                                    <span>
+                                        <i class="fa-solid fa-building-columns me-2"></i>
+                                        Companies
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.department') }}">
+                                    <span>
+                                        <i class="fa-solid fa-building-user me-2"></i> Departments
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.roles') }}">
+                                    <span>
+                                        <i class="fa-solid fa-user-shield me-2"></i>
+                                        Role Management
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.status.index') }}">
+                                    <span>
+                                        <i class="fa-solid fa-toggle-on me-2"></i>
+                                        Status Management
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="sidebar-list">
+                                <a class="sidebar-link" href="{{ route('admin.request.all') }}">
+                                    <span>
+                                        <i class=" fa-solid fa-paper-plane me-2"></i>
+                                        Request Management
+                                    </span>
+                                </a>
+                            </li>
                         @endrole()
                         <hr>
                         <li class="sidebar-list">
-                            <a class="sidebar-link d-flex align-items-center justify-content-between" href="javascript:void(0)" data-toggle="submenu">
+                            <a class="sidebar-link d-flex align-items-center justify-content-between"
+                                href="javascript:void(0)" data-toggle="submenu">
                                 <span class="d-flex align-items-center text-nowrap">
                                     <i class="fa-solid fa-users-rectangle me-2"></i>
                                     Enquiries
@@ -241,97 +247,137 @@
                             </a>
 
                             @php
-                            use App\Models\Company;
-                            use App\Models\LeadModel;
-                            use Illuminate\Support\Facades\Auth;
+                                use App\Models\Company;
+                                use App\Models\LeadModel;
+                                use Illuminate\Support\Facades\Auth;
 
-                            $user = Auth::user();
-                            $isAdmin = $user->role === 'admin';
-                            $userId = $user->id;
+                                $user = Auth::user();
+                                $isAdmin = $user->role === 'admin';
+                                $userId = $user->id;
 
-                            $companies = Company::with('status')->get();
+                                $companies = Company::with('status')->get();
 
                             @endphp
 
-                           <ul class="sidebar-submenu">
-    @foreach ($companies as $company)
-        @php
-            $companyName = $company->name ?? '';
-            $words = explode(' ', $companyName);
-            $displayName = count($words) > 3 ? implode(' ', array_slice($words, 0, 3)) . '...' : $companyName;
-        @endphp
+                            <ul class="sidebar-submenu">
+                                @foreach ($companies as $company)
+                                    @php
+                                        $companyName = $company->name ?? '';
+                                        $words = explode(' ', $companyName);
+                                        $displayName =
+                                            count($words) > 3
+                                                ? implode(' ', array_slice($words, 0, 3)) . '...'
+                                                : $companyName;
+                                    @endphp
 
-        <li class="sidebar-list">
-            <a class="sidebar-link" href="javascript:void(0)">
-                <i class="fa-solid fa-building-columns me-2"></i>
-                <span>{{ $displayName }}</span>
-            </a>
+                                    <li class="sidebar-list">
+                                        <a class="sidebar-link" href="javascript:void(0)">
+                                            <i class="fa-solid fa-building-columns me-2"></i>
+                                            <span>{{ $displayName }}</span>
+                                        </a>
 
-            <ul class="sidebar-submenu" style="display: none;">
-                @if (!empty($company->status))
-                    @foreach ($company->status as $status)
-                        @php
-                            $leadCount = 0;
+                                        <ul class="sidebar-submenu" style="display: none;">
+                                            {{-- Today Enquiries --}}
+                                            <li>
+                                                @php
+                                                    $todayQuery = \App\Models\LeadModel::where(
+                                                        'company_id',
+                                                        $company->id,
+                                                    )->whereDate('created_at', now());
 
-                            if ($status->status === 'Lead') {
-                                $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
-                                $excluded = ['deleted_at', 'disapproval_reason'];
+                                                    if (!$isAdmin) {
+                                                        $todayQuery->whereHas('assinges', function ($q) use ($userId) {
+                                                            $q->where('user_id', $userId);
+                                                        });
+                                                    }
 
-                                $leadCount = DB::connection('mysql2')->table('loan_applications')
-                                    ->where(function ($query) use ($columns, $excluded) {
-                                        foreach ($columns as $column) {
-                                            if (!in_array($column, $excluded)) {
-                                                $query->orWhereNull($column);
-                                            }
-                                        }
-                                    })
-                                    ->count();
+                                                    $todayCount = $todayQuery->count();
+                                                @endphp
 
-                            } elseif ($status->status === 'Qualified lead') {
-                                $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
-                                $excluded = ['deleted_at', 'disapproval_reason'];
+                                                <a href="{{ url('admin/leads/company/today/' . $company->id) }}"
+                                                    style="font-size: 14px; width: 200px;">
+                                                    <i class="fa-solid fa-calendar-day me-2"></i>
+                                                    Today Enquiries
+                                                    <span class="badge bg-info ms-2">{{ $todayCount }}</span>
+                                                </a>
+                                            </li>
+                                            @if (!empty($company->status))
+                                                @foreach ($company->status as $status)
+                                                    @php
+                                                        $leadCount = 0;
 
-                                $leadCount = DB::connection('mysql2')->table('loan_applications')
-                                    ->where('lead_status', 'Qualified Lead')
-                                    ->where(function ($query) use ($columns, $excluded) {
-                                        foreach ($columns as $column) {
-                                            if (!in_array($column, $excluded)) {
-                                                $query->whereNotNull($column);
-                                            }
-                                        }
-                                    })
-                                    ->count();
+                                                        if ($status->status === 'Lead') {
+                                                            $columns = \Illuminate\Support\Facades\Schema::connection(
+                                                                'mysql2',
+                                                            )->getColumnListing('loan_applications');
+                                                            $excluded = ['deleted_at', 'disapproval_reason'];
 
-                            } elseif ($status->status === 'Loan') {
-                                $leadCount = DB::connection('mysql2')->table('loan_queries')->count();
+                                                            $leadCount = DB::connection('mysql2')
+                                                                ->table('loan_applications')
+                                                                ->where(function ($query) use ($columns, $excluded) {
+                                                                    foreach ($columns as $column) {
+                                                                        if (!in_array($column, $excluded)) {
+                                                                            $query->orWhereNull($column);
+                                                                        }
+                                                                    }
+                                                                })
+                                                                ->count();
+                                                        } elseif ($status->status === 'Qualified lead') {
+                                                            $columns = \Illuminate\Support\Facades\Schema::connection(
+                                                                'mysql2',
+                                                            )->getColumnListing('loan_applications');
+                                                            $excluded = ['deleted_at', 'disapproval_reason'];
 
-                            } else {
-                                $query = \App\Models\LeadModel::where('company_id', $company->id)
-                                    ->where('status', $status->status);
+                                                            $leadCount = DB::connection('mysql2')
+                                                                ->table('loan_applications')
+                                                                ->where('status', 'Qualified Lead')
+                                                                ->where(function ($query) use ($columns, $excluded) {
+                                                                    foreach ($columns as $column) {
+                                                                        if (!in_array($column, $excluded)) {
+                                                                            $query->whereNotNull($column);
+                                                                        }
+                                                                    }
+                                                                })
+                                                                ->count();
+                                                        } elseif ($status->status === 'Loan') {
+                                                            $leadCount = DB::connection('mysql2')
+                                                                ->table('loan_queries')
+                                                                ->count();
+                                                        } else {
+                                                            $query = \App\Models\LeadModel::where(
+                                                                'company_id',
+                                                                $company->id,
+                                                            )->where('status', $status->status);
 
-                                if (!$isAdmin) {
-                                    $query->whereHas('assinges', function ($q) use ($userId) {
-                                        $q->where('user_id', $userId);
-                                    });
-                                }
+                                                            if (!$isAdmin) {
+                                                                $query->whereHas('assinges', function ($q) use (
+                                                                    $userId,
+                                                                ) {
+                                                                    $q->where('user_id', $userId);
+                                                                });
+                                                            }
 
-                                $leadCount = $query->count();
-                            }
-                        @endphp
+                                                            $leadCount = $query->count();
+                                                        }
 
-                        <li>
-                            <a href="{{ url('admin/leads/'.$company->id.'/'.$status->status) }}" style="font-size: 14px;width: 200px;">
-                                <i class="fa-solid fa-toggle-on me-2"></i>
-                                {{ $status->status ?? '' }}
-                                <span class="badge bg-warning ms-2">{{ $leadCount }}</span>
-                            </a>
-                        </li>
-                    @endforeach
-                @endif
-            </ul>
-        </li>
-    @endforeach
-</ul>
+                                                    @endphp
+
+
+                                                    <li>
+                                                        <a href="{{ url('admin/leads/' . $company->id . '/' . $status->status) }}"
+                                                            style="font-size: 14px;width: 200px;">
+                                                            <i class="fa-solid fa-toggle-on me-2"></i>
+                                                            {{ $status->status ?? '' }}
+                                                            <span
+                                                                class="badge bg-warning ms-2">{{ $leadCount }}</span>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            @endif
+                                        </ul>
+                                    </li>
+                                @endforeach
+                            </ul>
 
                         </li>
                         <hr>
@@ -396,12 +442,16 @@
                     }
 
                     // Close other submenus at the same level
-                    const parentList = this.closest('.sidebar-submenu') || this.closest('.sidebar-menu');
-                    const siblingSubmenus = parentList.querySelectorAll(':scope > li > .sidebar-submenu.show, :scope > .sidebar-list > .sidebar-submenu.show');
+                    const parentList = this.closest('.sidebar-submenu') || this.closest(
+                        '.sidebar-menu');
+                    const siblingSubmenus = parentList.querySelectorAll(
+                        ':scope > li > .sidebar-submenu.show, :scope > .sidebar-list > .sidebar-submenu.show'
+                        );
                     siblingSubmenus.forEach(sibling => {
                         if (sibling !== submenu) {
                             sibling.classList.remove('show');
-                            const siblingIcon = sibling.previousElementSibling.querySelector('.toggle-icon');
+                            const siblingIcon = sibling.previousElementSibling
+                                .querySelector('.toggle-icon');
                             if (siblingIcon) {
                                 siblingIcon.classList.remove('rotate');
                             }

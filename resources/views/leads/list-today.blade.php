@@ -119,7 +119,7 @@
         <div class="container-fluid">
             <div class="row align-items-center mb-4">
                 <div class="col-md-3">
-                    <h4 class="mb-0">All Enquiries</h4>
+                    <h4 class="mb-0">Today Enquiries</h4>
                 </div>
 
                 <div class="col-md-9 text-md-end mt-3 mt-md-0">
