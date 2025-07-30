@@ -761,62 +761,66 @@ class LeadController extends Controller
         }
     }
 
-    // public function todayleads(Request $request)
-    // {
-    //     $query = LeadModel::with(['company', 'user', 'assinges'])
-    //         ->whereDate('created_at', now());
-
-    //     // if ($request->filled('company_id')) {
-    //     $query->where('company_id', $request->company_id)->whereDate('created_at', now());
-    //     // }
-
-    //     if ($request->filled('user_id')) {
-    //         $query->where('user_id', $request->user_id);
-    //     }
-
-    //     $user = auth()->user();
-
-    //     if ($user->role !== 'admin') {
-    //         $query->whereHas('assinges', function ($q) use ($user) {
-    //             $q->where('user_id', $user->id);
-    //         });
-    //     }
-
-    //     $leads     = $query->orderBy("created_at", "desc")->paginate(40);
-    //     $companies = Company::all();
-
-    //     return view('leads.list-today', compact('leads', 'companies'));
-    // }
-
-
     public function todayleads($company_id, Request $request)
+    {
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->whereDate('created_at', now());
+
+        // if ($request->filled('company_id')) {
+        $query->where('company_id', $request->company_id)->whereDate('created_at', now());
+        // }
+
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        $user = auth()->user();
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+        $companies = Company::all();
+
+        return view('leads.list-today', compact('leads', 'companies'));
+    }
+
+   public function getcompanyleads($company_id, Request $request)
 {
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-        ->whereDate('created_at', now());
+    $user = auth()->user();
 
-    // if ($request->filled('company_id')) {
-    $query->where('company_id', $request->company_id)->whereDate('created_at', now());
-    // }
+    $excluded = ['deleted_at', 'disapproval_reason']; // Define excluded fields
 
+    // Base query from mysql2
+    $query = DB::connection('mysql2')->table('loan_applications')
+        ->whereDate('created_at', now())
+        ->where(function ($q) use ($excluded) {
+            $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+
+            foreach ($columns as $column) {
+                if (!in_array($column, $excluded)) {
+                    $q->orWhereNull($column);
+                }
+            }
+        });
+
+    // Optional user filter
     if ($request->filled('user_id')) {
         $query->where('user_id', $request->user_id);
     }
 
-    $user = auth()->user();
-
+    // Restrict to logged-in user if not admin
     if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
+        $query->where('user_id', $user->id);
     }
 
-    $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+    $leads = $query->orderBy("id", "desc")->paginate(40);
     $companies = Company::all();
 
-    return view('leads.list-today', compact('leads', 'companies'));
+    return view('leads.leads-today', compact('leads', 'companies'));
 }
-
-
-   
 
 }

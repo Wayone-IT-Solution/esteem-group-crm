@@ -26,8 +26,8 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::get('loan/{loan}/edit', [LeadController::class, 'editLeads'])->name('admin.leads.finance.edit');
     Route::put('/loan-applications/{id}', [LeadController::class, 'updateLoan'])->name('loan.update');
     Route::post('/filter-enquires', [LeadController::class, 'filterEnquires'])->name('admin.leads.filterEnquires');
-    Route::get('/company/today/{company_id}', [LeadController::class, 'todayleads']);
-    // Route::get('/{company_id}/today', [LeadController::class, 'getcompanyleads']);
+    Route::get('/enquiry/today/{company_id}', [LeadController::class, 'todayleads']);
+    Route::get('/company/today/{company_id}', [LeadController::class, 'getcompanyleads']);
 
 
 

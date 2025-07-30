@@ -273,304 +273,335 @@
 </style>
 
 @section('content')
-<div class="dashboard-wrapper">
-    <div class="container-fluid">
-        <div class="dashboard-header">
-            <h3 class="text-white">Hello Esteemgroup!</h3>
-            <p class="lead">Gain insights into your business performance with real-time data.</p>
-        </div>
-        <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-    </div>
-
-    <div class="container-fluid ecommerce-dashboard">
-        <div class="row">
-            @if(!empty($companies))
-            @foreach ($companies as $list)
-            @php
-            $statusLabels = [];
-            $statusCounts = [];
-            $colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
-            @endphp
-            <div class="col-12 col-md-12 mt-2">
-                <div class="branch-card">
-                    <div class="branch-card-header">
-                        <h3 class="branch-title">
-                            <img src="{{ asset($list->logo) }}" alt="Branch" class="branch-logo">
-                            {{ $list->name ?? '' }}
-                        </h3>
-                    </div>
-
-                    <div class="branch-stats">
-                        @role('admin')
-                        <div class="stat-card">
-                            <div class="stat-icon primary">
-                                <i class="ri-user-line"></i>
-                            </div>
-                            <div class="stat-value">
-                                <a href="{{ url('admin/users/company/'.$list->id) }}">{{ $list->users_count }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/users/company/'.$list->id) }}">Total Users</a>
-                            </div>
-                        </div>
-                        @endrole()
-                        <div class="stat-card">
-                            <div class="stat-icon info">
-                                <i class="ri-file-list-line"></i>
-                            </div>
-                            <div class="stat-value">
-                                <a href="{{ url('admin/leads/company/all/'.$list->id) }}">{{ $list->leads_count }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/leads/company/all/'.$list->id) }}">Total Leads</a>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon success">
-                                <i class="ri-file-list-line"></i>
-                            </div>
-                            <div class="stat-value">
-                                <a href="{{ url('admin/leads/company/today/'.$list->id) }}">{{ $list->today_leads_count }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/leads/company/today/'.$list->id) }}">Today's Leads</a>
-                            </div>
-
-                        </div>
-                        @if($list->name =='Esteem Finance')
-                        <div class="stat-card">
-                            <div class="stat-icon success">
-                                <i class="ri-file-list-line"></i>
-                            </div>
-                            @php
-                            $leadcount = DB::connection('mysql2')
-                            ->table('loan_applications')
-                            ->whereDate('created_at',now())->count();
-                            @endphp
-                            <div class="stat-value">
-                                <a href="{{ url('admin/leads/'.$list->id.'/Lead/today') }}">{{ $leadcount ?? 0 }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/leads/'.$list->id.'/Lead/today') }}">Today Apply Loan</a>
-                            </div>
-
-                        </div>
-                        @endif()
-                        <!-- <div class="stat-card">
-                            <div class="stat-icon warning">
-                                <i class="ri-time-line"></i>
-                            </div>
-                            <div class="stat-value">
-                                <a href="{{ url('admin/leads/company/pending/'.$list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/leads/company/pending/'.$list->id) }}">Pending Leads</a>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon danger">
-                                <i class="ri-close-circle-line"></i>
-                            </div>
-                            <div class="stat-value">
-                                <a href="{{ url('admin/leads/company/rejected/'.$list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
-                            </div>
-                            <div class="stat-label">
-                                <a href="{{ url('admin/leads/company/rejected/'.$list->id) }}">Rejected Leads</a>
-                            </div>
-                        </div> -->
-                    </div>
-
-                   <div class="status-section">
-    <h4 class="status-title mb-3">
-        <i class="ri-bar-chart-line"></i> Lead Status Overview
-    </h4>
-    <div class="row g-3">
-        @if (!empty($list->status))
-            @foreach ($list->status as $status)
-                @php
-                    $leadcount = 0;
-
-                    if ($status->status === 'Lead') {
-                        // Count incomplete leads (any null field except excluded ones)
-                        $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
-                        $excluded = ['deleted_at', 'disapproval_reason'];
-
-                        $leadcount = DB::connection('mysql2')->table('loan_applications')
-                            ->where(function ($query) use ($columns, $excluded) {
-                                foreach ($columns as $column) {
-                                    if (!in_array($column, $excluded)) {
-                                        $query->orWhereNull($column);
-                                    }
-                                }
-                            })
-                            ->count();
-
-
-                    } elseif ($status->status === 'Qualified lead') {
-                        // Count fully filled leads (all fields not null except excluded ones)
-                        $columns = \Illuminate\Support\Facades\Schema::connection('mysql2')->getColumnListing('loan_applications');
-                        $excluded = ['deleted_at', 'disapproval_reason'];
-
-                        $leadcount = DB::connection('mysql2')->table('loan_applications')
-                            ->where(function ($query) use ($columns, $excluded) {
-                                foreach ($columns as $column) {
-                                    if (!in_array($column, $excluded)) {
-                                        $query->whereNotNull($column);
-                                    }
-                                }
-                            })
-                            ->count();
-
-                    } else {
-                        // Default lead_models table count
-                        if (auth()->user()->role === 'admin') {
-                            $leadcount = DB::table('lead_models')
-                                ->where('company_id', $list->id)
-                                ->where('status', $status->status)
-                                ->count();
-                        } else {
-                            $leadcount = DB::table('lead_models')
-                                ->join('assign_leads', 'assign_leads.lead_id', '=', 'lead_models.id')
-                                ->where('lead_models.company_id', $list->id)
-                                ->where('lead_models.status', $status->status)
-                                ->where('assign_leads.user_id', auth()->id())
-                                ->count();
-                        }
-                    }
-                @endphp
-
-                <div class="col-6 col-md-3">
-                    <div class="status-item">
-                        <span class="status-label">{{ $status->status ?? '' }}</span>
-                        <span class="status-value">{{ $leadcount }}</span>
-                        <small class="status-today">
-                            <a href="{{ url('admin/leads/' . $list->id . '/' . $status->status) }}">View</a>
-                        </small>
-                    </div>
-                </div>
-            @endforeach
-        @endif
-    </div>
-</div>
-
-
-
-                    @if(!empty($statusLabels))
-                    <div class="charts-container">
-                        <div>
-                            <canvas id="bar-chart-{{ $list->id }}" height="150"></canvas>
-                        </div>
-                        <div>
-                            <canvas id="doughnut-chart-{{ $list->id }}" height="150"></canvas>
-                        </div>
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Bar Chart
-                                const barCtx = document.getElementById('bar-chart-{{ $list->id }}').getContext('2d');
-                                new Chart(barCtx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: @json($statusLabels),
-                                        datasets: [{
-                                            label: 'Leads by Status',
-                                            data: @json($statusCounts),
-                                            backgroundColor: @json($colors),
-                                            borderRadius: 8,
-                                            borderWidth: 1,
-                                            borderColor: '#ffffff'
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            },
-                                            title: {
-                                                display: true,
-                                                text: 'Lead Status Distribution',
-                                                color: '#1e293b',
-                                                font: {
-                                                    size: 16,
-                                                    weight: 'bold'
-                                                }
-                                            }
-                                        },
-                                        scales: {
-                                            y: {
-                                                beginAtZero: true,
-                                                ticks: {
-                                                    stepSize: 1
-                                                },
-                                                grid: {
-                                                    color: '#e5e7eb'
-                                                }
-                                            },
-                                            x: {
-                                                grid: {
-                                                    display: false
-                                                }
-                                            }
-                                        },
-                                        animation: {
-                                            duration: 1000,
-                                            easing: 'easeOutQuart'
-                                        }
-                                    }
-                                });
-
-                                // Doughnut Chart
-                                const doughnutCtx = document.getElementById('doughnut-chart-{{ $list->id }}').getContext('2d');
-                                new Chart(doughnutCtx, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: @json($statusLabels),
-                                        datasets: [{
-                                            data: @json($statusCounts),
-                                            backgroundColor: @json($colors),
-                                            borderWidth: 2,
-                                            borderColor: '#ffffff'
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                position: 'bottom',
-                                                labels: {
-                                                    font: {
-                                                        size: 12
-                                                    },
-                                                    color: '#1e293b'
-                                                }
-                                            },
-                                            title: {
-                                                display: true,
-                                                text: 'Lead Status Breakdown',
-                                                color: '#1e293b',
-                                                font: {
-                                                    size: 16,
-                                                    weight: 'bold'
-                                                }
-                                            }
-                                        },
-                                        animation: {
-                                            duration: 1000,
-                                            easing: 'easeOutQuart'
-                                        }
-                                    }
-                                });
-                            });
-                        </script>
-                    </div>
-                    @endif
-                </div>
+    <div class="dashboard-wrapper">
+        <div class="container-fluid">
+            <div class="dashboard-header">
+                <h3 class="text-white">Hello Esteemgroup!</h3>
+                <p class="lead">Gain insights into your business performance with real-time data.</p>
             </div>
-            @endforeach
-            @endif
+            <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+        </div>
+
+        <div class="container-fluid ecommerce-dashboard">
+            <div class="row">
+                @if (!empty($companies))
+                    @foreach ($companies as $list)
+                        @php
+                            $statusLabels = [];
+                            $statusCounts = [];
+                            $colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
+                        @endphp
+                        <div class="col-12 col-md-12 mt-2">
+                            <div class="branch-card">
+                                <div class="branch-card-header">
+                                    <h3 class="branch-title">
+                                        <img src="{{ asset($list->logo) }}" alt="Branch" class="branch-logo">
+                                        {{ $list->name ?? '' }}
+                                    </h3>
+                                </div>
+
+                                <div class="branch-stats">
+                                    @role('admin')
+                                        <div class="stat-card">
+                                            <div class="stat-icon primary">
+                                                <i class="ri-user-line"></i>
+                                            </div>
+                                            <div class="stat-value">
+                                                <a
+                                                    href="{{ url('admin/users/company/' . $list->id) }}">{{ $list->users_count }}</a>
+                                            </div>
+                                            <div class="stat-label">
+                                                <a href="{{ url('admin/users/company/' . $list->id) }}">Total Users</a>
+                                            </div>
+                                        </div>
+                                    @endrole()
+                                    <div class="stat-card">
+                                        <div class="stat-icon primary">
+                                            <i class="ri-file-list-line"></i>
+                                        </div>
+                                        <div class="stat-value">
+                                            <a
+                                                href="{{ url('admin/leads/company/all/' . $list->id) }}">{{ $list->leads_count }}</a>
+                                        </div>
+                                        <div class="stat-label">
+                                            <a href="{{ url('admin/leads/company/all/' . $list->id) }}">Total Leads</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="stat-card">
+                                        <div class="stat-icon success">
+                                            <i class="ri-file-list-line"></i>
+                                        </div>
+                                        <div class="stat-value">
+                                            <a
+                                                href="{{ url('admin/leads/enquiry/today/' . $list->id) }}">{{ $list->today_leads_count }}</a>
+                                        </div>
+                                        <div class="stat-label">
+                                            <a href="{{ url('admin/leads/enquiry/today/' . $list->id) }}">Today's
+                                                Enquiries</a>
+                                        </div>
+
+                                    </div>
+
+                                    @if ($list->name == 'Esteem Finance')
+                                        <div class="stat-card">
+                                            <div class="stat-icon primary">
+                                                <i class="ri-file-list-line"></i>
+                                            </div>
+                                            <div class="stat-value">
+                                                <a href="{{ url('admin/leads/company/today/' . $list->id) }}">{{ $todayEnquiriesCount }}</a>
+                                            </div>
+                                            <div class="stat-label">
+                                                <a href="{{ url('admin/leads/company/today/' . $list->id) }}">Today's Leads
+                                                </a>
+                                            </div>
+
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon success">
+                                                <i class="ri-file-list-line"></i>
+                                            </div>
+                                            @php
+                                                $leadcount = DB::connection('mysql2')
+                                                    ->table('loan_applications')
+                                                    ->whereDate('created_at', now())
+                                                    ->count();
+                                            @endphp
+                                            <div class="stat-value">
+                                                <a
+                                                    href="{{ url('admin/leads/' . $list->id . '/Lead/today') }}">{{ $leadcount ?? 0 }}</a>
+                                            </div>
+                                            <div class="stat-label">
+                                                <a href="{{ url('admin/leads/' . $list->id . '/Lead/today') }}">Today Apply
+                                                    Loan</a>
+                                            </div>
+
+                                        </div>
+                                    @endif()
+                                    <!-- <div class="stat-card">
+                                    <div class="stat-icon warning">
+                                        <i class="ri-time-line"></i>
+                                    </div>
+                                    <div class="stat-value">
+                                        <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
+                                    </div>
+                                    <div class="stat-label">
+                                        <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">Pending Leads</a>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon danger">
+                                        <i class="ri-close-circle-line"></i>
+                                    </div>
+                                    <div class="stat-value">
+                                        <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
+                                    </div>
+                                    <div class="stat-label">
+                                        <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">Rejected Leads</a>
+                                    </div>
+                                </div> -->
+                                </div>
+
+                                <div class="status-section">
+                                    <h4 class="status-title mb-3">
+                                        <i class="ri-bar-chart-line"></i> Lead Status Overview
+                                    </h4>
+                                    <div class="row g-3">
+                                        @if (!empty($list->status))
+                                            @foreach ($list->status as $status)
+                                                @php
+                                                    $leadcount = 0;
+
+                                                    if ($status->status === 'Lead') {
+                                                        // Count incomplete leads (any null field except excluded ones)
+                                                        $columns = \Illuminate\Support\Facades\Schema::connection(
+                                                            'mysql2',
+                                                        )->getColumnListing('loan_applications');
+                                                        $excluded = ['deleted_at', 'disapproval_reason'];
+
+                                                        $leadcount = DB::connection('mysql2')
+                                                            ->table('loan_applications')
+                                                            ->where(function ($query) use ($columns, $excluded) {
+                                                                foreach ($columns as $column) {
+                                                                    if (!in_array($column, $excluded)) {
+                                                                        $query->orWhereNull($column);
+                                                                    }
+                                                                }
+                                                            })
+                                                            ->count();
+                                                    } elseif ($status->status === 'Qualified lead') {
+                                                        // Count fully filled leads (all fields not null except excluded ones)
+                                                        $columns = \Illuminate\Support\Facades\Schema::connection(
+                                                            'mysql2',
+                                                        )->getColumnListing('loan_applications');
+                                                        $excluded = ['deleted_at', 'disapproval_reason'];
+
+                                                        $leadcount = DB::connection('mysql2')
+                                                            ->table('loan_applications')
+                                                            ->where(function ($query) use ($columns, $excluded) {
+                                                                foreach ($columns as $column) {
+                                                                    if (!in_array($column, $excluded)) {
+                                                                        $query->whereNotNull($column);
+                                                                    }
+                                                                }
+                                                            })
+                                                            ->count();
+                                                    } else {
+                                                        // Default lead_models table count
+                                                        if (auth()->user()->role === 'admin') {
+                                                            $leadcount = DB::table('lead_models')
+                                                                ->where('company_id', $list->id)
+                                                                ->where('status', $status->status)
+                                                                ->count();
+                                                        } else {
+                                                            $leadcount = DB::table('lead_models')
+                                                                ->join(
+                                                                    'assign_leads',
+                                                                    'assign_leads.lead_id',
+                                                                    '=',
+                                                                    'lead_models.id',
+                                                                )
+                                                                ->where('lead_models.company_id', $list->id)
+                                                                ->where('lead_models.status', $status->status)
+                                                                ->where('assign_leads.user_id', auth()->id())
+                                                                ->count();
+                                                        }
+                                                    }
+                                                @endphp
+
+                                                <div class="col-6 col-md-3">
+                                                    <div class="status-item">
+                                                        <span class="status-label">{{ $status->status ?? '' }}</span>
+                                                        <span class="status-value">{{ $leadcount }}</span>
+                                                        <small class="status-today">
+                                                            <a
+                                                                href="{{ url('admin/leads/' . $list->id . '/' . $status->status) }}">View</a>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                    </div>
+                                </div>
+
+
+
+                                @if (!empty($statusLabels))
+                                    <div class="charts-container">
+                                        <div>
+                                            <canvas id="bar-chart-{{ $list->id }}" height="150"></canvas>
+                                        </div>
+                                        <div>
+                                            <canvas id="doughnut-chart-{{ $list->id }}" height="150"></canvas>
+                                        </div>
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                // Bar Chart
+                                                const barCtx = document.getElementById('bar-chart-{{ $list->id }}').getContext('2d');
+                                                new Chart(barCtx, {
+                                                    type: 'bar',
+                                                    data: {
+                                                        labels: @json($statusLabels),
+                                                        datasets: [{
+                                                            label: 'Leads by Status',
+                                                            data: @json($statusCounts),
+                                                            backgroundColor: @json($colors),
+                                                            borderRadius: 8,
+                                                            borderWidth: 1,
+                                                            borderColor: '#ffffff'
+                                                        }]
+                                                    },
+                                                    options: {
+                                                        responsive: true,
+                                                        plugins: {
+                                                            legend: {
+                                                                display: false
+                                                            },
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Lead Status Distribution',
+                                                                color: '#1e293b',
+                                                                font: {
+                                                                    size: 16,
+                                                                    weight: 'bold'
+                                                                }
+                                                            }
+                                                        },
+                                                        scales: {
+                                                            y: {
+                                                                beginAtZero: true,
+                                                                ticks: {
+                                                                    stepSize: 1
+                                                                },
+                                                                grid: {
+                                                                    color: '#e5e7eb'
+                                                                }
+                                                            },
+                                                            x: {
+                                                                grid: {
+                                                                    display: false
+                                                                }
+                                                            }
+                                                        },
+                                                        animation: {
+                                                            duration: 1000,
+                                                            easing: 'easeOutQuart'
+                                                        }
+                                                    }
+                                                });
+
+                                                // Doughnut Chart
+                                                const doughnutCtx = document.getElementById('doughnut-chart-{{ $list->id }}').getContext('2d');
+                                                new Chart(doughnutCtx, {
+                                                    type: 'doughnut',
+                                                    data: {
+                                                        labels: @json($statusLabels),
+                                                        datasets: [{
+                                                            data: @json($statusCounts),
+                                                            backgroundColor: @json($colors),
+                                                            borderWidth: 2,
+                                                            borderColor: '#ffffff'
+                                                        }]
+                                                    },
+                                                    options: {
+                                                        responsive: true,
+                                                        plugins: {
+                                                            legend: {
+                                                                position: 'bottom',
+                                                                labels: {
+                                                                    font: {
+                                                                        size: 12
+                                                                    },
+                                                                    color: '#1e293b'
+                                                                }
+                                                            },
+                                                            title: {
+                                                                display: true,
+                                                                text: 'Lead Status Breakdown',
+                                                                color: '#1e293b',
+                                                                font: {
+                                                                    size: 16,
+                                                                    weight: 'bold'
+                                                                }
+                                                            }
+                                                        },
+                                                        animation: {
+                                                            duration: 1000,
+                                                            easing: 'easeOutQuart'
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                        </script>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
         </div>
     </div>
-</div>
 @endsection
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
