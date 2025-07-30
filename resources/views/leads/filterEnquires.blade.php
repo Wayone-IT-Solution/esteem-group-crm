@@ -10,7 +10,7 @@
                         <th>Description</th>
                         <th>Source</th>
                         <th>Status</th>
-                        <th>Creatd At</th>
+                        <th>Created At</th>
                         <th>Assigned To</th>
                         <th>Actions</th>
                     </tr>

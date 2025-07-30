@@ -135,33 +135,6 @@ class LeadController extends Controller
         return view('leads.list', compact('leads', 'companies'));
     }
 
-    public function todayleads(Request $request)
-    {
-        $query = LeadModel::with(['company', 'user', 'assinges'])
-            ->whereDate('created_at', now());
-
-        // if ($request->filled('company_id')) {
-        $query->where('company_id', $request->company_id)->whereDate('created_at', now());
-        // }
-
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
-        }
-
-        $user = auth()->user();
-
-        if ($user->role !== 'admin') {
-            $query->whereHas('assinges', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
-            });
-        }
-
-        $leads     = $query->orderBy("created_at", "desc")->paginate(40);
-        $companies = Company::all();
-
-        return view('leads.list-today', compact('leads', 'companies'));
-    }
-
     public function getallcompanyleads(Request $request)
     {
 
@@ -337,55 +310,54 @@ class LeadController extends Controller
 
 //     return response()->json(['code' => 200, 'table' => $table]);
 // }
-public function filterEnquires(Request $request)
-{
-    $query = LeadModel::with(['company', 'user', 'assinges']);
+    public function filterEnquires(Request $request)
+    {
+        $query = LeadModel::with(['company', 'user', 'assinges']);
 
-    if ($request->company_id) {
-        $query->where('company_id', $request->company_id);
+        if ($request->company_id) {
+            $query->where('company_id', $request->company_id);
+        }
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('mobile_number', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->from_date && $request->to_date) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$request->from_date, $request->to_date]);
+        }
+
+        // ✅ Show today's leads only if NO filters are applied
+        if (
+            ! $request->company_id &&
+            ! $request->search &&
+            ! $request->from_date &&
+            ! $request->to_date &&
+            ! $request->user_id
+        ) {
+            $query->whereDate('created_at', today());
+        }
+
+        if ($request->user_id) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // ✅ Restrict if not admin
+        $user = auth()->user();
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->latest()->get();
+
+        $table = view('leads.filterEnquires', compact('leads'))->render();
+
+        return response()->json(['code' => 200, 'table' => $table]);
     }
-
-    if ($request->search) {
-        $query->where(function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('mobile_number', 'like', '%' . $request->search . '%');
-        });
-    }
-
-    if ($request->from_date && $request->to_date) {
-        $query->whereBetween(DB::raw('DATE(created_at)'), [$request->from_date, $request->to_date]);
-    }
-
-    // ✅ Show today's leads only if NO filters are applied
-    if (
-        !$request->company_id &&
-        !$request->search &&
-        !$request->from_date &&
-        !$request->to_date &&
-        !$request->user_id
-    ) {
-        $query->whereDate('created_at', today());
-    }
-
-    if ($request->user_id) {
-        $query->where('user_id', $request->user_id);
-    }
-
-    // ✅ Restrict if not admin
-    $user = auth()->user();
-    if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
-    }
-
-    $leads = $query->latest()->get();
-
-    $table = view('leads.filterEnquires', compact('leads'))->render();
-
-    return response()->json(['code' => 200, 'table' => $table]);
-}
-
 
     public function edit(Request $request)
     {
@@ -788,5 +760,63 @@ public function filterEnquires(Request $request)
             return redirect()->back()->with('error', 'No changes made or update failed.');
         }
     }
+
+    // public function todayleads(Request $request)
+    // {
+    //     $query = LeadModel::with(['company', 'user', 'assinges'])
+    //         ->whereDate('created_at', now());
+
+    //     // if ($request->filled('company_id')) {
+    //     $query->where('company_id', $request->company_id)->whereDate('created_at', now());
+    //     // }
+
+    //     if ($request->filled('user_id')) {
+    //         $query->where('user_id', $request->user_id);
+    //     }
+
+    //     $user = auth()->user();
+
+    //     if ($user->role !== 'admin') {
+    //         $query->whereHas('assinges', function ($q) use ($user) {
+    //             $q->where('user_id', $user->id);
+    //         });
+    //     }
+
+    //     $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+    //     $companies = Company::all();
+
+    //     return view('leads.list-today', compact('leads', 'companies'));
+    // }
+
+
+    public function todayleads($company_id, Request $request)
+{
+    $query = LeadModel::with(['company', 'user', 'assinges'])
+        ->whereDate('created_at', now());
+
+    // if ($request->filled('company_id')) {
+    $query->where('company_id', $request->company_id)->whereDate('created_at', now());
+    // }
+
+    if ($request->filled('user_id')) {
+        $query->where('user_id', $request->user_id);
+    }
+
+    $user = auth()->user();
+
+    if ($user->role !== 'admin') {
+        $query->whereHas('assinges', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
+
+    $leads     = $query->orderBy("created_at", "desc")->paginate(40);
+    $companies = Company::all();
+
+    return view('leads.list-today', compact('leads', 'companies'));
+}
+
+
+   
 
 }
