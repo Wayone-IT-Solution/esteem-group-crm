@@ -285,21 +285,44 @@
                                                         $company->id,
                                                     )->whereDate('created_at', now());
 
+                                                    $Query = \App\Models\LeadModel::where('company_id', $company->id);
+
                                                     if (!$isAdmin) {
                                                         $todayQuery->whereHas('assinges', function ($q) use ($userId) {
                                                             $q->where('user_id', $userId);
                                                         });
                                                     }
-
+                                                    $toatalEnquiry = $Query->count();
                                                     $todayCount = $todayQuery->count();
                                                 @endphp
 
-                                                <a href="{{ url('admin/leads/company/today/' . $company->id) }}"
+                                                <a href="{{ url('admin/leads/enquiry/today/' . $company->id) }}"
                                                     style="font-size: 14px; width: 200px;">
                                                     <i class="fa-solid fa-calendar-day me-2"></i>
                                                     Today Enquiries
                                                     <span class="badge bg-info ms-2">{{ $todayCount }}</span>
                                                 </a>
+                                                @php
+
+                                                    $Query = \App\Models\LeadModel::where('company_id', $company->id);
+
+                                                    if (!$isAdmin) {
+                                                        $todayQuery->whereHas('assinges', function ($q) use ($userId) {
+                                                            $q->where('user_id', $userId);
+                                                        });
+                                                    }
+                                                    $toatalEnquiry = $Query->count();
+                                                @endphp
+                                                {{-- @if ($company->id == 7) --}}
+                                                    <a href="{{ url('admin/leads/' . $company->id . '/Enquiry') }}"
+                                                        style="font-size: 14px; width: 200px;">
+                                                        <i class="fa-solid fa-calendar-day me-2"></i>
+                                                        Datewise Enquiry
+                                                        <span class="badge bg-info ms-2">{{ $toatalEnquiry }}</span>
+                                                    </a>
+                                                {{-- @endif --}}
+
+
                                             </li>
                                             @if (!empty($company->status))
                                                 @foreach ($company->status as $status)
@@ -446,7 +469,7 @@
                         '.sidebar-menu');
                     const siblingSubmenus = parentList.querySelectorAll(
                         ':scope > li > .sidebar-submenu.show, :scope > .sidebar-list > .sidebar-submenu.show'
-                        );
+                    );
                     siblingSubmenus.forEach(sibling => {
                         if (sibling !== submenu) {
                             sibling.classList.remove('show');
