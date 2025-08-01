@@ -275,6 +275,10 @@ class LeadController extends Controller
             $leads->whereDate('created_at', '<=', $request->to_date);
         }
 
+        if ($request->filled('source')) {
+            $leads->where('source', 'like', '%' . $request->source . '%');
+        }
+
         $leads = $leads->latest()->get();
         $table = view('leads.filter', compact('leads'))->render();
 
@@ -652,6 +656,7 @@ class LeadController extends Controller
         if ($request->filled('status')) {
             $loanLeads->where('status', $request->status);
         }
+        
         $loanLeads = $loanLeads->latest()->get();
 
         $table = view('leads.finance.filter', compact('loanLeads'))->render();
@@ -788,39 +793,39 @@ class LeadController extends Controller
         return view('leads.list-today', compact('leads', 'companies'));
     }
 
-   public function getcompanyleads($company_id, Request $request)
-{
-    $user = auth()->user();
+    public function getcompanyleads($company_id, Request $request)
+    {
+        $user = auth()->user();
 
-    $excluded = ['deleted_at', 'disapproval_reason']; // Define excluded fields
+        $excluded = ['deleted_at', 'disapproval_reason']; // Define excluded fields
 
-    // Base query from mysql2
-    $query = DB::connection('mysql2')->table('loan_applications')
-        ->whereDate('created_at', now())
-        ->where(function ($q) use ($excluded) {
-            $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+        // Base query from mysql2
+        $query = DB::connection('mysql2')->table('loan_applications')
+            ->whereDate('created_at', now())
+            ->where(function ($q) use ($excluded) {
+                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
 
-            foreach ($columns as $column) {
-                if (!in_array($column, $excluded)) {
-                    $q->orWhereNull($column);
+                foreach ($columns as $column) {
+                    if (! in_array($column, $excluded)) {
+                        $q->orWhereNull($column);
+                    }
                 }
-            }
-        });
+            });
 
-    // Optional user filter
-    if ($request->filled('user_id')) {
-        $query->where('user_id', $request->user_id);
+        // Optional user filter
+        if ($request->filled('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        // Restrict to logged-in user if not admin
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        $leads     = $query->orderBy("id", "desc")->paginate(40);
+        $companies = Company::all();
+
+        return view('leads.leads-today', compact('leads', 'companies'));
     }
-
-    // Restrict to logged-in user if not admin
-    if ($user->role !== 'admin') {
-        $query->where('user_id', $user->id);
-    }
-
-    $leads = $query->orderBy("id", "desc")->paginate(40);
-    $companies = Company::all();
-
-    return view('leads.leads-today', compact('leads', 'companies'));
-}
 
 }
