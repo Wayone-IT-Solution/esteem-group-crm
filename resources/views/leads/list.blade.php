@@ -69,13 +69,22 @@
         <div class="col-md-12">
             <form id="userFilterForm" method="post" action="javascript:void(0);" class="d-flex align-items-end gap-2">
                 <div class="col-md-2">
-                    <select class="form-select" name="company_id" id="filterCompany">
-                        <option value="">All Companies</option>
-                        @foreach ($companies as $company)
-                            <option value="{{ $company->id }}">{{ $company->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    <select class="form-select" name="company_id" id="filterCompany" {{ isset($isCompanyLocked) && $isCompanyLocked ? 'disabled' : '' }}>
+        <option value="">All Companies</option>
+        @foreach ($companies as $company)
+            <option value="{{ $company->id }}"
+                {{ (isset($company_id) && $company_id == $company->id) ? 'selected' : '' }}>
+                {{ $company->name }}
+            </option>
+        @endforeach
+    </select>
+
+    @if(isset($isCompanyLocked) && $isCompanyLocked)
+        {{-- Hidden input to ensure value still submits in POST --}}
+        <input type="hidden" name="company_id" value="{{ $company_id }}">
+    @endif
+</div>
+
 
                 <div class="col-md-2">
                     {{-- <input type="text" class="form-control" name="source" id="searchSource" placeholder="Source"> --}}
@@ -256,57 +265,7 @@
                     </tbody>
                 </table>
 
-                <div class="row">
-                    <div class="mt-4 d-flex justify-content-end">
-                        <div class="pagination-container">
-                            {{-- Previous Link --}}
-                            @if ($leads->onFirstPage())
-                                <span class="page-link disabled">Previous</span>
-                            @else
-                                <a href="{{ $leads->previousPageUrl() }}" class="page-link">Previous</a>
-                            @endif
 
-                            {{-- Page Numbers --}}
-                            @php
-                                $current = $leads->currentPage();
-                                $last = $leads->lastPage();
-                                $start = max(1, $current - 2);
-                                $end = min($last, $current + 2);
-                            @endphp
-
-                            {{-- Always show first page --}}
-                            @if ($start > 1)
-                                <a href="{{ $leads->url(1) }}"
-                                    class="page-link {{ $current == 1 ? 'active' : '' }}">1</a>
-                                @if ($start > 2)
-                                    <span class="page-link dots">...</span>
-                                @endif
-                            @endif
-
-                            {{-- Main loop --}}
-                            @for ($i = $start; $i <= $end; $i++)
-                                <a href="{{ $leads->url($i) }}"
-                                    class="page-link {{ $current == $i ? 'active' : '' }}">{{ $i }}</a>
-                            @endfor
-
-                            {{-- Always show last page --}}
-                            @if ($end < $last)
-                                @if ($end < $last - 1)
-                                    <span class="page-link dots">...</span>
-                                @endif
-                                <a href="{{ $leads->url($last) }}"
-                                    class="page-link {{ $current == $last ? 'active' : '' }}">{{ $last }}</a>
-                            @endif
-
-                            {{-- Next Link --}}
-                            @if ($leads->hasMorePages())
-                                <a href="{{ $leads->nextPageUrl() }}" class="page-link">Next</a>
-                            @else
-                                <span class="page-link disabled">Next</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
 
                 <style>
                     .pagination-container {
@@ -358,6 +317,56 @@
 
 
 
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="mt-4 d-flex justify-content-end">
+            <div class="pagination-container">
+                {{-- Previous Link --}}
+                @if ($leads->onFirstPage())
+                    <span class="page-link disabled">Previous</span>
+                @else
+                    <a href="{{ $leads->previousPageUrl() }}" class="page-link">Previous</a>
+                @endif
+
+                {{-- Page Numbers --}}
+                @php
+                    $current = $leads->currentPage();
+                    $last = $leads->lastPage();
+                    $start = max(1, $current - 2);
+                    $end = min($last, $current + 2);
+                @endphp
+
+                {{-- Always show first page --}}
+                @if ($start > 1)
+                    <a href="{{ $leads->url(1) }}" class="page-link {{ $current == 1 ? 'active' : '' }}">1</a>
+                    @if ($start > 2)
+                        <span class="page-link dots">...</span>
+                    @endif
+                @endif
+
+                {{-- Main loop --}}
+                @for ($i = $start; $i <= $end; $i++)
+                    <a href="{{ $leads->url($i) }}"
+                        class="page-link {{ $current == $i ? 'active' : '' }}">{{ $i }}</a>
+                @endfor
+
+                {{-- Always show last page --}}
+                @if ($end < $last)
+                    @if ($end < $last - 1)
+                        <span class="page-link dots">...</span>
+                    @endif
+                    <a href="{{ $leads->url($last) }}"
+                        class="page-link {{ $current == $last ? 'active' : '' }}">{{ $last }}</a>
+                @endif
+
+                {{-- Next Link --}}
+                @if ($leads->hasMorePages())
+                    <a href="{{ $leads->nextPageUrl() }}" class="page-link">Next</a>
+                @else
+                    <span class="page-link disabled">Next</span>
+                @endif
             </div>
         </div>
     </div>
