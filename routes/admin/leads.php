@@ -15,6 +15,7 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::post('/canvas', [LeadController::class, 'canvas'])->name('admin.leads.canvas');
     Route::post('/description', [LeadController::class, 'description'])->name('leads.update.description');
     Route::get('/{company_id}/{status}', [LeadController::class, 'getleads']);
+    Route::get('/{company_id}/Enquiry/all', [LeadController::class, 'getleadsAll']);
     Route::get('/company/all/{company_id}', [LeadController::class, 'getallcompanyleads']);
     Route::post('/leads/import', [LeadController::class, 'import'])->name('admin.leads.import');
     Route::get('/secondconnection', [LeadController::class, 'secondconnection']);
@@ -27,7 +28,7 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::put('/loan-applications/{id}', [LeadController::class, 'updateLoan'])->name('loan.update');
     Route::post('/filter-enquires', [LeadController::class, 'filterEnquires'])->name('admin.leads.filterEnquires');
     Route::get('/enquiry/today/{company_id}', [LeadController::class, 'todayleads']);
-    Route::get('/company/today/{company_id}', [LeadController::class, 'getcompanyleads']);
+    Route::get('/company/today/{company_id}', [LeadController::class, 'getcompanytodayleads']);
 
 
 

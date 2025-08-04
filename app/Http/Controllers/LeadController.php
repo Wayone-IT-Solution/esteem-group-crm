@@ -65,21 +65,14 @@ class LeadController extends Controller
         $query = LeadModel::with(['company', 'user', 'assinges'])
             ->orderBy("created_at", "desc");
 
-        // Company ID filter
-        // if ($request->filled('company_id')) {
         $query->where('company_id', $request->company_id);
         // }
         $companies = Company::all();
-        // return $companies;
-        // Status filter
-
-        // check if the status is lead
 
         $query->where('status', $request->status);
         if ($request->status === 'Lead') {
 
             $leads = DB::connection('mysql2')->table('loan_applications')
-            // ->where('lead_status', '!=', 'Qualified Lead')
                 ->where(function ($q) {
                     $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
@@ -114,16 +107,10 @@ class LeadController extends Controller
                 ->orderBy('id', 'desc')
                 ->paginate(40);
 
-            // return $leads;
             return view('leads.finance.loanqueries', compact('leads', 'companies'));
-
-            // todo check kro in second db ( mysql2 )in loan_queries that is their any feild that is empty
-
-            // reditrect to new view in the lead folder
 
         }
 
-        // Role-based filtering
         if ($user->role !== 'admin') {
             $query->whereHas('assinges', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
@@ -132,9 +119,83 @@ class LeadController extends Controller
 
         $leads = $query->paginate(40);
 
-        return view('leads.list', compact('leads', 'companies'));
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => false,
+        ]);
+
     }
 
+    public function getleadsAll(Request $request)
+    {
+        $user = auth()->user();
+
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->orderBy("created_at", "desc");
+
+        $query->where('company_id', $request->company_id);
+        // }
+        $companies = Company::all();
+
+        if ($request->status === 'Lead') {
+
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
+
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNull($column);
+                        }
+                    }
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
+
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+
+        }
+
+        if ($request->status === 'Qualified lead') {
+
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
+                    }
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
+
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+
+        }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => true,
+        ]);
+
+    }
     public function getallcompanyleads(Request $request)
     {
 
@@ -656,7 +717,7 @@ class LeadController extends Controller
         if ($request->filled('status')) {
             $loanLeads->where('status', $request->status);
         }
-        
+
         $loanLeads = $loanLeads->latest()->get();
 
         $table = view('leads.finance.filter', compact('loanLeads'))->render();
@@ -793,7 +854,7 @@ class LeadController extends Controller
         return view('leads.list-today', compact('leads', 'companies'));
     }
 
-    public function getcompanyleads($company_id, Request $request)
+    public function getcompanytodayleads($company_id, Request $request)
     {
         $user = auth()->user();
 

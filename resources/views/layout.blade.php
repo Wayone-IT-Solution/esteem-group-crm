@@ -314,7 +314,7 @@
                                                     $toatalEnquiry = $Query->count();
                                                 @endphp
                                                 {{-- @if ($company->id == 7) --}}
-                                                    <a href="{{ url('admin/leads/' . $company->id . '/Enquiry') }}"
+                                                    <a href="{{ url('admin/leads/' . $company->id . '/Enquiry/all') }}"
                                                         style="font-size: 14px; width: 200px;">
                                                         <i class="fa-solid fa-calendar-day me-2"></i>
                                                         Datewise Enquiry
