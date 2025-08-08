@@ -84,6 +84,9 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'file_base_url' => env('FILE_BASE_URL', 'https://api.esteemfinance.co.nz'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

@@ -167,7 +167,8 @@
         </div>
 
 
-      <form action="{{ route('loan.update', ['id' => $loan->id]) }}" id="commanform" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('loan.update', ['id' => $loan->id]) }}" id="commanform" method="POST"
+            enctype="multipart/form-data">
 
             @csrf
             @method('PUT')
@@ -418,8 +419,12 @@
                                     <label class="form-label">Driver's License</label>
                                     @if ($loan->license_file ?? false)
                                         <div class="file-input-display mb-2">
-                                            <a href="/storage/{{ $loan->license_file }}" target="_blank"><i
-                                                    class="fa fa-file-pdf me-2 text-danger"></i>{{ basename($loan->license_file) }}</a>
+                                                <a href="{{ rtrim(config('app.file_base_url'), '/') }}/{{ ltrim($loan->license_file, '/') }}" target="_blank">
+                                                    <i class="fa fa-file-pdf me-2 text-danger"></i>{{ basename($loan->license_file) }}
+                                                </a>
+                                            {{-- <a href="https://api.esteemfinance.co.nz/storage/{{ $loan->license_file }}"
+                                                target="_blank"><i
+                                                    class="fa fa-file-pdf me-2 text-danger"></i>{{ basename($loan->license_file) }}</a> --}}
                                         </div>
                                     @endif
                                     <input type="file" name="license_file" class="form-control form-control-sm">
@@ -428,8 +433,9 @@
                                     <label class="form-label">Payslip 1</label>
                                     @if ($loan->payslip1 ?? false)
                                         <div class="file-input-display mb-2">
-                                            <a href="/storage/{{ $loan->payslip1 }}" target="_blank"><i
-                                                    class="fa fa-file-invoice-dollar me-2 text-success"></i>{{ basename($loan->payslip1) }}</a>
+                                             <a href="{{ rtrim(config('app.file_base_url'), '/') }}/{{ ltrim($loan->payslip1, '/') }}" target="_blank">
+                                            {{-- <a href="/storage/{{ $loan->payslip1 }}" target="_blank"> --}}
+                                                <i class="fa fa-file-invoice-dollar me-2 text-success"></i>{{ basename($loan->payslip1) }}</a>
                                         </div>
                                     @endif
                                     <input type="file" name="payslip1" class="form-control form-control-sm">
@@ -438,8 +444,9 @@
                                     <label class="form-label">Payslip 2</label>
                                     @if ($loan->payslip2 ?? false)
                                         <div class="file-input-display mb-2">
-                                            <a href="/storage/{{ $loan->payslip2 }}" target="_blank"><i
-                                                    class="fa fa-file-invoice-dollar me-2 text-success"></i>{{ basename($loan->payslip2) }}</a>
+                                             <a href="{{ rtrim(config('app.file_base_url'), '/') }}/{{ ltrim($loan->payslip2, '/') }}" target="_blank">
+                                            {{-- <a href="/storage/{{ $loan->payslip2 }}" target="_blank"> --}}
+                                                <i class="fa fa-file-invoice-dollar me-2 text-success"></i>{{ basename($loan->payslip2) }}</a>
                                         </div>
                                     @endif
                                     <input type="file" name="payslip2" class="form-control form-control-sm">
@@ -448,8 +455,9 @@
                                     <label class="form-label">Photo ID</label>
                                     @if ($loan->photo ?? false)
                                         <div class="file-input-display mb-2">
-                                            <a href="/storage/{{ $loan->photo }}" target="_blank"><i
-                                                    class="fa fa-id-card me-2 text-info"></i>{{ basename($loan->photo) }}</a>
+                                             <a href="{{ rtrim(config('app.file_base_url'), '/') }}/{{ ltrim($loan->photo, '/') }}" target="_blank">
+                                            {{-- <a href="/storage/{{ $loan->photo }}" target="_blank"> --}}
+                                                <i class="fa fa-id-card me-2 text-info"></i>{{ basename($loan->photo) }}</a>
                                         </div>
                                     @endif
                                     <input type="file" name="photo" class="form-control form-control-sm">
@@ -458,8 +466,9 @@
                                     <label class="form-label">WINZ Breakdown</label>
                                     @if ($loan->winz_breakdown ?? false)
                                         <div class="file-input-display mb-2">
-                                            <a href="/storage/{{ $loan->winz_breakdown }}" target="_blank"><i
-                                                    class="fa fa-file-alt me-2 text-secondary"></i>{{ basename($loan->winz_breakdown) }}</a>
+                                             <a href="{{ rtrim(config('app.file_base_url'), '/') }}/{{ ltrim($loan->winz_breakdown, '/') }}" target="_blank">
+                                            {{-- <a href="/storage/{{ $loan->winz_breakdown }}" target="_blank"> --}}
+                                                <i class="fa fa-file-alt me-2 text-secondary"></i>{{ basename($loan->winz_breakdown) }}</a>
                                         </div>
                                     @endif
                                     <input type="file" name="winz_breakdown" class="form-control form-control-sm">

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -424,40 +425,105 @@ class LeadController extends Controller
         return response()->json(['code' => 200, 'table' => $table]);
     }
 
+    // public function edit(Request $request)
+    // {
+
+    //     $lead      = LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
+    //     $companies = Company::all();
+    //     $status    = Status::where('company_id', $lead->company_id)->get();
+    //     $users     = User::where('company_id', $lead->company_id)->get();
+
+    //     // Initialize empty collections
+    //     $loansByStatus   = collect();
+    //     $queriesByStatus = collect();
+
+    //     if ($lead && $lead->mobile_number) {
+    //         // Get all loan applications
+    //         $allLoans = DB::connection('mysql2')->table('loan_applications')
+    //             ->where('mobile', $lead->mobile_number)
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         // Group loans by status
+    //         $loansByStatus = $allLoans->groupBy('status');
+
+    //         // Get all loan queries for these loans
+    //         $allQueries = DB::connection('mysql2')->table('loan_queries')
+    //             ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
+    //             ->orderBy('created_at', 'desc')
+    //             ->get();
+
+    //         // Group queries by their own status
+    //         if ($allQueries->isNotEmpty()) {
+    //             $queriesByStatus = $allQueries->groupBy('status');
+    //         }
+    //     }
+    //     // return $loansByStatus;
+
+    //     return view('leads.edit', compact(
+    //         'companies',
+    //         'lead',
+    //         'status',
+    //         'users',
+    //         'loansByStatus',
+    //         'queriesByStatus'
+    //     ));
+    // }
     public function edit(Request $request)
     {
-
         $lead      = LeadModel::with(['company', 'user', 'assinges'])->find($request->lead);
         $companies = Company::all();
         $status    = Status::where('company_id', $lead->company_id)->get();
         $users     = User::where('company_id', $lead->company_id)->get();
 
-        // Initialize empty collections
+        //
+        if (! empty($lead) && $lead->company_id == 7 && strtolower($lead->status) === 'enquiry') {
+            $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number); // Clean and format
+            $templateName   = 'thankyou';
+            $broadcastName  = 'thankyou';
+            $watiToken      = 'YOUR_WATI_API_TOKEN'; // Replace with actual token
+
+            try {
+                $response = Http::withToken($watiToken)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+                        'template_name'  => $templateName,
+                        'broadcast_name' => $broadcastName,
+                    ]);
+
+                if ($response->successful()) {
+                    Log::info("WATI WhatsApp message sent to {$whatsappNumber}");
+                } else {
+                    Log::error("WATI Error: " . $response->body());
+                }
+            } catch (\Exception $e) {
+                Log::error("WATI Exception: " . $e->getMessage());
+            }
+        }
+
+        // Loan & Query loading
         $loansByStatus   = collect();
         $queriesByStatus = collect();
 
         if ($lead && $lead->mobile_number) {
-            // Get all loan applications
             $allLoans = DB::connection('mysql2')->table('loan_applications')
                 ->where('mobile', $lead->mobile_number)
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Group loans by status
             $loansByStatus = $allLoans->groupBy('status');
 
-            // Get all loan queries for these loans
             $allQueries = DB::connection('mysql2')->table('loan_queries')
                 ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Group queries by their own status
             if ($allQueries->isNotEmpty()) {
                 $queriesByStatus = $allQueries->groupBy('status');
             }
         }
-        // return $loansByStatus;
 
         return view('leads.edit', compact(
             'companies',
@@ -506,8 +572,9 @@ class LeadController extends Controller
 
     public function description(Request $request)
     {
-        $save =
-            [
+        $lead = LeadModel::findOrFail($request->lead_id);
+
+        $save = [
             'lead_id'       => $request->lead_id,
             'status'        => $request->status,
             'add_by'        => Auth::user()->id,
@@ -516,16 +583,76 @@ class LeadController extends Controller
             'created_at'    => now(),
         ];
         LeadFollowup::insert($save);
-        LeadModel::where('id', $request->lead_id)->update(['status' => $request->status, 'description' => $request->description]);
 
-        if ($request->filled('user_id')) {
-            // check if the same user exist with same lead or noit
-            $exist = DB::table('assign_leads')->where('lead_id', $request->lead_id)->where('user_id', $request->user_id)->first();
+        LeadModel::where('id', $request->lead_id)->update([
+            'status'      => $request->status,
+            'description' => $request->description,
+        ]);
 
-            if (empty($exist)) {
-                DB::table('assign_leads')->insert(['lead_id' => $request->lead_id, 'status' => $request->status, 'user_id' => $request->user_id, 'created_at' => now(), 'add_by' => Auth::user()->id]);
+        if ($lead->company_id == 7 && strtolower($request->status) === 'qualified lead') {
+            $whatsappNumber = '918505822089';
+            // $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number);
+            $templateName  = 'thankyou';
+            $broadcastName = 'thankyou';
+            $watiToken     = env('WATI_API_TOKEN');
+            try {
+                $response = Http::withToken($watiToken)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+                        'template_name'  => $templateName,
+                        'broadcast_name' => $broadcastName,
+                    ]);
+
+                Log::info("📤 WATI WhatsApp Sent Attempt", [
+                    'number'      => $whatsappNumber,
+                    'status_code' => $response->status(),
+                    'response'    => $response->body(),
+                ]);
+
+                if ($response->successful()) {
+                    Log::info("✅ WhatsApp message sent via WATI", [
+                        'lead_id'         => $lead->id,
+                        'whatsapp_number' => $whatsappNumber,
+                        'status'          => $request->status,
+                        'company_id'      => $lead->company_id,
+                        'response_status' => $response->status(),
+                        'response_body'   => $response->body(),
+                    ]);
+                } else {
+                    Log::error("❌ Failed to send WhatsApp via WATI", [
+                        'lead_id'         => $lead->id,
+                        'status_code'     => $response->status(),
+                        'response_body'   => $response->body(),
+                        'json_response'   => $response->json(),
+                        'whatsapp_number' => $whatsappNumber,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error("❌ Exception while sending WhatsApp via WATI", [
+                    'lead_id'         => $lead->id,
+                    'error'           => $e->getMessage(),
+                    'whatsapp_number' => $whatsappNumber,
+                ]);
             }
         }
+
+        if ($request->filled('user_id')) {
+            $exist = DB::table('assign_leads')
+                ->where('lead_id', $request->lead_id)
+                ->where('user_id', $request->user_id)
+                ->first();
+
+            if (empty($exist)) {
+                DB::table('assign_leads')->insert([
+                    'lead_id'    => $request->lead_id,
+                    'status'     => $request->status,
+                    'user_id'    => $request->user_id,
+                    'created_at' => now(),
+                    'add_by'     => Auth::user()->id,
+                ]);
+            }
+        }
+
         return response()->json(['code' => 200, 'message' => 'Lead Status updated successfully!']);
     }
 
@@ -888,5 +1015,138 @@ class LeadController extends Controller
 
         return view('leads.leads-today', compact('leads', 'companies'));
     }
+
+    public function getNullEnquires(Request $request)
+{
+    $user = auth()->user();
+
+    $query = LeadModel::with(['company', 'user', 'assinges'])
+        ->where('source', '_')
+        ->orderBy("created_at", "desc");
+
+    $query->where('company_id', $request->company_id);
+    $companies = Company::all();
+
+    if ($request->status) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->status === 'Lead') {
+        $leads = DB::connection('mysql2')->table('loan_applications')
+            ->where(function ($q) {
+                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $excluded = ['deleted_at', 'disapproval_reason'];
+
+                foreach ($columns as $column) {
+                    if (!in_array($column, $excluded)) {
+                        $q->orWhereNull($column);
+                    }
+                }
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(40);
+
+        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+    }
+
+    if ($request->status === 'Qualified lead') {
+        $leads = DB::connection('mysql2')->table('loan_applications')
+            ->where('lead_status', 'Qualified Lead')
+            ->where(function ($q) {
+                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+
+                foreach ($columns as $column) {
+                    if (!in_array($column, $excluded)) {
+                        $q->orWhereNotNull($column);
+                    }
+                }
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(40);
+
+        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+    }
+
+    if ($user->role !== 'admin') {
+        $query->whereHas('assinges', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
+
+    $leads = $query->paginate(40);
+
+    return view('leads.list', [
+        'leads'           => $leads,
+        'companies'       => $companies,
+        'company_id'      => $request->company_id,
+        'isCompanyLocked' => false,
+    ]);
+}
+
+public function getSMEnquires(Request $request)
+{
+    $user = auth()->user();
+
+    $query = LeadModel::with(['company', 'user', 'assinges'])
+        ->where('source', '!=', '_') 
+        ->orderBy("created_at", "desc");
+
+    $query->where('company_id', $request->company_id);
+    $companies = Company::all();
+
+    if ($request->status === 'Lead') {
+        $leads = DB::connection('mysql2')->table('loan_applications')
+            ->where(function ($q) {
+                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $excluded = ['deleted_at', 'disapproval_reason'];
+
+                foreach ($columns as $column) {
+                    if (!in_array($column, $excluded)) {
+                        $q->orWhereNull($column);
+                    }
+                }
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(40);
+
+        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+    }
+
+    if ($request->status === 'Qualified lead') {
+        $leads = DB::connection('mysql2')->table('loan_applications')
+            ->where('lead_status', 'Qualified Lead')
+            ->where(function ($q) {
+                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+
+                foreach ($columns as $column) {
+                    if (!in_array($column, $excluded)) {
+                        $q->orWhereNotNull($column);
+                    }
+                }
+            })
+            ->orderBy('id', 'desc')
+            ->paginate(40);
+
+        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+    }
+
+    if ($user->role !== 'admin') {
+        $query->whereHas('assinges', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+    }
+
+    $leads = $query->paginate(40);
+
+    return view('leads.list', [
+        'leads'           => $leads,
+        'companies'       => $companies,
+        'company_id'      => $request->company_id,
+        'isCompanyLocked' => false,
+    ]);
+}
+
 
 }

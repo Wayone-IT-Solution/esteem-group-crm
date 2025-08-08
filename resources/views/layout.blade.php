@@ -292,8 +292,27 @@
                                                             $q->where('user_id', $userId);
                                                         });
                                                     }
+
                                                     $toatalEnquiry = $Query->count();
                                                     $todayCount = $todayQuery->count();
+                                                    $nullEnquiryCount = LeadModel::where('company_id', $company->id)
+                                                        ->where('source', '_')
+                                                        ->when(!$isAdmin, function ($q) use ($userId) {
+                                                            $q->whereHas('assinges', function ($q2) use ($userId) {
+                                                                $q2->where('user_id', $userId);
+                                                            });
+                                                        })
+                                                        ->count();
+
+                                                    // SM Enquiries (source != '_')
+                                                    $smEnquiryCount = LeadModel::where('company_id', $company->id)
+                                                        ->where('source', '!=', '_')
+                                                        ->when(!$isAdmin, function ($q) use ($userId) {
+                                                            $q->whereHas('assinges', function ($q2) use ($userId) {
+                                                                $q2->where('user_id', $userId);
+                                                            });
+                                                        })
+                                                        ->count();
                                                 @endphp
 
                                                 <a href="{{ url('admin/leads/enquiry/today/' . $company->id) }}"
@@ -314,13 +333,25 @@
                                                     $toatalEnquiry = $Query->count();
                                                 @endphp
                                                 {{-- @if ($company->id == 7) --}}
-                                                    <a href="{{ url('admin/leads/' . $company->id . '/Enquiry/all') }}"
-                                                        style="font-size: 14px; width: 200px;">
-                                                        <i class="fa-solid fa-calendar-day me-2"></i>
-                                                        Datewise Enquiry
-                                                        <span class="badge bg-info ms-2">{{ $toatalEnquiry }}</span>
-                                                    </a>
+                                                <a href="{{ url('admin/leads/' . $company->id . '/Enquiry/all') }}"
+                                                    style="font-size: 14px; width: 200px;">
+                                                    <i class="fa-solid fa-calendar-day me-2"></i>
+                                                    Datewise Enquiry
+                                                    <span class="badge bg-info ms-2">{{ $toatalEnquiry }}</span>
+                                                </a>
                                                 {{-- @endif --}}
+                                                <a href="{{ url('admin/leads/' . $company->id . '/Enquiry/database') }}"
+                                                    style="font-size: 14px; width: 200px;">
+                                                    <i class="fa-solid fa-calendar-day me-2"></i>
+                                                    Enquiry(Database)
+                                                    <span class="badge bg-info ms-2">{{ $nullEnquiryCount }}</span>
+                                                </a>
+                                                <a href="{{ url('admin/leads/' . $company->id . '/Enquiry/social-media') }}"
+                                                    style="font-size: 14px; width: 200px;">
+                                                    <i class="fa-solid fa-calendar-day me-2"></i>
+                                                    Enquiry(SM)
+                                                    <span class="badge bg-info ms-2">{{ $smEnquiryCount }}</span>
+                                                </a>
 
 
                                             </li>

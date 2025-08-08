@@ -29,6 +29,10 @@ Route::middleware([UserAuthMiddleware::class])->prefix('admin/leads')->group(fun
     Route::post('/filter-enquires', [LeadController::class, 'filterEnquires'])->name('admin.leads.filterEnquires');
     Route::get('/enquiry/today/{company_id}', [LeadController::class, 'todayleads']);
     Route::get('/company/today/{company_id}', [LeadController::class, 'getcompanytodayleads']);
+    Route::get('/{company_id}/Enquiry/database', [LeadController::class, 'getNullEnquires']);
+    Route::get('/{company_id}/Enquiry/social-media', [LeadController::class, 'getSMEnquires']);
+
+
 
 
 
