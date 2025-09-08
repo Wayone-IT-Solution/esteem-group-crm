@@ -131,7 +131,8 @@
                             <div class="custom-menu overflow-hidden">
                                 <ul>
                                     <li class="d-flex">
-                                        <a class="ms-2" href="{{ url('admin/profile/update-password') }}">Update Password</a>
+                                        <a class="ms-2" href="{{ url('admin/profile/update-password') }}">Update
+                                            Password</a>
                                     </li>
                                     <li class="d-flex">
                                         <a class="ms-2" href="{{ url('auth/logout') }}">Log Out</a>
@@ -366,11 +367,11 @@
                                                         if ($status->status === 'Lead') {
                                                             $columns = \Illuminate\Support\Facades\Schema::connection(
                                                                 'mysql2',
-                                                            )->getColumnListing('esteem_loan_applications');
+                                                            )->getColumnListing('loan_applications');
                                                             $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('esteem_loan_applications')
+                                                                ->table('loan_applications')
                                                                 ->where(function ($query) use ($columns, $excluded) {
                                                                     foreach ($columns as $column) {
                                                                         if (!in_array($column, $excluded)) {
@@ -382,11 +383,11 @@
                                                         } elseif ($status->status === 'Qualified lead') {
                                                             $columns = \Illuminate\Support\Facades\Schema::connection(
                                                                 'mysql2',
-                                                            )->getColumnListing('esteem_loan_applications');
+                                                            )->getColumnListing('loan_applications');
                                                             $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('esteem_loan_applications')
+                                                                ->table('loan_applications')
                                                                 // ->where('status', 'Qualified Lead')
                                                                 ->where(function ($query) use ($columns, $excluded) {
                                                                     foreach ($columns as $column) {
@@ -454,7 +455,7 @@
                                 </span>
                             </a>
                         </li>
-                        
+
                     </ul>
                 </div>
             </aside>
