@@ -364,7 +364,7 @@
                                             </div>
                                             @php
                                                 $leadcount = DB::connection('mysql2')
-                                                    ->table('loan_applications')
+                                                    ->table('esteem_loan_applications')
                                                     ->whereDate('created_at', now())
                                                     ->count();
                                             @endphp
@@ -417,11 +417,11 @@
                                                         // Count incomplete leads (any null field except excluded ones)
                                                         $columns = \Illuminate\Support\Facades\Schema::connection(
                                                             'mysql2',
-                                                        )->getColumnListing('loan_applications');
+                                                        )->getColumnListing('esteem_loan_applications');
                                                         $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                         $leadcount = DB::connection('mysql2')
-                                                            ->table('loan_applications')
+                                                            ->table('esteem_loan_applications')
                                                             ->where(function ($query) use ($columns, $excluded) {
                                                                 foreach ($columns as $column) {
                                                                     if (!in_array($column, $excluded)) {
@@ -434,11 +434,11 @@
                                                         // Count fully filled leads (all fields not null except excluded ones)
                                                         $columns = \Illuminate\Support\Facades\Schema::connection(
                                                             'mysql2',
-                                                        )->getColumnListing('loan_applications');
+                                                        )->getColumnListing('esteem_loan_applications');
                                                         $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                         $leadcount = DB::connection('mysql2')
-                                                            ->table('loan_applications')
+                                                            ->table('esteem_loan_applications')
                                                             ->where(function ($query) use ($columns, $excluded) {
                                                                 foreach ($columns as $column) {
                                                                     if (!in_array($column, $excluded)) {

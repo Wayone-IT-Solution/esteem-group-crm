@@ -24,7 +24,7 @@ class DashboardController extends Controller
             ])->with('status')->get();
 
             $todayEnquiriesCount = DB::connection('mysql2')
-                ->table('loan_applications')
+                ->table('esteem_loan_applications')
                 ->whereDate('created_at', $nzNowDate)
                 ->count();
         } else {
@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ])->with('status')->get();
 
             $todayEnquiriesCount = DB::connection('mysql2')
-                ->table('loan_applications')
+                ->table('esteem_loan_applications')
                 ->whereDate('created_at', $nzNowDate)
                 ->where('user_id', $user->id)
                 ->count();
