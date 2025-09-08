@@ -22,9 +22,10 @@ class LeadController extends Controller
     {
         $companies = Company::all();
 
-        $leads = DB::connection('mysql2')->table('loan_applications')
+        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where(function ($q) {
-                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications
+');
                 foreach ($columns as $column) {
                     if ($column != 'deleted_at') {
                         $q->orWhereNull($column);
@@ -73,9 +74,9 @@ class LeadController extends Controller
         $query->where('status', $request->status);
         if ($request->status === 'Lead') {
 
-            $leads = DB::connection('mysql2')->table('loan_applications')
+            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
 
                     foreach ($columns as $column) {
@@ -93,10 +94,10 @@ class LeadController extends Controller
 
         if ($request->status === 'Qualified lead') {
 
-            $leads = DB::connection('mysql2')->table('loan_applications')
-                ->where('lead_status', 'Qualified Lead')
+            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+                // ->where('status', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                     foreach ($columns as $column) {
@@ -142,9 +143,9 @@ class LeadController extends Controller
 
         if ($request->status === 'Lead') {
 
-            $leads = DB::connection('mysql2')->table('loan_applications')
+            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
 
                     foreach ($columns as $column) {
@@ -162,10 +163,10 @@ class LeadController extends Controller
 
         if ($request->status === 'Qualified lead') {
 
-            $leads = DB::connection('mysql2')->table('loan_applications')
-                ->where('lead_status', 'Qualified Lead')
+            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+                ->where('status', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                     foreach ($columns as $column) {
@@ -395,7 +396,7 @@ class LeadController extends Controller
             $query->whereBetween(DB::raw('DATE(created_at)'), [$request->from_date, $request->to_date]);
         }
 
-        // ✅ Show today's leads only if NO filters are applied
+        //  Show today's leads only if NO filters are applied
         if (
             ! $request->company_id &&
             ! $request->search &&
@@ -410,7 +411,7 @@ class LeadController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        // ✅ Restrict if not admin
+        //  Restrict if not admin
         $user = auth()->user();
         if ($user->role !== 'admin') {
             $query->whereHas('assinges', function ($q) use ($user) {
@@ -439,7 +440,7 @@ class LeadController extends Controller
 
     //     if ($lead && $lead->mobile_number) {
     //         // Get all loan applications
-    //         $allLoans = DB::connection('mysql2')->table('loan_applications')
+    //         $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
     //             ->where('mobile', $lead->mobile_number)
     //             ->orderBy('created_at', 'desc')
     //             ->get();
@@ -477,45 +478,45 @@ class LeadController extends Controller
         $users     = User::where('company_id', $lead->company_id)->get();
 
         //
-        if (! empty($lead) && $lead->company_id == 7 && strtolower($lead->status) === 'enquiry') {
-            $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number); // Clean and format
-            $templateName   = 'thankyou';
-            $broadcastName  = 'thankyou';
-            $watiToken      = 'YOUR_WATI_API_TOKEN'; // Replace with actual token
+        // if (! empty($lead) && $lead->company_id == 7 && strtolower($lead->status) === 'enquiry') {
+        //     $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number); // Clean and format
+        //     $templateName   = 'thankyou';
+        //     $broadcastName  = 'thankyou';
+        //     $watiToken      = 'YOUR_WATI_API_TOKEN'; // Replace with actual token
 
-            try {
-                $response = Http::withToken($watiToken)
-                    ->withHeaders([
-                        'Content-Type' => 'application/json',
-                    ])
-                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
-                        'template_name'  => $templateName,
-                        'broadcast_name' => $broadcastName,
-                    ]);
+        //     try {
+        //         $response = Http::withToken($watiToken)
+        //             ->withHeaders([
+        //                 'Content-Type' => 'application/json',
+        //             ])
+        //             ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+        //                 'template_name'  => $templateName,
+        //                 'broadcast_name' => $broadcastName,
+        //             ]);
 
-                if ($response->successful()) {
-                    Log::info("WATI WhatsApp message sent to {$whatsappNumber}");
-                } else {
-                    Log::error("WATI Error: " . $response->body());
-                }
-            } catch (\Exception $e) {
-                Log::error("WATI Exception: " . $e->getMessage());
-            }
-        }
+        //         if ($response->successful()) {
+        //             Log::info("WATI WhatsApp message sent to {$whatsappNumber}");
+        //         } else {
+        //             Log::error("WATI Error: " . $response->body());
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::error("WATI Exception: " . $e->getMessage());
+        //     }
+        // }
 
         // Loan & Query loading
         $loansByStatus   = collect();
         $queriesByStatus = collect();
 
         if ($lead && $lead->mobile_number) {
-            $allLoans = DB::connection('mysql2')->table('loan_applications')
+            $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
                 ->where('mobile', $lead->mobile_number)
                 ->orderBy('created_at', 'desc')
                 ->get();
 
             $loansByStatus = $allLoans->groupBy('status');
 
-            $allQueries = DB::connection('mysql2')->table('loan_queries')
+            $allQueries = DB::connection('mysql2')->table('esteem_loan_queries')
                 ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -589,52 +590,52 @@ class LeadController extends Controller
             'description' => $request->description,
         ]);
 
-        if ($lead->company_id == 7 && strtolower($request->status) === 'qualified lead') {
-            $whatsappNumber = '918505822089';
-            // $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number);
-            $templateName  = 'thankyou';
-            $broadcastName = 'thankyou';
-            $watiToken     = env('WATI_API_TOKEN');
-            try {
-                $response = Http::withToken($watiToken)
-                    ->withHeaders(['Content-Type' => 'application/json'])
-                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
-                        'template_name'  => $templateName,
-                        'broadcast_name' => $broadcastName,
-                    ]);
+        // if ($lead->company_id == 7 && strtolower($request->status) === 'qualified lead') {
+        //     $whatsappNumber = '918505822089';
+        //     // $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number);
+        //     $templateName  = 'thankyou';
+        //     $broadcastName = 'thankyou';
+        //     $watiToken     = env('WATI_API_TOKEN');
+        //     try {
+        //         $response = Http::withToken($watiToken)
+        //             ->withHeaders(['Content-Type' => 'application/json'])
+        //             ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+        //                 'template_name'  => $templateName,
+        //                 'broadcast_name' => $broadcastName,
+        //             ]);
 
-                Log::info("📤 WATI WhatsApp Sent Attempt", [
-                    'number'      => $whatsappNumber,
-                    'status_code' => $response->status(),
-                    'response'    => $response->body(),
-                ]);
+        //         Log::info("📤 WATI WhatsApp Sent Attempt", [
+        //             'number'      => $whatsappNumber,
+        //             'status_code' => $response->status(),
+        //             'response'    => $response->body(),
+        //         ]);
 
-                if ($response->successful()) {
-                    Log::info("✅ WhatsApp message sent via WATI", [
-                        'lead_id'         => $lead->id,
-                        'whatsapp_number' => $whatsappNumber,
-                        'status'          => $request->status,
-                        'company_id'      => $lead->company_id,
-                        'response_status' => $response->status(),
-                        'response_body'   => $response->body(),
-                    ]);
-                } else {
-                    Log::error("❌ Failed to send WhatsApp via WATI", [
-                        'lead_id'         => $lead->id,
-                        'status_code'     => $response->status(),
-                        'response_body'   => $response->body(),
-                        'json_response'   => $response->json(),
-                        'whatsapp_number' => $whatsappNumber,
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error("❌ Exception while sending WhatsApp via WATI", [
-                    'lead_id'         => $lead->id,
-                    'error'           => $e->getMessage(),
-                    'whatsapp_number' => $whatsappNumber,
-                ]);
-            }
-        }
+        //         if ($response->successful()) {
+        //             Log::info("✅ WhatsApp message sent via WATI", [
+        //                 'lead_id'         => $lead->id,
+        //                 'whatsapp_number' => $whatsappNumber,
+        //                 'status'          => $request->status,
+        //                 'company_id'      => $lead->company_id,
+        //                 'response_status' => $response->status(),
+        //                 'response_body'   => $response->body(),
+        //             ]);
+        //         } else {
+        //             Log::error("❌ Failed to send WhatsApp via WATI", [
+        //                 'lead_id'         => $lead->id,
+        //                 'status_code'     => $response->status(),
+        //                 'response_body'   => $response->body(),
+        //                 'json_response'   => $response->json(),
+        //                 'whatsapp_number' => $whatsappNumber,
+        //             ]);
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::error("❌ Exception while sending WhatsApp via WATI", [
+        //             'lead_id'         => $lead->id,
+        //             'error'           => $e->getMessage(),
+        //             'whatsapp_number' => $whatsappNumber,
+        //         ]);
+        //     }
+        // }
 
         if ($request->filled('user_id')) {
             $exist = DB::table('assign_leads')
@@ -740,7 +741,7 @@ class LeadController extends Controller
 
     public function secondconnection()
     {
-        return DB::connection('mysql2')->table('loan_applications')->get();
+        return DB::connection('mysql2')->table('esteem_loan_applications')->get();
     }
 
     public function updateStatus(Request $request)
@@ -749,17 +750,17 @@ class LeadController extends Controller
         // dd($request->all());
 
         $request->validate([
-            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
+            'id'     => 'required|integer|exists:mysql2.esteem_loan_applications,id',
             'status' => 'required|string',
         ]);
 
         $loanApplication = DB::connection('mysql2')
-            ->table('loan_applications')
+            ->table('esteem_loan_applications')
             ->where('id', $request->id)->first();
 
         // check the status that is comming
         DB::connection('mysql2')
-            ->table('loan_applications')
+            ->table('esteem_loan_applications')
             ->where('id', $request->id)
             ->update([
                 'status'     => $request->status,
@@ -823,7 +824,7 @@ class LeadController extends Controller
 
     public function financeFilter(Request $request)
     {
-        $loanLeads = DB::connection('mysql2')->table('loan_applications');
+        $loanLeads = DB::connection('mysql2')->table('esteem_loan_applications');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -858,12 +859,12 @@ class LeadController extends Controller
         // dd($request->all());
 
         $request->validate([
-            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
+            'id'     => 'required|integer|exists:mysql2.esteem_loan_applications,id',
             'status' => 'required|string',
         ]);
 
         DB::connection('mysql2')
-            ->table('loan_applications')
+            ->table('esteem_loan_applications')
             ->where('id', $request->id)
             ->update([
                 'status'     => $request->status,
@@ -900,7 +901,7 @@ class LeadController extends Controller
     public function editLeads($id)
     {
         // Fetch loan data from mysql2
-        $loan = DB::connection('mysql2')->table('loan_applications')->where('id', $id)->first();
+        $loan = DB::connection('mysql2')->table('esteem_loan_applications')->where('id', $id)->first();
 
         if (! $loan) {
             return redirect()->back()->with('error', 'Loan not found.');
@@ -929,7 +930,7 @@ class LeadController extends Controller
             'status'         => 'nullable|string|max:100',
         ]);
 
-        $updated = DB::connection('mysql2')->table('loan_applications')
+        $updated = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where('id', $id)
             ->update([
                 'first_name'     => $request->first_name,
@@ -988,10 +989,10 @@ class LeadController extends Controller
         $excluded = ['deleted_at', 'disapproval_reason']; // Define excluded fields
 
         // Base query from mysql2
-        $query = DB::connection('mysql2')->table('loan_applications')
+        $query = DB::connection('mysql2')->table('esteem_loan_applications')
             ->whereDate('created_at', now())
             ->where(function ($q) use ($excluded) {
-                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
 
                 foreach ($columns as $column) {
                     if (! in_array($column, $excluded)) {
@@ -1032,9 +1033,9 @@ class LeadController extends Controller
     }
 
     if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
+        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                 $excluded = ['deleted_at', 'disapproval_reason'];
 
                 foreach ($columns as $column) {
@@ -1050,10 +1051,10 @@ class LeadController extends Controller
     }
 
     if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
+        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where('lead_status', 'Qualified Lead')
             ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                 $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                 foreach ($columns as $column) {
@@ -1096,9 +1097,9 @@ public function getSMEnquires(Request $request)
     $companies = Company::all();
 
     if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
+        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                 $excluded = ['deleted_at', 'disapproval_reason'];
 
                 foreach ($columns as $column) {
@@ -1114,10 +1115,10 @@ public function getSMEnquires(Request $request)
     }
 
     if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
+        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
             ->where('lead_status', 'Qualified Lead')
             ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
                 $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                 foreach ($columns as $column) {

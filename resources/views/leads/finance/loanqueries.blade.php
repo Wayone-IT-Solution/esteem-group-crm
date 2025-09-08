@@ -620,7 +620,7 @@
             const toDate = $('#toDate').val();
 
             $.ajax({
-                url: `{{ route('admin.finance.filter') }}`,
+                
                 method: 'POST',
                 data: {
                     company_id,
