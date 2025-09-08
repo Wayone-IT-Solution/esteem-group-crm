@@ -131,6 +131,9 @@
                             <div class="custom-menu overflow-hidden">
                                 <ul>
                                     <li class="d-flex">
+                                        <a class="ms-2" href="{{ url('admin/profile/update-password') }}">Update Password</a>
+                                    </li>
+                                    <li class="d-flex">
                                         <a class="ms-2" href="{{ url('auth/logout') }}">Log Out</a>
                                     </li>
                                 </ul>
@@ -435,6 +438,14 @@
 
                         </li>
                         <hr>
+                        {{-- <li class="sidebar-list">
+                            <a class="sidebar-link" href="{{ url('admin/profile') }}">
+                                <span>
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>
+                                    Profile
+                                </span>
+                            </a>
+                        </li> --}}
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ url('auth/logout') }}">
                                 <span>
@@ -443,6 +454,7 @@
                                 </span>
                             </a>
                         </li>
+                        
                     </ul>
                 </div>
             </aside>

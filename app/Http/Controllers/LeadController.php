@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -395,7 +394,7 @@ class LeadController extends Controller
             $query->whereBetween(DB::raw('DATE(created_at)'), [$request->from_date, $request->to_date]);
         }
 
-        // ✅ Show today's leads only if NO filters are applied
+        //  Show today's leads only if NO filters are applied
         if (
             ! $request->company_id &&
             ! $request->search &&
@@ -410,7 +409,7 @@ class LeadController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        // ✅ Restrict if not admin
+        //  Restrict if not admin
         $user = auth()->user();
         if ($user->role !== 'admin') {
             $query->whereHas('assinges', function ($q) use ($user) {
@@ -477,45 +476,45 @@ class LeadController extends Controller
         $users     = User::where('company_id', $lead->company_id)->get();
 
         //
-        if (! empty($lead) && $lead->company_id == 7 && strtolower($lead->status) === 'enquiry') {
-            $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number); // Clean and format
-            $templateName   = 'thankyou';
-            $broadcastName  = 'thankyou';
-            $watiToken      = 'YOUR_WATI_API_TOKEN'; // Replace with actual token
+        // if (! empty($lead) && $lead->company_id == 7 && strtolower($lead->status) === 'enquiry') {
+        //     $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number); // Clean and format
+        //     $templateName   = 'thankyou';
+        //     $broadcastName  = 'thankyou';
+        //     $watiToken      = 'YOUR_WATI_API_TOKEN'; // Replace with actual token
 
-            try {
-                $response = Http::withToken($watiToken)
-                    ->withHeaders([
-                        'Content-Type' => 'application/json',
-                    ])
-                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
-                        'template_name'  => $templateName,
-                        'broadcast_name' => $broadcastName,
-                    ]);
+        //     try {
+        //         $response = Http::withToken($watiToken)
+        //             ->withHeaders([
+        //                 'Content-Type' => 'application/json',
+        //             ])
+        //             ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+        //                 'template_name'  => $templateName,
+        //                 'broadcast_name' => $broadcastName,
+        //             ]);
 
-                if ($response->successful()) {
-                    Log::info("WATI WhatsApp message sent to {$whatsappNumber}");
-                } else {
-                    Log::error("WATI Error: " . $response->body());
-                }
-            } catch (\Exception $e) {
-                Log::error("WATI Exception: " . $e->getMessage());
-            }
-        }
+        //         if ($response->successful()) {
+        //             Log::info("WATI WhatsApp message sent to {$whatsappNumber}");
+        //         } else {
+        //             Log::error("WATI Error: " . $response->body());
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::error("WATI Exception: " . $e->getMessage());
+        //     }
+        // }
 
         // Loan & Query loading
         $loansByStatus   = collect();
         $queriesByStatus = collect();
 
         if ($lead && $lead->mobile_number) {
-            $allLoans = DB::connection('mysql2')->table('loan_applications')
+            $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
                 ->where('mobile', $lead->mobile_number)
                 ->orderBy('created_at', 'desc')
                 ->get();
 
             $loansByStatus = $allLoans->groupBy('status');
 
-            $allQueries = DB::connection('mysql2')->table('loan_queries')
+            $allQueries = DB::connection('mysql2')->table('esteem_loan_queries')
                 ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -589,52 +588,52 @@ class LeadController extends Controller
             'description' => $request->description,
         ]);
 
-        if ($lead->company_id == 7 && strtolower($request->status) === 'qualified lead') {
-            $whatsappNumber = '918505822089';
-            // $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number);
-            $templateName  = 'thankyou';
-            $broadcastName = 'thankyou';
-            $watiToken     = env('WATI_API_TOKEN');
-            try {
-                $response = Http::withToken($watiToken)
-                    ->withHeaders(['Content-Type' => 'application/json'])
-                    ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
-                        'template_name'  => $templateName,
-                        'broadcast_name' => $broadcastName,
-                    ]);
+        // if ($lead->company_id == 7 && strtolower($request->status) === 'qualified lead') {
+        //     $whatsappNumber = '918505822089';
+        //     // $whatsappNumber = preg_replace('/\D/', '', $lead->mobile_number);
+        //     $templateName  = 'thankyou';
+        //     $broadcastName = 'thankyou';
+        //     $watiToken     = env('WATI_API_TOKEN');
+        //     try {
+        //         $response = Http::withToken($watiToken)
+        //             ->withHeaders(['Content-Type' => 'application/json'])
+        //             ->post("https://live-mt-server.wati.io/425322/api/v1/sendTemplateMessage?whatsappNumber={$whatsappNumber}", [
+        //                 'template_name'  => $templateName,
+        //                 'broadcast_name' => $broadcastName,
+        //             ]);
 
-                Log::info("📤 WATI WhatsApp Sent Attempt", [
-                    'number'      => $whatsappNumber,
-                    'status_code' => $response->status(),
-                    'response'    => $response->body(),
-                ]);
+        //         Log::info("📤 WATI WhatsApp Sent Attempt", [
+        //             'number'      => $whatsappNumber,
+        //             'status_code' => $response->status(),
+        //             'response'    => $response->body(),
+        //         ]);
 
-                if ($response->successful()) {
-                    Log::info("✅ WhatsApp message sent via WATI", [
-                        'lead_id'         => $lead->id,
-                        'whatsapp_number' => $whatsappNumber,
-                        'status'          => $request->status,
-                        'company_id'      => $lead->company_id,
-                        'response_status' => $response->status(),
-                        'response_body'   => $response->body(),
-                    ]);
-                } else {
-                    Log::error("❌ Failed to send WhatsApp via WATI", [
-                        'lead_id'         => $lead->id,
-                        'status_code'     => $response->status(),
-                        'response_body'   => $response->body(),
-                        'json_response'   => $response->json(),
-                        'whatsapp_number' => $whatsappNumber,
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error("❌ Exception while sending WhatsApp via WATI", [
-                    'lead_id'         => $lead->id,
-                    'error'           => $e->getMessage(),
-                    'whatsapp_number' => $whatsappNumber,
-                ]);
-            }
-        }
+        //         if ($response->successful()) {
+        //             Log::info("✅ WhatsApp message sent via WATI", [
+        //                 'lead_id'         => $lead->id,
+        //                 'whatsapp_number' => $whatsappNumber,
+        //                 'status'          => $request->status,
+        //                 'company_id'      => $lead->company_id,
+        //                 'response_status' => $response->status(),
+        //                 'response_body'   => $response->body(),
+        //             ]);
+        //         } else {
+        //             Log::error("❌ Failed to send WhatsApp via WATI", [
+        //                 'lead_id'         => $lead->id,
+        //                 'status_code'     => $response->status(),
+        //                 'response_body'   => $response->body(),
+        //                 'json_response'   => $response->json(),
+        //                 'whatsapp_number' => $whatsappNumber,
+        //             ]);
+        //         }
+        //     } catch (\Exception $e) {
+        //         Log::error("❌ Exception while sending WhatsApp via WATI", [
+        //             'lead_id'         => $lead->id,
+        //             'error'           => $e->getMessage(),
+        //             'whatsapp_number' => $whatsappNumber,
+        //         ]);
+        //     }
+        // }
 
         if ($request->filled('user_id')) {
             $exist = DB::table('assign_leads')
@@ -1017,136 +1016,135 @@ class LeadController extends Controller
     }
 
     public function getNullEnquires(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-        ->where('source', '_')
-        ->orderBy("created_at", "desc");
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->where('source', '_')
+            ->orderBy("created_at", "desc");
 
-    $query->where('company_id', $request->company_id);
-    $companies = Company::all();
+        $query->where('company_id', $request->company_id);
+        $companies = Company::all();
 
-    if ($request->status) {
-        $query->where('status', $request->status);
-    }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
 
-    if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason'];
+        if ($request->status === 'Lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
-    }
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
 
-    if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
-            ->where('lead_status', 'Qualified Lead')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+        if ($request->status === 'Qualified lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNotNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => false,
+        ]);
     }
 
-    if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
-    }
+    public function getSMEnquires(Request $request)
+    {
+        $user = auth()->user();
 
-    $leads = $query->paginate(40);
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->where('source', '!=', '_')
+            ->orderBy("created_at", "desc");
 
-    return view('leads.list', [
-        'leads'           => $leads,
-        'companies'       => $companies,
-        'company_id'      => $request->company_id,
-        'isCompanyLocked' => false,
-    ]);
-}
+        $query->where('company_id', $request->company_id);
+        $companies = Company::all();
 
-public function getSMEnquires(Request $request)
-{
-    $user = auth()->user();
+        if ($request->status === 'Lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason'];
 
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-        ->where('source', '!=', '_') 
-        ->orderBy("created_at", "desc");
-
-    $query->where('company_id', $request->company_id);
-    $companies = Company::all();
-
-    if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason'];
-
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
-    }
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
 
-    if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('loan_applications')
-            ->where('lead_status', 'Qualified Lead')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+        if ($request->status === 'Qualified lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNotNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => false,
+        ]);
     }
-
-    if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
-    }
-
-    $leads = $query->paginate(40);
-
-    return view('leads.list', [
-        'leads'           => $leads,
-        'companies'       => $companies,
-        'company_id'      => $request->company_id,
-        'isCompanyLocked' => false,
-    ]);
-}
-
 
 }

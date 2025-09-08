@@ -324,7 +324,7 @@
                                                 href="{{ url('admin/leads/company/all/' . $list->id) }}">{{ $list->leads_count }}</a>
                                         </div>
                                         <div class="stat-label">
-                                            <a href="{{ url('admin/leads/company/all/' . $list->id) }}">Total Leads</a>
+                                            <a href="{{ url('admin/leads/company/all/' . $list->id) }}">Total Enquiries</a>
                                         </div>
                                     </div>
 
@@ -349,7 +349,8 @@
                                                 <i class="ri-file-list-line"></i>
                                             </div>
                                             <div class="stat-value">
-                                                <a href="{{ url('admin/leads/company/today/' . $list->id) }}">{{ $todayEnquiriesCount }}</a>
+                                                <a
+                                                    href="{{ url('admin/leads/company/today/' . $list->id) }}">{{ $todayEnquiriesCount }}</a>
                                             </div>
                                             <div class="stat-label">
                                                 <a href="{{ url('admin/leads/company/today/' . $list->id) }}">Today's Leads
@@ -363,7 +364,7 @@
                                             </div>
                                             @php
                                                 $leadcount = DB::connection('mysql2')
-                                                    ->table('loan_applications')
+                                                    ->table('esteem_loan_applications')
                                                     ->whereDate('created_at', now())
                                                     ->count();
                                             @endphp
@@ -379,27 +380,27 @@
                                         </div>
                                     @endif()
                                     <!-- <div class="stat-card">
-                                    <div class="stat-icon warning">
-                                        <i class="ri-time-line"></i>
+                                        <div class="stat-icon warning">
+                                            <i class="ri-time-line"></i>
+                                        </div>
+                                        <div class="stat-value">
+                                            <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
+                                        </div>
+                                        <div class="stat-label">
+                                            <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">Pending Leads</a>
+                                        </div>
                                     </div>
-                                    <div class="stat-value">
-                                        <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
-                                    </div>
-                                    <div class="stat-label">
-                                        <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">Pending Leads</a>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon danger">
-                                        <i class="ri-close-circle-line"></i>
-                                    </div>
-                                    <div class="stat-value">
-                                        <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
-                                    </div>
-                                    <div class="stat-label">
-                                        <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">Rejected Leads</a>
-                                    </div>
-                                </div> -->
+                                    <div class="stat-card">
+                                        <div class="stat-icon danger">
+                                            <i class="ri-close-circle-line"></i>
+                                        </div>
+                                        <div class="stat-value">
+                                            <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
+                                        </div>
+                                        <div class="stat-label">
+                                            <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">Rejected Leads</a>
+                                        </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="status-section">
