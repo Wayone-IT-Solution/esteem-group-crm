@@ -364,7 +364,7 @@
                                             </div>
                                             @php
                                                 $leadcount = DB::connection('mysql2')
-                                                    ->table('esteem_loan_applications')
+                                                    ->table('loan_applications')
                                                     ->whereDate('created_at', now())
                                                     ->count();
                                             @endphp

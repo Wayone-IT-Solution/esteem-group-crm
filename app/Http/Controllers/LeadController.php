@@ -507,7 +507,7 @@ class LeadController extends Controller
         $queriesByStatus = collect();
 
         if ($lead && $lead->mobile_number) {
-            $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
+            $allLoans = DB::connection('mysql2')->table('loan_applications')
                 ->where('mobile', $lead->mobile_number)
                 ->orderBy('created_at', 'desc')
                 ->get();
