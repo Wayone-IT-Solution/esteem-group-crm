@@ -131,6 +131,9 @@
                             <div class="custom-menu overflow-hidden">
                                 <ul>
                                     <li class="d-flex">
+                                        <a class="ms-2" href="{{ url('admin/profile/update-password') }}">Update Password</a>
+                                    </li>
+                                    <li class="d-flex">
                                         <a class="ms-2" href="{{ url('auth/logout') }}">Log Out</a>
                                     </li>
                                 </ul>
@@ -363,11 +366,11 @@
                                                         if ($status->status === 'Lead') {
                                                             $columns = \Illuminate\Support\Facades\Schema::connection(
                                                                 'mysql2',
-                                                            )->getColumnListing('loan_applications');
+                                                            )->getColumnListing('esteem_loan_applications');
                                                             $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('loan_applications')
+                                                                ->table('esteem_loan_applications')
                                                                 ->where(function ($query) use ($columns, $excluded) {
                                                                     foreach ($columns as $column) {
                                                                         if (!in_array($column, $excluded)) {
@@ -379,12 +382,12 @@
                                                         } elseif ($status->status === 'Qualified lead') {
                                                             $columns = \Illuminate\Support\Facades\Schema::connection(
                                                                 'mysql2',
-                                                            )->getColumnListing('loan_applications');
+                                                            )->getColumnListing('esteem_loan_applications');
                                                             $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('loan_applications')
-                                                                ->where('status', 'Qualified Lead')
+                                                                ->table('esteem_loan_applications')
+                                                                // ->where('status', 'Qualified Lead')
                                                                 ->where(function ($query) use ($columns, $excluded) {
                                                                     foreach ($columns as $column) {
                                                                         if (!in_array($column, $excluded)) {
@@ -395,7 +398,7 @@
                                                                 ->count();
                                                         } elseif ($status->status === 'Loan') {
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('loan_queries')
+                                                                ->table('esteem_loan_queries')
                                                                 ->count();
                                                         } else {
                                                             $query = \App\Models\LeadModel::where(
@@ -435,6 +438,14 @@
 
                         </li>
                         <hr>
+                        {{-- <li class="sidebar-list">
+                            <a class="sidebar-link" href="{{ url('admin/profile') }}">
+                                <span>
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>
+                                    Profile
+                                </span>
+                            </a>
+                        </li> --}}
                         <li class="sidebar-list">
                             <a class="sidebar-link" href="{{ url('auth/logout') }}">
                                 <span>
@@ -443,6 +454,7 @@
                                 </span>
                             </a>
                         </li>
+                        
                     </ul>
                 </div>
             </aside>
