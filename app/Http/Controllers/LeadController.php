@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -22,9 +21,9 @@ class LeadController extends Controller
     {
         $companies = Company::all();
 
-        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+        $leads = DB::connection('mysql2')->table('loan_applications')
             ->where(function ($q) {
-                $columns = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications
+                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications
 ');
                 foreach ($columns as $column) {
                     if ($column != 'deleted_at') {
@@ -74,9 +73,9 @@ class LeadController extends Controller
         $query->where('status', $request->status);
         if ($request->status === 'Lead') {
 
-            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+            $leads = DB::connection('mysql2')->table('loan_applications')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
 
                     foreach ($columns as $column) {
@@ -94,10 +93,10 @@ class LeadController extends Controller
 
         if ($request->status === 'Qualified lead') {
 
-            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
-                // ->where('status', 'Qualified Lead')
+            $leads = DB::connection('mysql2')->table('loan_applications')
+            // ->where('status', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                     foreach ($columns as $column) {
@@ -143,9 +142,9 @@ class LeadController extends Controller
 
         if ($request->status === 'Lead') {
 
-            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+            $leads = DB::connection('mysql2')->table('loan_applications')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason']; // exclude these fields
 
                     foreach ($columns as $column) {
@@ -163,10 +162,10 @@ class LeadController extends Controller
 
         if ($request->status === 'Qualified lead') {
 
-            $leads = DB::connection('mysql2')->table('esteem_loan_applications')
+            $leads = DB::connection('mysql2')->table('loan_applications')
                 ->where('status', 'Qualified Lead')
                 ->where(function ($q) {
-                    $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
                     $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
                     foreach ($columns as $column) {
@@ -440,7 +439,7 @@ class LeadController extends Controller
 
     //     if ($lead && $lead->mobile_number) {
     //         // Get all loan applications
-    //         $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
+    //         $allLoans = DB::connection('mysql2')->table('loan_applications')
     //             ->where('mobile', $lead->mobile_number)
     //             ->orderBy('created_at', 'desc')
     //             ->get();
@@ -509,7 +508,7 @@ class LeadController extends Controller
         $queriesByStatus = collect();
 
         if ($lead && $lead->mobile_number) {
-            $allLoans = DB::connection('mysql2')->table('esteem_loan_applications')
+            $allLoans = DB::connection('mysql2')->table('loan_applications')
                 ->where('mobile', $lead->mobile_number)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -741,7 +740,7 @@ class LeadController extends Controller
 
     public function secondconnection()
     {
-        return DB::connection('mysql2')->table('esteem_loan_applications')->get();
+        return DB::connection('mysql2')->table('loan_applications')->get();
     }
 
     public function updateStatus(Request $request)
@@ -750,17 +749,17 @@ class LeadController extends Controller
         // dd($request->all());
 
         $request->validate([
-            'id'     => 'required|integer|exists:mysql2.esteem_loan_applications,id',
+            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
             'status' => 'required|string',
         ]);
 
         $loanApplication = DB::connection('mysql2')
-            ->table('esteem_loan_applications')
+            ->table('loan_applications')
             ->where('id', $request->id)->first();
 
         // check the status that is comming
         DB::connection('mysql2')
-            ->table('esteem_loan_applications')
+            ->table('loan_applications')
             ->where('id', $request->id)
             ->update([
                 'status'     => $request->status,
@@ -824,7 +823,7 @@ class LeadController extends Controller
 
     public function financeFilter(Request $request)
     {
-        $loanLeads = DB::connection('mysql2')->table('esteem_loan_applications');
+        $loanLeads = DB::connection('mysql2')->table('loan_applications');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -859,12 +858,12 @@ class LeadController extends Controller
         // dd($request->all());
 
         $request->validate([
-            'id'     => 'required|integer|exists:mysql2.esteem_loan_applications,id',
+            'id'     => 'required|integer|exists:mysql2.loan_applications,id',
             'status' => 'required|string',
         ]);
 
         DB::connection('mysql2')
-            ->table('esteem_loan_applications')
+            ->table('loan_applications')
             ->where('id', $request->id)
             ->update([
                 'status'     => $request->status,
@@ -901,7 +900,7 @@ class LeadController extends Controller
     public function editLeads($id)
     {
         // Fetch loan data from mysql2
-        $loan = DB::connection('mysql2')->table('esteem_loan_applications')->where('id', $id)->first();
+        $loan = DB::connection('mysql2')->table('loan_applications')->where('id', $id)->first();
 
         if (! $loan) {
             return redirect()->back()->with('error', 'Loan not found.');
@@ -930,7 +929,7 @@ class LeadController extends Controller
             'status'         => 'nullable|string|max:100',
         ]);
 
-        $updated = DB::connection('mysql2')->table('esteem_loan_applications')
+        $updated = DB::connection('mysql2')->table('loan_applications')
             ->where('id', $id)
             ->update([
                 'first_name'     => $request->first_name,
@@ -989,10 +988,10 @@ class LeadController extends Controller
         $excluded = ['deleted_at', 'disapproval_reason']; // Define excluded fields
 
         // Base query from mysql2
-        $query = DB::connection('mysql2')->table('esteem_loan_applications')
+        $query = DB::connection('mysql2')->table('loan_applications')
             ->whereDate('created_at', now())
             ->where(function ($q) use ($excluded) {
-                $columns = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
+                $columns = Schema::connection('mysql2')->getColumnListing('loan_applications');
 
                 foreach ($columns as $column) {
                     if (! in_array($column, $excluded)) {
@@ -1018,136 +1017,135 @@ class LeadController extends Controller
     }
 
     public function getNullEnquires(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-        ->where('source', '_')
-        ->orderBy("created_at", "desc");
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->where('source', '_')
+            ->orderBy("created_at", "desc");
 
-    $query->where('company_id', $request->company_id);
-    $companies = Company::all();
+        $query->where('company_id', $request->company_id);
+        $companies = Company::all();
 
-    if ($request->status) {
-        $query->where('status', $request->status);
-    }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
 
-    if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason'];
+        if ($request->status === 'Lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
-    }
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
 
-    if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
-            ->where('lead_status', 'Qualified Lead')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+        if ($request->status === 'Qualified lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNotNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => false,
+        ]);
     }
 
-    if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
-    }
+    public function getSMEnquires(Request $request)
+    {
+        $user = auth()->user();
 
-    $leads = $query->paginate(40);
+        $query = LeadModel::with(['company', 'user', 'assinges'])
+            ->where('source', '!=', '_')
+            ->orderBy("created_at", "desc");
 
-    return view('leads.list', [
-        'leads'           => $leads,
-        'companies'       => $companies,
-        'company_id'      => $request->company_id,
-        'isCompanyLocked' => false,
-    ]);
-}
+        $query->where('company_id', $request->company_id);
+        $companies = Company::all();
 
-public function getSMEnquires(Request $request)
-{
-    $user = auth()->user();
+        if ($request->status === 'Lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason'];
 
-    $query = LeadModel::with(['company', 'user', 'assinges'])
-        ->where('source', '!=', '_') 
-        ->orderBy("created_at", "desc");
-
-    $query->where('company_id', $request->company_id);
-    $companies = Company::all();
-
-    if ($request->status === 'Lead') {
-        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason'];
-
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
-    }
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
 
-    if ($request->status === 'Qualified lead') {
-        $leads = DB::connection('mysql2')->table('esteem_loan_applications')
-            ->where('lead_status', 'Qualified Lead')
-            ->where(function ($q) {
-                $columns  = Schema::connection('mysql2')->getColumnListing('esteem_loan_applications');
-                $excluded = ['deleted_at', 'disapproval_reason', 'status'];
+        if ($request->status === 'Qualified lead') {
+            $leads = DB::connection('mysql2')->table('loan_applications')
+                ->where('lead_status', 'Qualified Lead')
+                ->where(function ($q) {
+                    $columns  = Schema::connection('mysql2')->getColumnListing('loan_applications');
+                    $excluded = ['deleted_at', 'disapproval_reason', 'status'];
 
-                foreach ($columns as $column) {
-                    if (!in_array($column, $excluded)) {
-                        $q->orWhereNotNull($column);
+                    foreach ($columns as $column) {
+                        if (! in_array($column, $excluded)) {
+                            $q->orWhereNotNull($column);
+                        }
                     }
-                }
-            })
-            ->orderBy('id', 'desc')
-            ->paginate(40);
+                })
+                ->orderBy('id', 'desc')
+                ->paginate(40);
 
-        return view('leads.finance.loanqueries', compact('leads', 'companies'));
+            return view('leads.finance.loanqueries', compact('leads', 'companies'));
+        }
+
+        if ($user->role !== 'admin') {
+            $query->whereHas('assinges', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+
+        $leads = $query->paginate(40);
+
+        return view('leads.list', [
+            'leads'           => $leads,
+            'companies'       => $companies,
+            'company_id'      => $request->company_id,
+            'isCompanyLocked' => false,
+        ]);
     }
-
-    if ($user->role !== 'admin') {
-        $query->whereHas('assinges', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        });
-    }
-
-    $leads = $query->paginate(40);
-
-    return view('leads.list', [
-        'leads'           => $leads,
-        'companies'       => $companies,
-        'company_id'      => $request->company_id,
-        'isCompanyLocked' => false,
-    ]);
-}
-
 
 }

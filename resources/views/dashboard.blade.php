@@ -364,7 +364,7 @@
                                             </div>
                                             @php
                                                 $leadcount = DB::connection('mysql2')
-                                                    ->table('esteem_loan_applications')
+                                                    ->table('loan_applications')
                                                     ->whereDate('created_at', now())
                                                     ->count();
                                             @endphp
@@ -380,27 +380,27 @@
                                         </div>
                                     @endif()
                                     <!-- <div class="stat-card">
-                                        <div class="stat-icon warning">
-                                            <i class="ri-time-line"></i>
+                                            <div class="stat-icon warning">
+                                                <i class="ri-time-line"></i>
+                                            </div>
+                                            <div class="stat-value">
+                                                <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
+                                            </div>
+                                            <div class="stat-label">
+                                                <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">Pending Leads</a>
+                                            </div>
                                         </div>
-                                        <div class="stat-value">
-                                            <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">{{ $list->pending_leads_count ?? 0 }}</a>
-                                        </div>
-                                        <div class="stat-label">
-                                            <a href="{{ url('admin/leads/company/pending/' . $list->id) }}">Pending Leads</a>
-                                        </div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-icon danger">
-                                            <i class="ri-close-circle-line"></i>
-                                        </div>
-                                        <div class="stat-value">
-                                            <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
-                                        </div>
-                                        <div class="stat-label">
-                                            <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">Rejected Leads</a>
-                                        </div>
-                                    </div> -->
+                                        <div class="stat-card">
+                                            <div class="stat-icon danger">
+                                                <i class="ri-close-circle-line"></i>
+                                            </div>
+                                            <div class="stat-value">
+                                                <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">{{ $list->rejected_leads_count ?? 0 }}</a>
+                                            </div>
+                                            <div class="stat-label">
+                                                <a href="{{ url('admin/leads/company/rejected/' . $list->id) }}">Rejected Leads</a>
+                                            </div>
+                                        </div> -->
                                 </div>
 
                                 <div class="status-section">
@@ -417,11 +417,11 @@
                                                         // Count incomplete leads (any null field except excluded ones)
                                                         $columns = \Illuminate\Support\Facades\Schema::connection(
                                                             'mysql2',
-                                                        )->getColumnListing('esteem_loan_applications');
+                                                        )->getColumnListing('loan_applications');
                                                         $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                         $leadcount = DB::connection('mysql2')
-                                                            ->table('esteem_loan_applications')
+                                                            ->table('loan_applications')
                                                             ->where(function ($query) use ($columns, $excluded) {
                                                                 foreach ($columns as $column) {
                                                                     if (!in_array($column, $excluded)) {
@@ -434,11 +434,11 @@
                                                         // Count fully filled leads (all fields not null except excluded ones)
                                                         $columns = \Illuminate\Support\Facades\Schema::connection(
                                                             'mysql2',
-                                                        )->getColumnListing('esteem_loan_applications');
+                                                        )->getColumnListing('loan_applications');
                                                         $excluded = ['deleted_at', 'disapproval_reason'];
 
                                                         $leadcount = DB::connection('mysql2')
-                                                            ->table('esteem_loan_applications')
+                                                            ->table('loan_applications')
                                                             ->where(function ($query) use ($columns, $excluded) {
                                                                 foreach ($columns as $column) {
                                                                     if (!in_array($column, $excluded)) {
