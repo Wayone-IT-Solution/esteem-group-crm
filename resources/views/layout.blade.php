@@ -399,7 +399,7 @@
                                                                 ->count();
                                                         } elseif ($status->status === 'Loan') {
                                                             $leadCount = DB::connection('mysql2')
-                                                                ->table('esteem_loan_queries')
+                                                                ->table('loan_queries')
                                                                 ->count();
                                                         } else {
                                                             $query = \App\Models\LeadModel::where(

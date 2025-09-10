@@ -515,7 +515,7 @@ class LeadController extends Controller
 
             $loansByStatus = $allLoans->groupBy('status');
 
-            $allQueries = DB::connection('mysql2')->table('esteem_loan_queries')
+            $allQueries = DB::connection('mysql2')->table('loan_queries')
                 ->whereIn('loan_application_id', $allLoans->pluck('id')->toArray())
                 ->orderBy('created_at', 'desc')
                 ->get();
