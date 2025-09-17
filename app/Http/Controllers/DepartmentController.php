@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
 {
@@ -29,10 +30,22 @@ class DepartmentController extends Controller
 
     {
         // Validate the incoming request
+        // $request->validate([
+        //     'department' => 'required|string|max:255|unique:departments,department', // Fixed table name 'departments'
+        //     'company_id' => 'required|exists:companies,id', // Ensure the company_id exists in the companies table
+        // ]);
         $request->validate([
-            'department' => 'required|string|max:255|unique:departments,department', // Fixed table name 'departments'
-            'company_id' => 'required|exists:companies,id', // Ensure the company_id exists in the companies table
-        ]);
+    'department' => [
+        'required',
+        'string',
+        'max:255',
+        Rule::unique('departments')->where(function ($query) use ($request) {
+            return $query->where('company_id', $request->company_id);
+        }),
+    ],
+    'company_id' => 'required|exists:companies,id',
+]);
+
 
         // Create a new department record in the database
         Department::create([
