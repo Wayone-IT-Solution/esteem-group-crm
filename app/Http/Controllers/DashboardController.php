@@ -9,50 +9,59 @@ use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $user      = auth()->user();
-        $nzNowDate = Carbon::now('Pacific/Auckland')->toDateString();
+   public function index()
+{
+    $user = auth()->user();
+    $nzNowDate = Carbon::now('Pacific/Auckland')->toDateString();
+    
+    // Initialize variables to avoid undefined variable error
+    $todayEnquiriesCount = 0;
+    
+    if ($user->role === 'admin') {
+        $companies = Company::withCount([
+            'users',
+            'leads',
+            'todayLeads' => function ($query) use ($nzNowDate) {
+                $query->whereDate('created_at', $nzNowDate);
+            },
+        ])->with('status')->get();
 
-        if ($user->role === 'admin') {
-            $companies = Company::withCount([
-                'users',
-                'leads',
-                'todayLeads' => function ($query) use ($nzNowDate) {
-                    $query->whereDate('created_at', $nzNowDate);
-                },
-            ])->with('status')->get();
-
-            $todayEnquiriesCount = DB::connection('mysql2')
-                ->table('loan_applications')
-                ->whereDate('created_at', $nzNowDate)
-                ->count();
-        } else {
-            $companies = Company::withCount([
-                'users',
-                'leads as leads_count'            => function ($query) use ($user) {
-                    $query->whereHas('assinges', function ($q) use ($user) {
+        // Set todayEnquiriesCount for admin
+        $todayEnquiriesCount = DB::connection('mysql2')
+            ->table('loan_applications')
+            ->whereDate('created_at', $nzNowDate)
+            ->count();
+    } else {
+        $companies = Company::withCount([
+            'users',
+            'leads as leads_count' => function ($query) use ($user) {
+                $query->whereHas('assinges', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+            },
+            'todayLeads as today_leads_count' => function ($query) use ($user, $nzNowDate) {
+                $query->whereDate('created_at', $nzNowDate)
+                    ->whereHas('assinges', function ($q) use ($user) {
                         $q->where('user_id', $user->id);
                     });
-                },
-                'todayLeads as today_leads_count' => function ($query) use ($user, $nzNowDate) {
-                    $query->whereDate('created_at', $nzNowDate)
-                        ->whereHas('assinges', function ($q) use ($user) {
-                            $q->where('user_id', $user->id);
-                        });
-                },
-            ])->with('status')->get();
+            },
+        ])->with('status')->get();
 
+        // Set todayEnquiriesCount for non-admin users (if needed)
+        try {
             $todayEnquiriesCount = DB::connection('mysql2')
                 ->table('loan_applications')
                 ->whereDate('created_at', $nzNowDate)
                 ->where('user_id', $user->id)
                 ->count();
+        } catch (\Exception $e) {
+            // If table doesn't exist or connection fails, keep default value
+            $todayEnquiriesCount = 0;
         }
-        // return $todayEnquiriesCount;
-
-        return view('dashboard', compact('companies', 'todayEnquiriesCount'));
     }
+
+    return view('dashboard', compact('companies', 'todayEnquiriesCount'));
+}
 
     public function show()
     {
