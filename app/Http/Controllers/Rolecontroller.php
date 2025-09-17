@@ -24,7 +24,6 @@ class RoleController extends Controller
         return view('company.roles', compact('roles', 'companies'));
     }
 
-    
     public function create()
     {
         return view('roles.create'); // No need to pass companies
