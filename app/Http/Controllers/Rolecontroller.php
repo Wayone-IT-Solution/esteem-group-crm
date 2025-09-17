@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Company;
@@ -18,13 +17,12 @@ class RoleController extends Controller
     // }
     public function index()
     {
-        // Fetch roles with associated company and paginate results
-        $roles = Role::with('company')->orderBy('id','desc')->paginate(10); // Show 10 roles per page
+                                                                                 // Fetch roles with associated company and paginate results
+        $roles     = Role::with('company')->orderBy('id', 'desc')->paginate(10); // Show 10 roles per page
         $companies = Company::all();
 
         return view('company.roles', compact('roles', 'companies'));
     }
-
 
     public function create()
     {
@@ -36,12 +34,12 @@ class RoleController extends Controller
         // Validate role and company name as plain text
         $request->validate([
             'company_id' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
+            'role'       => 'required|string|max:255',
         ]);
 
         Role::create([
             'company_id' => $request->company_id,
-            'role' => $request->role,
+            'role'       => $request->role,
         ]);
 
         return redirect()->route('admin.roles')->with('success', 'Role created successfully!');
@@ -56,12 +54,12 @@ class RoleController extends Controller
     {
         $request->validate([
             'company_id' => 'required',
-            'role' => 'required|string|max:255|unique:roles,role,' . $role->id,
+            'role'       => 'required|string|max:255|unique:roles,role,' . $role->id,
         ]);
 
         $role->update([
             'company_id' => $request->company_id,
-            'role' => $request->role,
+            'role'       => $request->role,
         ]);
 
         return redirect()->route('admin.roles')->with('success', 'Role updated successfully!');
@@ -73,17 +71,15 @@ class RoleController extends Controller
         return redirect()->route('admin.roles')->with('success', 'Role deleted successfully!');
     }
 
-
     public function filter(Request $request)
     {
         $roles = Role::with('company'); // Show 10 roles per page
-
 
         if ($request->company_id) {
             $roles->where('company_id', $request->company_id);
         }
 
-        $roles = $roles->orderby('id','desc')->paginate(40);
+        $roles = $roles->orderby('id', 'desc')->paginate(40);
 
         return view('company.roles.filter', compact('roles'));
     }
